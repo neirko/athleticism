@@ -1,0 +1,3439 @@
+<!DOCTYPE html>
+<!-- Athleticism — local workout tracker. Single file, no build step. See chat for save/open instructions. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="icon" href="data:,">
+<title>Athleticism</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F5F6F8; --surface:#FFFFFF; --surface-2:#F0F1F4; --border:#E1E3E8;
+  --text:#1B1D22; --text-dim:#666B74; --text-faint:#9AA0A8;
+  --accent:#D2451F; --accent-hover:#B93B19; --accent-soft:#FBE7E0; --accent-soft-border:#F3C7B7;
+  --good:#2F9E56; --good-soft:#E4F5E9; --danger:#D33B3B;
+  --radius-sm:6px; --radius-md:10px; --radius-lg:14px;
+  --shadow-md:0 8px 24px rgba(20,20,25,0.10);
+  --font-ui:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);-webkit-font-smoothing:antialiased;}
+button,input,select{font-family:inherit;color:inherit;font-size:14px;}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+a{color:inherit;}
+::selection{background:var(--accent-soft);}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{transition:none !important;animation:none !important;}}
+
+/* Topbar */
+.topbar{position:sticky;top:0;z-index:30;background:var(--surface);border-bottom:1px solid var(--border);}
+.topbar-inner{max-width:1080px;margin:0 auto;display:flex;align-items:center;gap:28px;padding:14px 24px;}
+.brand{font-family:var(--font-mono);font-weight:600;font-size:15px;letter-spacing:0.3px;flex-shrink:0;}
+.brand span{color:var(--accent);}
+.tabs{display:flex;gap:4px;flex:1;}
+.tab-btn{background:none;border:none;padding:8px 14px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text-dim);transition:background .15s ease,color .15s ease;}
+.tab-btn:hover{background:var(--surface-2);color:var(--text);}
+.tab-btn.active{color:var(--text);background:var(--surface-2);font-weight:600;}
+.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+.inprogress-pill{display:flex;align-items:center;gap:8px;background:var(--accent-soft);color:var(--accent-hover);border:1px solid var(--accent-soft-border);border-radius:20px;padding:6px 12px 6px 10px;font-size:13px;font-weight:600;font-family:var(--font-mono);white-space:nowrap;}
+.inprogress-pill .dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;}
+.icon-btn{background:none;border:none;color:var(--text-dim);width:34px;height:34px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s ease,color .15s ease;flex-shrink:0;}
+.icon-btn:hover{background:var(--surface-2);color:var(--text);}
+.icon-btn:disabled{opacity:.35;cursor:default;}
+.icon-btn:disabled:hover{background:none;color:var(--text-dim);}
+
+/* Layout */
+.main{max-width:1080px;margin:0 auto;padding:32px 24px 90px;}
+.section-title{font-size:15px;font-weight:600;color:var(--text);margin:32px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.section-title:first-child{margin-top:0;}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;}
+
+/* Buttons & inputs */
+.btn{display:inline-flex;align-items:center;gap:6px;border:none;border-radius:8px;padding:9px 16px;font-size:14px;font-weight:600;transition:background .15s ease,border-color .15s ease,color .15s ease;white-space:nowrap;}
+.btn-primary{background:var(--accent);color:#fff;}
+.btn-primary:hover{background:var(--accent-hover);}
+.btn-primary:disabled{background:var(--surface-2);color:var(--text-faint);cursor:not-allowed;}
+.btn-ghost{background:var(--surface);color:var(--text);border:1px solid var(--border);}
+.btn-ghost:hover{border-color:var(--text-dim);}
+.btn-danger{background:var(--danger) !important;color:#fff !important;border-color:var(--danger) !important;}
+.btn-tag{background:var(--surface-2);border:1px solid var(--border);padding:7px 12px;font-size:13px;font-weight:500;}
+.btn-tag:hover{border-color:var(--accent);}
+.btn-tag:disabled{opacity:.4;cursor:not-allowed;}
+.btn.small{padding:6px 12px;font-size:13px;}
+.full-width{width:100%;justify-content:center;}
+.input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 12px;font-size:14px;margin-bottom:14px;}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.field-label{font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:6px;display:block;}
+.field-optional{font-weight:400;color:var(--text-faint);}
+.empty-hint{font-size:13px;color:var(--text-faint);padding:6px 2px;}
+
+/* Chips */
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+.chip{display:flex;align-items:center;gap:6px;background:var(--surface-2);border:1px solid var(--border);border-radius:20px;padding:6px 6px 6px 12px;font-size:13px;}
+.chip button{background:none;border:none;color:var(--text-faint);display:flex;}
+.chip button:hover{color:var(--danger);}
+.preset-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.custom-field-form{background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:14px;}
+.row-gap{display:flex;gap:10px;margin-bottom:12px;}
+.badge{font-size:11px;padding:3px 9px;background:var(--surface-2);border:1px solid var(--border);border-radius:20px;color:var(--text-dim);white-space:nowrap;}
+
+/* Empty state */
+.empty-state{text-align:center;padding:48px 20px;color:var(--text-dim);}
+.empty-state p{margin:0 0 6px;}
+.empty-sub{font-size:13.5px;color:var(--text-faint);margin-bottom:18px !important;}
+
+/* Home */
+.cta-card{display:flex;justify-content:space-between;align-items:center;background:var(--text);color:#fff;border-radius:var(--radius-lg);padding:26px 28px;margin-bottom:28px;gap:16px;}
+.cta-card.active{background:var(--surface);color:var(--text);border:1px solid var(--accent);}
+.cta-eyebrow{font-size:13px;opacity:.7;margin-bottom:4px;}
+.cta-title{font-size:24px;font-weight:600;}
+.cta-card > button{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:12px 22px;font-size:15px;font-weight:600;display:flex;align-items:center;gap:8px;transition:background .15s ease;flex-shrink:0;}
+.cta-card > button:hover{background:var(--accent-hover);}
+.cta-card.active > button{background:var(--surface-2);color:var(--text);}
+.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:8px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:18px;text-align:center;}
+.stat-num{font-family:var(--font-mono);font-size:30px;font-weight:600;}
+.stat-lbl{font-size:12.5px;color:var(--text-dim);margin-top:4px;}
+.plan-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;}
+.plan-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:16px;text-align:left;transition:border-color .15s ease,transform .15s ease;}
+.plan-card:hover{border-color:var(--accent);transform:translateY(-2px);}
+.plan-card-name{font-weight:600;margin-bottom:4px;}
+.plan-card-sub{font-size:12.5px;color:var(--text-dim);}
+
+/* Master-detail */
+.split{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;}
+.split-list{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;}
+.split-list-head{display:flex;justify-content:space-between;align-items:center;padding:16px 16px 10px;}
+.split-list-head h2{font-size:16px;margin:0;}
+.split-item{display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-top:1px solid var(--border);font-size:14px;transition:background .15s ease;width:100%;text-align:left;background:none;border-left:3px solid transparent;}
+.split-item:hover{background:var(--surface-2);}
+.split-item.active{background:var(--accent-soft);border-left-color:var(--accent);font-weight:600;}
+.split-detail{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;min-height:320px;}
+.search-box{display:flex;align-items:center;gap:8px;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;margin:0 16px 12px;}
+.search-box input{border:none;background:none;flex:1;font-size:13.5px;min-width:0;}
+.result-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-radius:8px;transition:background .15s ease;cursor:pointer;background:none;border:none;width:100%;text-align:left;}
+.result-row:hover{background:var(--surface-2);}
+.result-row-name{font-weight:600;font-size:14px;}
+.result-row-sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+.back-link{display:none;align-items:center;gap:4px;color:var(--text-dim);font-size:13px;background:none;border:none;margin-bottom:14px;text-decoration:none;cursor:pointer;padding:0;}
+.detail-head{display:flex;align-items:center;gap:10px;margin-bottom:18px;}
+@media (max-width:760px){
+  .split{grid-template-columns:1fr;}
+  .split:not(.has-selection) .split-detail{display:none;}
+  .split.has-selection .split-list{display:none;}
+  .back-link.mobile-only{display:inline-flex;}
+}
+
+/* Plan rows */
+.plan-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+.plan-row:last-of-type{border-bottom:none;}
+.plan-row-order{display:flex;flex-direction:column;}
+.plan-row-order button{background:none;border:none;color:var(--text-faint);padding:1px;}
+.plan-row-order button:hover{color:var(--text);}
+.plan-row-order button:disabled{opacity:.3;}
+.plan-row-main{flex:1;min-width:0;}
+.plan-row-name{font-weight:600;font-size:14.5px;}
+.plan-row-sub{font-size:12.5px;color:var(--text-dim);}
+.stepper{display:flex;align-items:center;gap:10px;background:var(--surface-2);border-radius:20px;padding:4px 12px;flex-shrink:0;}
+.stepper button{background:none;border:none;color:var(--text-dim);font-size:15px;line-height:1;}
+.stepper button:hover{color:var(--text);}
+.stepper span{font-family:var(--font-mono);font-weight:600;min-width:14px;text-align:center;}
+
+/* Titled input (plan/workout name) */
+.title-input{border:none;background:none;padding:2px 4px;border-radius:6px;min-width:0;font-family:inherit;}
+.title-input:hover,.title-input:focus{background:var(--surface-2);outline:none;}
+
+/* Active workout */
+.workout-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:16px;flex-wrap:wrap;}
+.workout-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1;}
+.workout-head-left .title-input{font-size:22px;font-weight:600;flex:1;min-width:80px;}
+.workout-head-right{display:flex;align-items:center;gap:14px;}
+.workout-meta{font-family:var(--font-mono);font-size:13px;color:var(--text-dim);white-space:nowrap;}
+.workout-progress{font-size:13px;color:var(--text-dim);margin-bottom:24px;}
+
+.ex-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:18px;overflow-x:auto;}
+.ex-card-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;gap:12px;}
+.ex-card-name{font-weight:600;font-size:16px;margin-bottom:4px;}
+.ex-default-rest{font-size:12.5px;color:var(--text-dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.ex-default-rest button{background:none;border:none;color:var(--accent);font-size:12.5px;font-weight:600;padding:0;}
+.ex-default-rest input{width:60px;font-family:var(--font-mono);font-size:12.5px;padding:4px 6px;border:1px solid var(--border);border-radius:5px;}
+
+.set-table{width:100%;border-collapse:collapse;min-width:420px;}
+.set-table th{font-size:11.5px;color:var(--text-faint);font-weight:600;text-align:center;padding:0 6px 8px;white-space:nowrap;}
+.set-table th:first-child{text-align:left;width:26px;}
+.set-table td{padding:5px 6px;text-align:center;vertical-align:middle;}
+.set-table td:first-child{color:var(--text-dim);font-family:var(--font-mono);font-size:13px;}
+.num-input{width:100%;min-width:64px;max-width:100px;text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 6px;font-family:var(--font-mono);font-size:14px;}
+.num-input::placeholder{color:var(--text-faint);}
+.num-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft);}
+.rest-cell{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:nowrap;}
+.rest-pill{font-family:var(--font-mono);font-size:12.5px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;padding:4px 9px;white-space:nowrap;}
+.rest-pill.custom{background:var(--accent-soft);border-color:var(--accent-soft-border);color:var(--accent-hover);}
+.rest-add{font-size:12px;color:var(--accent);background:none;border:none;font-weight:600;white-space:nowrap;padding:0;}
+.rest-icon-btn{width:24px;height:24px;border-radius:6px;background:none;border:none;color:var(--text-faint);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.rest-icon-btn:hover{background:var(--surface-2);color:var(--text);}
+.check-btn{width:26px;height:26px;border-radius:7px;border:1px solid var(--border);background:var(--surface);color:var(--text-faint);display:inline-flex;align-items:center;justify-content:center;}
+.check-btn:hover{border-color:var(--text-dim);}
+.check-btn.done{background:var(--good-soft);border-color:var(--good);color:var(--good);}
+.rest-card{background:var(--surface-2);border-style:dashed;display:flex;align-items:center;justify-content:center;padding:14px;}
+.rest-block-row td{background:var(--surface-2);}
+.rest-block-row td:first-child{border-radius:6px 0 0 6px;}
+.rest-block-row td:last-child{border-radius:0 6px 6px 0;}
+.plan-ex-head-left{display:flex;align-items:flex-start;gap:10px;min-width:0;}
+.plan-ex-order{display:flex;flex-direction:column;padding-top:3px;flex-shrink:0;}
+.plan-ex-order button{background:none;border:none;color:var(--text-faint);padding:1px;}
+.plan-ex-order button:hover{color:var(--text);}
+.plan-ex-order button:disabled{opacity:.3;}
+.measured-cell{background:var(--surface-2) !important;color:var(--text-faint) !important;cursor:not-allowed;font-style:italic;}
+.toggle-row{display:flex;align-items:flex-start;gap:12px;width:100%;text-align:left;background:none;border:1px solid var(--border);border-radius:var(--radius-md);padding:14px;margin-bottom:10px;transition:border-color .15s ease,background .15s ease;}
+.toggle-row:hover{border-color:var(--text-dim);background:var(--surface-2);}
+.toggle-box{width:20px;height:20px;border-radius:5px;border:1.5px solid var(--border);background:var(--surface);display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;color:#fff;}
+.toggle-box.on{background:var(--accent);border-color:var(--accent);}
+.toggle-text{display:flex;flex-direction:column;gap:3px;min-width:0;}
+.toggle-title{font-weight:600;font-size:14px;}
+.toggle-sub{font-size:12.5px;color:var(--text-dim);line-height:1.4;}
+
+/* Categories */
+.cat-header{display:flex;align-items:center;gap:8px;padding:10px 12px;margin:18px 0 10px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-md);}
+.cat-header:first-child{margin-top:0;}
+.cat-caret{background:none;border:none;color:var(--text-dim);display:inline-flex;align-items:center;justify-content:center;padding:2px;border-radius:5px;transition:transform .15s ease;flex-shrink:0;}
+.cat-caret:hover{color:var(--text);}
+.cat-caret.collapsed{transform:rotate(-90deg);}
+.cat-name{flex:1;min-width:0;background:none;border:none;font-size:14px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;padding:4px 6px;border-radius:6px;}
+.cat-name:hover,.cat-name:focus{background:var(--surface);outline:none;}
+.cat-title{flex:1;min-width:0;font-size:14px;font-weight:700;letter-spacing:.3px;text-transform:uppercase;}
+.cat-count{font-family:var(--font-mono);font-size:12px;color:var(--text-faint);flex-shrink:0;}
+.cat-header.workout{background:none;border:none;border-bottom:2px solid var(--border);border-radius:0;padding:6px 2px;margin:26px 0 12px;}
+.cat-header.workout.complete{border-bottom-color:var(--good);}
+.cat-header.workout.complete .cat-title,.cat-header.workout.complete .cat-count{color:var(--good);}
+.cat-header.workout.static{margin:22px 0 10px;}
+.ex-card.in-category{margin-left:14px;}
+@media (max-width:640px){ .ex-card.in-category{margin-left:8px;} }
+
+/* Drag and drop */
+.drag-handle{background:none;border:none;color:var(--text-faint);padding:4px 2px;display:inline-flex;align-items:center;cursor:grab;touch-action:none;flex-shrink:0;}
+.drag-handle:hover{color:var(--text);}
+body.is-dragging{cursor:grabbing;user-select:none;-webkit-user-select:none;}
+body.is-dragging .drag-handle{cursor:grabbing;}
+.dragging{opacity:.45;}
+.drop-before{box-shadow:0 -3px 0 -1px var(--accent);}
+.drop-zone-end{height:10px;}
+.drop-zone-end.drop-after{box-shadow:0 -3px 0 -1px var(--accent);}
+
+/* Landing strip for dropping an exercise out of a category downwards.
+   Sits flush-left, unlike the indented cards above it, so the drop
+   position alone shows it lands outside. Only visible while dragging. */
+.cat-exit-zone{height:0;opacity:0;border:0 dashed transparent;border-radius:var(--radius-md);
+  margin:0;transition:height .13s ease,opacity .13s ease,margin .13s ease;}
+body.dragging-exercise .cat-exit-zone{height:26px;opacity:1;margin:4px 0 12px;border-width:1px;border-color:var(--border);}
+body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);border-style:solid;background:var(--accent-soft);}
+
+/* Timer bar */
+.timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--text);color:#fff;z-index:40;display:flex;justify-content:center;box-shadow:0 -8px 24px rgba(0,0,0,.14);transform:translateY(100%);transition:transform .25s ease;}
+.timerbar.show{transform:translateY(0);}
+.timerbar.done{background:var(--good);}
+.timerbar-inner{max-width:1080px;width:100%;display:flex;align-items:center;gap:16px;padding:14px 24px;}
+.timerbar-label{font-size:13px;opacity:.8;flex-shrink:0;}
+.timerbar-time{font-family:var(--font-mono);font-size:24px;font-weight:600;font-variant-numeric:tabular-nums;flex:1;}
+.timerbar-inner button{background:rgba(255,255,255,.16);border:none;color:#fff;min-width:34px;height:34px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;padding:0 10px;font-weight:600;font-size:13px;}
+.timerbar-inner button:hover{background:rgba(255,255,255,.28);}
+
+/* Heatmap */
+.heatmap-wrap{overflow-x:auto;padding-bottom:4px;}
+.heatmap{display:grid;grid-auto-flow:column;grid-template-rows:repeat(7,14px);gap:3px;width:max-content;}
+.heatmap-cell{width:14px;height:14px;border-radius:3px;background:var(--surface-2);border:none;padding:0;cursor:default;}
+button.heatmap-cell{cursor:pointer;}
+button.heatmap-cell:hover{outline:1.5px solid var(--text-dim);outline-offset:1px;}
+.heatmap-cell[data-level="1"]{background:#F3CBBB;}
+.heatmap-cell[data-level="2"]{background:#E89A79;}
+.heatmap-cell[data-level="3"]{background:#DE6B41;}
+.heatmap-cell[data-level="4"]{background:var(--accent);}
+.heatmap-cell.today{box-shadow:inset 0 0 0 1.5px var(--text);}
+.heatmap-cell.selected{box-shadow:inset 0 0 0 2px var(--accent);}
+.heatmap-legend{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--text-faint);margin-top:10px;justify-content:flex-end;}
+.heatmap-legend .heatmap-cell{width:11px;height:11px;}
+
+/* History */
+.history-row{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);margin-bottom:8px;transition:border-color .15s ease;cursor:pointer;width:100%;text-align:left;}
+.history-row:hover{border-color:var(--text-dim);}
+.history-row-name{font-weight:600;font-size:14.5px;}
+.history-row-sub{font-size:12.5px;color:var(--text-dim);margin-top:2px;}
+
+/* Modals */
+.modal-overlay{position:fixed;inset:0;background:rgba(20,20,25,.4);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px;}
+.modal-overlay[hidden]{display:none;}
+.modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:100%;max-width:460px;max-height:88vh;overflow-y:auto;box-shadow:var(--shadow-md);}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-head h2{margin:0;font-size:17px;}
+.settings-row{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--border);gap:12px;}
+.settings-row:last-child{border-bottom:none;}
+.segmented{display:flex;background:var(--surface-2);border-radius:20px;padding:3px;}
+.segmented button{border:none;background:none;padding:6px 16px;border-radius:16px;font-size:13px;font-weight:600;color:var(--text-dim);}
+.segmented button.active{background:var(--accent);color:#fff;}
+.settings-row-text{display:flex;flex-direction:column;gap:2px;min-width:0;padding-right:12px;}
+.settings-row-sub{font-size:12px;color:var(--text-dim);line-height:1.4;}
+.settings-section-label{font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;color:var(--text-faint);margin:22px 0 8px;}
+.settings-note{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin-bottom:10px;}
+.settings-stat{font-family:var(--font-mono);font-size:12px;color:var(--text-dim);background:var(--surface-2);border-radius:var(--radius-sm);padding:8px 10px;margin-bottom:12px;}
+.settings-msg{font-size:12.5px;line-height:1.45;border-radius:var(--radius-sm);padding:10px 12px;margin-bottom:12px;}
+.settings-msg.ok{background:var(--good-soft);color:#1F6B3A;}
+.settings-msg.error{background:#FBE7E7;color:#96262A;}
+.import-confirm{border:1px solid var(--accent-soft-border);background:var(--accent-soft);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;}
+.import-confirm-title{font-weight:700;font-size:14px;margin-bottom:10px;}
+.import-confirm-row{display:flex;justify-content:space-between;gap:12px;font-size:12.5px;padding:4px 0;color:var(--text-dim);}
+.import-confirm-row span:last-child{color:var(--text);text-align:right;}
+.import-confirm-warn{font-size:12px;color:#96262A;margin-top:10px;line-height:1.45;}
+.settings-row-actions{display:flex;gap:8px;flex-shrink:0;}
+
+/* Profile */
+.avatar-btn{background:none;border:none;padding:0;width:32px;height:32px;border-radius:50%;overflow:hidden;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;box-shadow:0 0 0 1px var(--border);transition:box-shadow .15s ease;}
+.avatar-btn:hover{box-shadow:0 0 0 2px var(--text-dim);}
+.avatar-btn.active{box-shadow:0 0 0 2px var(--accent);}
+.avatar-img{display:block;width:100%;height:100%;object-fit:cover;border-radius:50%;}
+.avatar-initials{display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:50%;background:var(--accent);color:#fff;font-weight:700;font-size:12.5px;letter-spacing:.3px;}
+.avatar-initials.empty{background:var(--surface-2);color:var(--text-faint);}
+.avatar-img.lg,.avatar-initials.lg{width:88px;height:88px;font-size:30px;}
+.home-greeting{font-size:14px;color:var(--text-dim);margin-bottom:14px;}
+.profile-head{display:flex;align-items:center;gap:18px;margin:20px 0 16px;}
+.profile-avatar{position:relative;background:none;border:none;padding:0;width:88px;height:88px;border-radius:50%;flex-shrink:0;box-shadow:0 0 0 1px var(--border);}
+.profile-avatar:hover .profile-avatar-overlay{opacity:1;}
+.profile-avatar-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(20,20,25,.55);color:#fff;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .15s ease;}
+.profile-head-text{min-width:0;}
+.profile-name{font-size:24px;font-weight:700;line-height:1.2;}
+.profile-handle{font-family:var(--font-mono);font-size:13px;color:var(--text-dim);margin-top:3px;}
+.profile-since{font-size:12.5px;color:var(--text-faint);margin-top:6px;}
+.profile-avatar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px;}
+.profile-avatar-size{font-family:var(--font-mono);font-size:11.5px;color:var(--text-faint);}
+.profile-note{font-size:12.5px;color:var(--text-dim);line-height:1.5;margin:18px 0 14px;}
+
+/* Cropper */
+.cropper-modal{max-width:360px;}
+.crop-stage{position:relative;margin:4px auto 0;border-radius:var(--radius-md);overflow:hidden;background:var(--surface-2);touch-action:none;}
+.crop-stage canvas{display:block;cursor:grab;touch-action:none;}
+.crop-stage canvas:active{cursor:grabbing;}
+.crop-mask{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 9999px rgba(20,20,25,.55);pointer-events:none;}
+.crop-mask::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,255,255,.9);}
+.crop-hint{text-align:center;font-size:12.5px;color:var(--text-dim);margin:12px 0 8px;}
+.crop-zoom-row{display:flex;align-items:center;gap:10px;}
+.crop-zoom-row input[type=range]{flex:1;accent-color:var(--accent);}
+@media (max-width:640px){
+  .cropper-modal{max-width:100%;}
+}
+@media (max-width:640px){
+  .profile-head{gap:14px;}
+  .avatar-img.lg,.avatar-initials.lg,.profile-avatar{width:68px;height:68px;}
+  .avatar-initials.lg{font-size:24px;}
+  .profile-name{font-size:20px;}
+}
+.import-mode{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
+.import-mode-btn{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px;transition:border-color .15s ease;}
+.import-mode-btn:hover{border-color:var(--accent);}
+.import-mode-btn.danger:hover{border-color:var(--danger);}
+.import-mode-title{font-weight:700;font-size:14px;}
+.import-mode-btn.danger .import-mode-title{color:var(--danger);}
+.import-mode-sub{font-size:12px;color:var(--text-dim);line-height:1.4;}
+.backup-nudge{display:flex;align-items:center;gap:12px;background:var(--accent-soft);border:1px solid var(--accent-soft-border);border-radius:var(--radius-md);padding:14px 16px;margin-bottom:20px;}
+.backup-nudge-text{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
+.backup-nudge-text strong{font-size:14px;}
+.backup-nudge-text span{font-size:12.5px;color:var(--text-dim);line-height:1.4;}
+.backup-nudge-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+@media (max-width:640px){
+  .backup-nudge{flex-direction:column;align-items:stretch;}
+  .backup-nudge-actions{justify-content:space-between;}
+  .settings-row-actions{flex-direction:column;}
+}
+
+@media (max-width:640px){
+  .topbar-inner{padding:12px 14px;gap:10px;}
+  .brand{font-size:11px;letter-spacing:0;}
+  .tabs{gap:2px;}
+  .tab-btn{padding:7px 9px;font-size:12.5px;}
+  .main{padding:20px 14px 110px;}
+  .stat-card{padding:12px;}
+  .stat-num{font-size:22px;}
+  .cta-card{flex-direction:column;align-items:flex-start;padding:20px;}
+  .cta-card > button{width:100%;justify-content:center;}
+  .split-detail{padding:16px;}
+  .num-input{max-width:72px;}
+}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-inner">
+    <div class="brand">ATHLETIC<span>ISM</span></div>
+    <nav class="tabs" id="tabs">
+      <button class="tab-btn" data-tab="home">Home</button>
+      <button class="tab-btn" data-tab="plans">Plans</button>
+      <button class="tab-btn" data-tab="exercises">Exercises</button>
+      <button class="tab-btn" data-tab="history">History</button>
+    </nav>
+    <div class="topbar-right">
+      <button id="inprogress-btn" class="inprogress-pill" data-action="resume-workout" hidden></button>
+      <button class="icon-btn" data-action="settings-open" title="Settings"></button>
+      <button id="avatar-btn" class="avatar-btn" data-action="open-profile" title="Profile"></button>
+    </div>
+  </div>
+</header>
+
+<main class="main" id="main"></main>
+
+<div class="timerbar" id="timerbar"></div>
+
+<div class="modal-overlay" id="settings-modal" hidden></div>
+<div class="modal-overlay" id="finish-modal" hidden></div>
+<div class="modal-overlay" id="restore-modal" hidden></div>
+<div class="modal-overlay" id="cropper-modal" hidden></div>
+<div class="modal-overlay" id="exercise-modal" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* =========================================================================
+   DATA MODEL
+   exercises: [{ id, name, tag, fields:[{id,type,label,unit}], defaultRestSec }]
+   plans:     [{ id, name, items:[{ exerciseId, targetSets }] }]
+   workouts:  [{ id, planId, name, date, startedAt, completedAt,
+                 exercises:[{ exerciseId, name, fields:[snapshot], defaultRestSec,
+                              sets:[{ id, values:{fieldId:val}, restSec, done }] }] }]
+   activeWorkout: same shape as a workout entry, completedAt=null, or null
+   settings:  { weightUnit: 'lb'|'kg' }
+   Fields/defaultRestSec are SNAPSHOTTED onto workouts so editing a library
+   exercise later never changes historical logs.
+   Persisted as one JSON blob in localStorage under STORAGE_KEY.
+   ========================================================================= */
+
+var STORAGE_KEY = 'athleticism_data_v1';
+var LEGACY_STORAGE_KEY = 'ironlog_data_v1';
+var BACKUP_FORMAT = 1;
+var EMBED_ID = 'embedded-backup';
+var KG_PER_LB = 0.45359237;
+var FIELD_TYPE_NAMES = {weight:'Weight', assisted:'Assisted', reps:'Reps', timer:'Target Time', time:'Measured Time', number:'Number', text:'Text'};
+
+var ICONS = {
+  plus:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  x:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>',
+  trash:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
+  chevronRight:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>',
+  chevronLeft:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>',
+  chevronUp:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"/></svg>',
+  chevronDown:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>',
+  check:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+  play:'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20"/></svg>',
+  pause:'<svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" stroke="none"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>',
+  settings:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+  search:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  grip:'<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
+  user:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  camera:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  folder:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>'
+};
+function icon(name){ return ICONS[name] || ''; }
+
+/* ------------------------------------------------------------- utils */
+
+function uid(p){ return (p||'id') + '_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2,8); }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function toLocalISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+function todayISO(){ return toLocalISO(new Date()); }
+function parseISO(iso){ var p=iso.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
+function fmtHeaderDate(iso){ return parseISO(iso).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}); }
+function fmtShortDate(iso){ return parseISO(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+function fmtElapsed(ms){
+  var totalSec = Math.max(0, Math.floor(ms/1000));
+  var h = Math.floor(totalSec/3600), m = Math.floor((totalSec%3600)/60), s = totalSec%60;
+  return h>0 ? (h+':'+pad2(m)+':'+pad2(s)) : (m+':'+pad2(s));
+}
+function kgToDisplay(kg, unit){
+  if (kg===null||kg===undefined||isNaN(kg)) return null;
+  var v = unit==='lb' ? kg/KG_PER_LB : kg;
+  return Math.round(v*10)/10;
+}
+function displayToKg(val, unit){
+  if (val===null||val===undefined||isNaN(val)) return null;
+  return unit==='lb' ? val*KG_PER_LB : val;
+}
+function secToMMSS(totalSec){
+  if (totalSec===null||totalSec===undefined||isNaN(totalSec)) return '';
+  var s = Math.round(totalSec), m = Math.floor(Math.abs(s)/60), sec = Math.abs(s)%60;
+  return (s<0?'-':'') + m + ':' + pad2(sec);
+}
+function mmssToSec(str){
+  if (str===null||str===undefined) return null;
+  var t = String(str).trim();
+  if (t==='') return null;
+  if (t.indexOf(':')>=0){
+    var parts = t.split(':');
+    var mi = parseInt(parts[0],10)||0, se = parseInt(parts[1],10)||0;
+    return mi*60+se;
+  }
+  var n = parseFloat(t);
+  return isNaN(n) ? null : n;
+}
+function fmtRest(sec){
+  if (sec===null||sec===undefined) return null;
+  if (sec>=60){ var m=Math.floor(sec/60), s=sec%60; return s===0 ? (m+'m') : (m+':'+pad2(s)); }
+  return sec+'s';
+}
+function blankSetValues(fields){ var o={}; fields.forEach(function(f){ o[f.id]=null; }); return o; }
+function snapshotFields(ex){ return ex.fields.map(function(f){ return Object.assign({},f); }); }
+function fieldDisplayValue(f, raw, unit){
+  if (raw===null||raw===undefined||raw==='') return '';
+  if (f.type==='weight') return String(kgToDisplay(raw, unit));
+  if (f.type==='assisted') return '\u2212' + String(kgToDisplay(raw, unit));
+  if (f.type==='time' || f.type==='timer') return secToMMSS(raw);
+  return String(raw);
+}
+function isTimeType(t){ return t==='time' || t==='timer'; }
+function fieldUnitSuffix(f, unit){
+  if (f.unit) return ' ('+esc(f.unit)+')';
+  if (f.type==='weight') return ' ('+unit+')';
+  if (f.type==='assisted') return ' (\u2212'+unit+')';
+  return '';
+}
+function esc(s){
+  return String(s===null||s===undefined?'':s).replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+/* --------------------------------------------------------- persistence */
+
+function defaultData(){
+  return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, backupNudgeDismissedAt:null, settings:{weightUnit:'lb'} };
+}
+function loadData(){
+  try{
+    var raw = localStorage.getItem(STORAGE_KEY);
+    /* one-time carry-over from the app's previous name (IronLog).
+       The old key is left untouched as a safety copy. */
+    if (!raw){
+      var legacy = localStorage.getItem(LEGACY_STORAGE_KEY);
+      if (legacy){
+        localStorage.setItem(STORAGE_KEY, legacy);
+        raw = legacy;
+      }
+    }
+    if (!raw) return defaultData();
+    var parsed = JSON.parse(raw);
+    return Object.assign(defaultData(), parsed);
+  }catch(e){ return defaultData(); }
+}
+var data = loadData();
+/* When this file was produced by "Export portable copy" it carries a data
+   snapshot. Seed it only into an empty install; if there is already live
+   data we ask first rather than silently overwriting it. */
+var pendingRestore = null;
+(function(){
+  var el = document.getElementById(EMBED_ID);
+  if (!el) return;
+  var snap;
+  try { snap = JSON.parse(el.textContent); } catch(e){ return; }
+  var payload = snap && snap.data ? snap.data : null;
+  if (!payload || !Array.isArray(payload.exercises)) return;
+  var isEmpty = (data.exercises||[]).length===0 && (data.plans||[]).length===0 && (data.workouts||[]).length===0;
+  if (isEmpty){
+    data = Object.assign(defaultData(), payload);
+    try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+  } else {
+    pendingRestore = snap;
+  }
+})();
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+  catch(e){ console.error('Athleticism: save failed', e); }
+}
+/* ---- Backup & restore ---------------------------------------------------
+   localStorage is not permanent. iOS Safari in particular can evict site
+   data for pages that are not installed to the Home Screen, so exporting a
+   real file is the only durable safety net. Three formats:
+     .json  - compact data-only backup
+     .html  - a full working copy of the app with the data baked inside
+   Importing accepts either. */
+
+function backupPayload(){
+  var snapshot = Object.assign({}, data);
+  /* device-local state that should not travel with the data */
+  delete snapshot.restTimer;
+  delete snapshot.lastExportAt;
+  delete snapshot.backupNudgeDismissedAt;
+  return {
+    app: 'Athleticism',
+    backupFormat: BACKUP_FORMAT,
+    exportedAt: new Date().toISOString(),
+    data: snapshot
+  };
+}
+function backupStamp(){
+  var d = new Date();
+  return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());
+}
+function dataCounts(d){
+  return {
+    exercises: (d.exercises||[]).length,
+    plans: (d.plans||[]).length,
+    workouts: (d.workouts||[]).filter(function(w){return w.completedAt;}).length
+  };
+}
+function countsLine(c){
+  return c.exercises+' exercise'+(c.exercises!==1?'s':'')+' &middot; '+
+         c.plans+' plan'+(c.plans!==1?'s':'')+' &middot; '+
+         c.workouts+' workout'+(c.workouts!==1?'s':'');
+}
+function downloadFile(filename, mime, content){
+  try{
+    var blob = new Blob([content], {type: mime});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(function(){
+      if (a.parentNode) a.parentNode.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 200);
+    return true;
+  }catch(e){
+    console.error('Athleticism: download failed', e);
+    return false;
+  }
+}
+/* On phones the OS share sheet is a far better destination than a silent
+   download - it puts the file straight into Files, iCloud Drive or AirDrop. */
+function canShareFiles(){
+  try{
+    if (!navigator.share || !navigator.canShare || typeof File !== 'function') return false;
+    return navigator.canShare({ files: [ new File(['x'], 'x.txt', {type:'text/plain'}) ] });
+  }catch(e){ return false; }
+}
+function markExported(){
+  data.lastExportAt = Date.now();
+  data.backupNudgeDismissedAt = null;
+  save();
+}
+function shareFile(filename, mime, content, done){
+  var file;
+  try { file = new File([content], filename, {type: mime}); }
+  catch(e){ return false; }
+  navigator.share({ files:[file], title: filename })
+    .then(function(){ done(true); })
+    .catch(function(){ done(false); });  /* cancelled or unsupported - stay put */
+  return true;
+}
+function jsonBackupText(){ return JSON.stringify(backupPayload(), null, 2); }
+function jsonBackupName(){ return 'athleticism-backup-'+backupStamp()+'.json'; }
+function portableBackupName(){ return 'athleticism-backup-'+backupStamp()+'.html'; }
+
+function exportJSON(){
+  var ok = downloadFile(jsonBackupName(), 'application/json', jsonBackupText());
+  if (ok) markExported();
+  return ok;
+}
+/* Serialise a clean copy of this page with the current data embedded, so the
+   backup file is itself a fully working copy of the app. */
+function buildPortableHTML(){
+  var clone = document.documentElement.cloneNode(true);
+
+  /* strip anything the app rebuilds on load, plus any embed from a file
+     this copy was itself opened from */
+  var prior = clone.querySelector('#'+EMBED_ID);
+  if (prior && prior.parentNode) prior.parentNode.removeChild(prior);
+
+  /* A portable copy runs from a file:// path, where service workers and
+     manifests are invalid. Strip the PWA wiring so the archive never tries
+     to register anything and never claims to be installable. */
+  var pwaBits = clone.querySelectorAll('link[rel="manifest"], [data-pwa]');
+  for (var q=0;q<pwaBits.length;q++){
+    if (pwaBits[q].parentNode) pwaBits[q].parentNode.removeChild(pwaBits[q]);
+  }
+  ['#main','#settings-modal','#exercise-modal','#finish-modal','#restore-modal','#timerbar'].forEach(function(sel){
+    var el = clone.querySelector(sel);
+    if (el) el.innerHTML = '';
+  });
+  ['#settings-modal','#exercise-modal','#finish-modal','#restore-modal'].forEach(function(sel){
+    var el = clone.querySelector(sel);
+    if (el) el.setAttribute('hidden','');
+  });
+  var tb = clone.querySelector('#timerbar');
+  if (tb) tb.className = 'timerbar';
+  var pill = clone.querySelector('#inprogress-btn');
+  if (pill){ pill.innerHTML = ''; pill.setAttribute('hidden',''); }
+  var cloneBody = clone.querySelector('body');
+  if (cloneBody) cloneBody.className = '';
+  var tabs = clone.querySelectorAll('.tab-btn');
+  for (var i=0;i<tabs.length;i++) tabs[i].classList.remove('active');
+
+  /* "<" is escaped so a closing script tag inside user text can't end this one early */
+  var json = JSON.stringify(backupPayload()).replace(/</g, '\\u003c');
+  var seed = clone.ownerDocument.createElement('script');
+  seed.type = 'application/json';
+  seed.id = EMBED_ID;
+  seed.textContent = json;
+
+  var appScript = null;
+  var scripts = clone.querySelectorAll('script');
+  for (var j=0;j<scripts.length;j++){ if (!scripts[j].type) appScript = scripts[j]; }
+  if (appScript && appScript.parentNode) appScript.parentNode.insertBefore(seed, appScript);
+  else if (cloneBody) cloneBody.appendChild(seed);
+
+  return '<!DOCTYPE html>\n' + clone.outerHTML;
+}
+function exportPortable(){
+  var ok = downloadFile(portableBackupName(), 'text/html', buildPortableHTML());
+  if (ok) markExported();
+  return ok;
+}
+/* Accepts a .json backup, or a portable .html backup (data pulled out of
+   its embedded block). */
+function parseBackupText(text){
+  var trimmed = (text||'').trim();
+  if (trimmed.charAt(0) !== '{'){
+    var marker = 'id="'+EMBED_ID+'"';
+    var at = trimmed.indexOf(marker);
+    if (at === -1) return { ok:false, error:'That file does not contain any Athleticism data.' };
+    var open = trimmed.indexOf('>', at);
+    var close = trimmed.indexOf('<\/script>', open);
+    if (open === -1 || close === -1) return { ok:false, error:'The backup block in that file is incomplete.' };
+    trimmed = trimmed.slice(open+1, close).replace(/\\u003c/g, '<').trim();
+  }
+  var parsed;
+  try { parsed = JSON.parse(trimmed); }
+  catch(e){ return { ok:false, error:'That file is not valid backup data.' }; }
+  if (parsed && typeof parsed.backupFormat==='number' && parsed.backupFormat > BACKUP_FORMAT){
+    return { ok:false, error:'That backup was made by a newer version of Athleticism. Update this copy first.' };
+  }
+  var payload = (parsed && parsed.data && typeof parsed.data==='object') ? parsed.data : parsed;
+  if (!payload || typeof payload!=='object') return { ok:false, error:'That file is not valid backup data.' };
+  if (!Array.isArray(payload.exercises) || !Array.isArray(payload.plans) || !Array.isArray(payload.workouts)){
+    return { ok:false, error:'That backup is missing its exercises, plans or workouts.' };
+  }
+  return { ok:true, data: payload, exportedAt: parsed.exportedAt || null };
+}
+/* Merge is additive and never destructive: anything whose id we already have
+   is left exactly as it is. That makes combining two devices predictable -
+   you can run it twice and get the same result. */
+function mergeImportedData(payload){
+  var added = { exercises:0, plans:0, workouts:0 };
+  var seen = {};
+
+  data.exercises.forEach(function(e){ seen['e:'+e.id] = true; });
+  (payload.exercises||[]).forEach(function(e){
+    if (!e || !e.id || seen['e:'+e.id]) return;
+    seen['e:'+e.id] = true;
+    data.exercises.push(e);
+    added.exercises++;
+  });
+
+  data.plans.forEach(function(pl){ seen['p:'+pl.id] = true; });
+  (payload.plans||[]).forEach(function(pl){
+    if (!pl || !pl.id || seen['p:'+pl.id]) return;
+    seen['p:'+pl.id] = true;
+    pl.items = normalizePlanItems(pl.items || []);
+    data.plans.push(pl);
+    added.plans++;
+  });
+
+  data.workouts.forEach(function(w){ seen['w:'+w.id] = true; });
+  (payload.workouts||[]).forEach(function(w){
+    if (!w || !w.id || seen['w:'+w.id]) return;
+    seen['w:'+w.id] = true;
+    data.workouts.push(w);
+    added.workouts++;
+  });
+
+  /* identity is not additive - only adopt it if this device has none */
+  if (payload.profile){
+    var mine = profile();
+    if (!mine.name && !mine.username && !mine.avatar) data.profile = payload.profile;
+  }
+
+  data.workouts.sort(function(a,b){ return (a.completedAt||0) - (b.completedAt||0); });
+  save();
+  migratePlanItems();
+  return added;
+}
+
+function applyImportedData(payload){
+  clearInterval(runtime.timerHandle);
+  runtime.timerHandle = null;
+  runtime.timer = null;
+  runtime.pendingBeep = false;
+  data = Object.assign(defaultData(), payload);
+  data.restTimer = null;
+  if (!data.settings || !data.settings.weightUnit) data.settings = { weightUnit:'lb' };
+  data.plans.forEach(function(plan){
+    plan.items = normalizePlanItems(plan.items || []);
+  });
+  save();
+  migratePlanItems();
+  renderAvatarButton();
+}
+
+/* ---- Profile ------------------------------------------------------------
+   The avatar is stored as a base64 data URL inside the same localStorage
+   blob as everything else. That store is only ~5MB in total, and base64
+   adds about a third on top, so a straight-from-the-camera photo would
+   blow the quota and take the workout history with it. Every image is
+   therefore center-cropped and downscaled to a 256px square JPEG first,
+   which lands around 15-25KB. */
+
+var AVATAR_PX = 256;
+var AVATAR_QUALITY = 0.82;
+var AVATAR_MAX_BYTES = 120 * 1024;
+
+function profile(){
+  if (!data.profile) data.profile = { name:'', username:'', avatar:null, createdAt:null };
+  return data.profile;
+}
+function displayName(){
+  var p = profile();
+  return (p.name && p.name.trim()) || (p.username && p.username.trim()) || '';
+}
+function initials(){
+  var n = displayName();
+  if (!n) return '';
+  var parts = n.trim().split(/\s+/).slice(0,2);
+  return parts.map(function(x){ return x.charAt(0).toUpperCase(); }).join('');
+}
+function avatarMarkup(sizeClass){
+  var p = profile();
+  if (p.avatar) return '<img class="avatar-img '+sizeClass+'" src="'+p.avatar+'" alt="">';
+  var ini = initials();
+  if (ini) return '<span class="avatar-initials '+sizeClass+'">'+esc(ini)+'</span>';
+  return '<span class="avatar-initials '+sizeClass+' empty">'+icon('user')+'</span>';
+}
+function renderAvatarButton(){
+  var btn = document.getElementById('avatar-btn');
+  if (!btn) return;
+  btn.innerHTML = avatarMarkup('sm');
+  btn.classList.toggle('active', ui.view==='profile');
+}
+function dataUrlBytes(dataUrl){
+  if (!dataUrl) return 0;
+  var i = dataUrl.indexOf(',');
+  return Math.round((dataUrl.length - i - 1) * 0.75);
+}
+/* Decode -> center crop -> downscale -> re-encode. Quality steps down if the
+   result is somehow still large. */
+function loadImageFromFile(file, cb){
+  if (!file || !file.type || file.type.indexOf('image/') !== 0){
+    cb({ error:'That file is not an image.' });
+    return;
+  }
+  var reader = new FileReader();
+  reader.onerror = function(){ cb({ error:'Could not read that file.' }); };
+  reader.onload = function(){
+    var img = new Image();
+    img.onerror = function(){
+      cb({ error:'This browser could not decode that image. Try a JPEG or PNG.' });
+    };
+    img.onload = function(){
+      if (!img.width || !img.height){ cb({ error:'That image appears to be empty.' }); return; }
+      cb({ img: img });
+    };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ---- Crop / reposition --------------------------------------------------
+   A square viewport with a circular mask. The image is panned and zoomed
+   under it, then only the visible square is re-encoded at AVATAR_PX. The
+   viewport can never show empty space: offsets are clamped so the image
+   always covers it, and zoom is floored at "just covers". */
+
+var CROP_VIEW = 288;
+var CROP_MAX_ZOOM = 4;
+var cropper = null;
+
+function cropDims(){
+  var c = cropper;
+  return { w: c.img.width * c.base * c.z, h: c.img.height * c.base * c.z };
+}
+function clampCropper(){
+  var c = cropper, d = cropDims();
+  c.ox = Math.min(0, Math.max(c.view - d.w, c.ox));
+  c.oy = Math.min(0, Math.max(c.view - d.h, c.oy));
+}
+function centerCropper(){
+  var c = cropper, d = cropDims();
+  c.ox = (c.view - d.w) / 2;
+  c.oy = (c.view - d.h) / 2;
+  clampCropper();
+}
+function setCropZoom(z){
+  var c = cropper;
+  var nz = Math.max(1, Math.min(CROP_MAX_ZOOM, z));
+  if (nz === c.z) return;
+  var mid = c.view / 2;
+  var d0 = cropDims();
+  var rx = (mid - c.ox) / d0.w;
+  var ry = (mid - c.oy) / d0.h;
+  c.z = nz;
+  var d1 = cropDims();
+  c.ox = mid - rx * d1.w;
+  c.oy = mid - ry * d1.h;
+  clampCropper();
+  drawCropper();
+  var slider = document.getElementById('crop-zoom');
+  if (slider && Math.abs(slider.value*1 - c.z) > 0.001) slider.value = c.z;
+}
+function drawCropper(){
+  var c = cropper;
+  if (!c) return;
+  var canvas = document.getElementById('crop-canvas');
+  if (!canvas) return;
+  var dpr = window.devicePixelRatio || 1;
+  if (canvas.width !== Math.round(c.view*dpr)){
+    canvas.width = Math.round(c.view*dpr);
+    canvas.height = Math.round(c.view*dpr);
+  }
+  var ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, c.view, c.view);
+  var d = cropDims();
+  ctx.drawImage(c.img, c.ox, c.oy, d.w, d.h);
+}
+function openCropper(img){
+  /* the stage must match the canvas exactly or the circular mask would no
+     longer correspond to the square we actually export */
+  var view = Math.max(200, Math.min(CROP_VIEW, window.innerWidth - 88));
+  cropper = { img: img, view: view, z: 1, ox: 0, oy: 0, pointers: {}, pinchDist: 0, pinchZoom: 1 };
+  cropper.base = view / Math.min(img.width, img.height);
+  centerCropper();
+  var wrap = document.getElementById('cropper-modal');
+  wrap.innerHTML = '<div class="modal cropper-modal">'+
+    '<div class="modal-head"><h2>Adjust picture</h2><button class="icon-btn" data-action="crop-cancel">'+icon('x')+'</button></div>'+
+    '<div class="crop-stage" style="width:'+view+'px;height:'+view+'px"><canvas id="crop-canvas" style="width:'+view+'px;height:'+view+'px"></canvas><div class="crop-mask"></div></div>'+
+    '<div class="crop-hint">Drag to reposition. Pinch or use the slider to zoom.</div>'+
+    '<div class="crop-zoom-row">'+
+      '<button class="icon-btn" data-action="crop-zoom-out" title="Zoom out">&minus;</button>'+
+      '<input id="crop-zoom" type="range" min="1" max="'+CROP_MAX_ZOOM+'" step="0.01" value="1">'+
+      '<button class="icon-btn" data-action="crop-zoom-in" title="Zoom in">+</button>'+
+    '</div>'+
+    '<div style="display:flex;gap:10px;margin-top:16px;">'+
+      '<button class="btn btn-ghost full-width" data-action="crop-reset">Reset</button>'+
+      '<button class="btn btn-ghost full-width" data-action="crop-cancel">Cancel</button>'+
+      '<button class="btn btn-primary full-width" data-action="crop-save">Use photo</button>'+
+    '</div>'+
+  '</div>';
+  wrap.hidden = false;
+  attachCropperGestures();
+  drawCropper();
+}
+function closeCropper(){
+  cropper = null;
+  var wrap = document.getElementById('cropper-modal');
+  wrap.hidden = true;
+  wrap.innerHTML = '';
+}
+function attachCropperGestures(){
+  var canvas = document.getElementById('crop-canvas');
+  if (!canvas) return;
+  var slider = document.getElementById('crop-zoom');
+  if (slider){
+    slider.addEventListener('input', function(){ setCropZoom(slider.value*1); });
+  }
+  function pointerList(){
+    var ids = Object.keys(cropper.pointers);
+    return ids.map(function(k){ return cropper.pointers[k]; });
+  }
+  canvas.addEventListener('pointerdown', function(e){
+    if (!cropper) return;
+    e.preventDefault();
+    e.stopPropagation();
+    canvas.setPointerCapture(e.pointerId);
+    cropper.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var pts = pointerList();
+    if (pts.length === 2){
+      cropper.pinchDist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      cropper.pinchZoom = cropper.z;
+    }
+  });
+  canvas.addEventListener('pointermove', function(e){
+    if (!cropper || !cropper.pointers[e.pointerId]) return;
+    e.preventDefault();
+    var prev = cropper.pointers[e.pointerId];
+    var dx = e.clientX - prev.x;
+    var dy = e.clientY - prev.y;
+    cropper.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    var pts = pointerList();
+    if (pts.length >= 2){
+      var dist = Math.hypot(pts[0].x-pts[1].x, pts[0].y-pts[1].y);
+      if (cropper.pinchDist > 0){
+        setCropZoom(cropper.pinchZoom * (dist / cropper.pinchDist));
+      }
+      return;
+    }
+    cropper.ox += dx;
+    cropper.oy += dy;
+    clampCropper();
+    drawCropper();
+  });
+  function release(e){
+    if (!cropper) return;
+    delete cropper.pointers[e.pointerId];
+    cropper.pinchDist = 0;
+  }
+  canvas.addEventListener('pointerup', release);
+  canvas.addEventListener('pointercancel', release);
+  canvas.addEventListener('wheel', function(e){
+    if (!cropper) return;
+    e.preventDefault();
+    setCropZoom(cropper.z * (e.deltaY < 0 ? 1.12 : 1/1.12));
+  }, { passive:false });
+}
+/* Re-encode only the square currently under the viewport. */
+function commitCrop(){
+  var c = cropper;
+  if (!c) return { error:'Nothing to save.' };
+  try{
+    var out = document.createElement('canvas');
+    out.width = AVATAR_PX;
+    out.height = AVATAR_PX;
+    var ctx = out.getContext('2d');
+    var f = c.base * c.z;
+    var sx = (-c.ox) / f;
+    var sy = (-c.oy) / f;
+    var sSide = c.view / f;
+    ctx.drawImage(c.img, sx, sy, sSide, sSide, 0, 0, AVATAR_PX, AVATAR_PX);
+
+    var q = AVATAR_QUALITY;
+    var dataUrl = out.toDataURL('image/jpeg', q);
+    while (dataUrlBytes(dataUrl) > AVATAR_MAX_BYTES && q > 0.4){
+      q -= 0.15;
+      dataUrl = out.toDataURL('image/jpeg', q);
+    }
+    if (!dataUrl || dataUrl.indexOf('data:image') !== 0) return { error:'Could not process that image.' };
+    return { dataUrl: dataUrl, bytes: dataUrlBytes(dataUrl) };
+  }catch(e){
+    return { error:'Could not process that image.' };
+  }
+}
+function setAvatar(dataUrl){
+  var p = profile();
+  p.avatar = dataUrl;
+  if (!p.createdAt) p.createdAt = Date.now();
+  try{
+    save();
+  }catch(e){
+    p.avatar = null;
+    return false;
+  }
+  renderAvatarButton();
+  return true;
+}
+function greeting(){
+  var h = new Date().getHours();
+  if (h < 5) return 'Still up';
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
+}
+
+function migratePlanItems(){
+  var changed = false;
+  data.plans.forEach(function(plan){
+    plan.items.forEach(function(item){
+      if (!item.sets){
+        changed = true;
+        var ex = data.exercises.find(function(e){return e.id===item.exerciseId;});
+        var fields = ex ? ex.fields : [];
+        var count = Math.max(1, item.targetSets || 1);
+        var sets = [];
+        for (var i=0;i<count;i++){
+          sets.push({ kind:'set', id: uid('s'), values: blankSetValues(fields), restSec: null });
+        }
+        item.defaultRestSec = (item.restSec!==undefined) ? item.restSec : null;
+        item.sets = sets;
+        delete item.targetSets;
+        delete item.restSec;
+      }
+    });
+  });
+  if (changed) save();
+}
+migratePlanItems();
+function newPlanItem(exerciseId){
+  var ex = data.exercises.find(function(e){return e.id===exerciseId;});
+  var fields = ex ? ex.fields : [];
+  var sets = [];
+  for (var i=0;i<3;i++){ sets.push({ kind:'set', id: uid('s'), values: blankSetValues(fields), restSec: null }); }
+  return { kind:'exercise', exerciseId: exerciseId, defaultRestSec: null, sets: sets };
+}
+
+/* ---- Categories ---------------------------------------------------------
+   plan.items is a FLAT sequence. A category entry acts as a section header;
+   every exercise entry after it belongs to that category until the next
+   category entry. Entries before any header are uncategorised. This keeps
+   drag-and-drop to a single flat reorder instead of nested tree surgery. */
+
+function newPlanCategory(){
+  return { kind:'category', id: uid('cat'), name: 'New Category', collapsed: false };
+}
+function itemKind(it){ return it.kind || 'exercise'; }
+/* A 'break' entry closes the category above it, so exercises can sit BELOW a
+   category while staying outside it. Without it, position alone would always
+   pull them back into the nearest heading above. */
+function newPlanBreak(){ return { kind:'break', id: uid('brk') }; }
+/* how many entries move together when this one is dragged:
+   a category takes its members with it, an exercise moves alone */
+function planBlockLength(items, idx){
+  if (itemKind(items[idx]) !== 'category') return 1;
+  var n = 1;
+  for (var i=idx+1; i<items.length; i++){
+    var k = itemKind(items[i]);
+    if (k==='category' || k==='break') break;
+    n++;
+  }
+  return n;
+}
+/* index of the category heading governing this entry, or -1 if uncategorised */
+function owningCategoryIdx(items, idx){
+  for (var i=idx-1; i>=0; i--){
+    var k = itemKind(items[i]);
+    if (k==='break') return -1;
+    if (k==='category') return i;
+  }
+  return -1;
+}
+/* true when this entry is the last member of the category block it belongs to */
+function isLastInCategory(items, idx){
+  if (itemKind(items[idx])!=='exercise') return false;
+  if (owningCategoryIdx(items, idx) === -1) return false;
+  var next = items[idx+1];
+  if (!next) return true;
+  var nk = itemKind(next);
+  return nk==='category' || nk==='break';
+}
+/* drop a break marker wherever it no longer separates anything */
+function normalizePlanItems(items){
+  var out = [];
+  for (var i=0;i<items.length;i++){
+    if (itemKind(items[i])!=='break'){ out.push(items[i]); continue; }
+    var prev = out[out.length-1];
+    if (!prev) continue;                                  /* nothing above to close */
+    if (itemKind(prev)==='break') continue;               /* duplicate */
+    if (owningCategoryIdx(out, out.length) === -1) continue; /* not inside a category */
+    var next = items[i+1];
+    if (!next) continue;                                  /* nothing below to separate */
+    if (itemKind(next)==='category') continue;            /* next heading already closes it */
+    out.push(items[i]);
+  }
+  return out;
+}
+function planExerciseCount(plan){
+  return (plan.items||[]).filter(function(it){ return itemKind(it)==='exercise'; }).length;
+}
+function movePlanBlock(fromIdx, toIdx, exitCategory){
+  var plan = currentPlan();
+  var items = plan.items;
+  var len = planBlockLength(items, fromIdx);
+  if (toIdx > fromIdx && toIdx < fromIdx + len) return; /* dropped inside itself */
+  var moved = items.splice(fromIdx, len);
+  var dest = toIdx > fromIdx ? toIdx - len : toIdx;
+  /* dropping into a category's exit zone: close the category first, so the
+     item lands below the heading but outside it */
+  if (exitCategory && itemKind(moved[0])!=='category'){
+    items.splice(dest, 0, newPlanBreak());
+    dest++;
+  }
+  for (var i=0;i<moved.length;i++) items.splice(dest+i, 0, moved[i]);
+  plan.items = normalizePlanItems(items);
+  save(); renderMain();
+}
+
+/* ------------------------------------------------------------ ui state */
+
+var ui = {
+  view: 'home',
+  selectedPlanId: null,
+  selectedExerciseId: null,
+  exerciseSearch: '',
+  historyFilterDate: null,
+  viewingWorkoutId: null,
+  picker: null,
+  pickerContextForModal: null,
+  exerciseDraft: null,
+  showCustomFieldForm: false,
+  editingRest: null,
+  editingDefaultRest: null,
+  editingPlanRest: null,
+  editingPlanSetRest: null,
+  editingPlanRestBlock: null,
+  editingRestBlock: null,
+  editingTopRest: null,
+  finishDraft: null,
+  importPreview: null,
+  settingsMessage: null,
+  profileMessage: null,
+  lastTab: 'home'
+};
+var runtime = { timer: null, timerHandle: null, audioCtx: null, pendingBeep: false };
+var originalTitle = document.title;
+
+/* ------------------------------------------------------- derived stats */
+
+function trainedDatesSet(){
+  var s = new Set();
+  data.workouts.forEach(function(w){ if (w.completedAt) s.add(w.date); });
+  return s;
+}
+function computeStreak(trained){
+  var count=0, cursor=new Date();
+  if (!trained.has(toLocalISO(cursor))) cursor.setDate(cursor.getDate()-1);
+  while (trained.has(toLocalISO(cursor))) { count++; cursor.setDate(cursor.getDate()-1); }
+  return count;
+}
+function computeThisMonthCount(){
+  var now = new Date();
+  return data.workouts.filter(function(w){ return w.completedAt; }).filter(function(w){
+    var d = parseISO(w.date);
+    return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
+  }).length;
+}
+function lastEntryFor(exerciseId, excludeWorkoutId){
+  var past = data.workouts.filter(function(w){ return w.completedAt && w.id!==excludeWorkoutId && !w.excludeFromReference; })
+    .sort(function(a,b){ return b.completedAt-a.completedAt; });
+  for (var i=0;i<past.length;i++){
+    var entry = past[i].exercises.find(function(e){ return e.exerciseId===exerciseId; });
+    if (entry) return entry;
+  }
+  return null;
+}
+function currentPlan(){ return data.plans.find(function(p){ return p.id===ui.selectedPlanId; }); }
+
+/* ---------------------------------------------------------- navigation */
+
+function setView(view){
+  ui.view = view;
+  ui.picker = null;
+  ui.editingRest = null;
+  ui.editingDefaultRest = null;
+  ui.editingPlanRest = null;
+  ui.editingPlanSetRest = null;
+  ui.editingPlanRestBlock = null;
+  ui.editingRestBlock = null;
+  ui.editingTopRest = null;
+  if (view!=='profile' && view!=='workout') ui.lastTab = view;
+  if (view!=='profile') ui.profileMessage = null;
+  document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===view); });
+  renderMain();
+  renderAvatarButton();
+  updateInProgressBar();
+}
+function renderMain(){
+  switch(ui.view){
+    case 'home': renderHome(); break;
+    case 'plans': renderPlans(); break;
+    case 'exercises': renderExercises(); break;
+    case 'history': renderHistory(); break;
+    case 'workout': renderWorkout(); break;
+    case 'profile': renderProfile(); break;
+  }
+}
+function updateInProgressBar(){
+  var btn = document.getElementById('inprogress-btn');
+  if (data.activeWorkout && ui.view!=='workout'){
+    btn.hidden = false;
+    btn.innerHTML = '<span class="dot"></span> ' + esc(data.activeWorkout.name) + ' &middot; ' + fmtElapsed(Date.now()-data.activeWorkout.startedAt);
+  } else {
+    btn.hidden = true;
+  }
+}
+
+/* ---------------------------------------------------------------- home */
+
+function renderHome(){
+  var main = document.getElementById('main');
+  var trained = trainedDatesSet();
+  var streak = computeStreak(trained);
+  var monthCount = computeThisMonthCount();
+  var allTime = data.workouts.filter(function(w){return w.completedAt;}).length;
+  var aw = data.activeWorkout;
+
+  var html = '';
+  var who = displayName();
+  if (who) html += '<div class="home-greeting">'+esc(greeting())+', '+esc(who.split(/\s+/)[0])+'</div>';
+  if (backupIsStale()){
+    var n = workoutsSinceExport();
+    html += '<div class="backup-nudge">'+
+      '<div class="backup-nudge-text">'+
+        '<strong>Back up your data</strong>'+
+        '<span>'+n+' workout'+(n!==1?'s':'')+' logged since your last export. Browsers can clear local data without warning.</span>'+
+      '</div>'+
+      '<div class="backup-nudge-actions">'+
+        '<button class="btn btn-primary small" data-action="backup-nudge-export">Export now</button>'+
+        '<button class="icon-btn" data-action="backup-nudge-dismiss" title="Not now">'+icon('x')+'</button>'+
+      '</div>'+
+    '</div>';
+  }
+  if (aw){
+    html += '<div class="cta-card active"><div><div class="cta-eyebrow">In progress</div><div class="cta-title">'+esc(aw.name)+'</div></div>'+
+      '<button data-action="resume-workout">'+icon('play')+' Resume</button></div>';
+  } else {
+    html += '<div class="cta-card"><div><div class="cta-eyebrow">Ready when you are</div><div class="cta-title">Start a workout</div></div>'+
+      '<button data-action="start-blank">'+icon('play')+' Start Workout</button></div>';
+  }
+
+  html += '<div class="stat-grid">'+
+    '<div class="stat-card"><div class="stat-num">'+streak+'</div><div class="stat-lbl">day streak</div></div>'+
+    '<div class="stat-card"><div class="stat-num">'+monthCount+'</div><div class="stat-lbl">this month</div></div>'+
+    '<div class="stat-card"><div class="stat-num">'+allTime+'</div><div class="stat-lbl">all time</div></div>'+
+  '</div>';
+
+  html += '<div class="section-title"><span>Your Plans</span></div><div class="plan-grid">';
+  data.plans.forEach(function(p){
+    var pcount = planExerciseCount(p);
+    html += '<button class="plan-card" data-action="start-plan" data-id="'+p.id+'">'+
+      '<div class="plan-card-name">'+esc(p.name)+'</div>'+
+      '<div class="plan-card-sub">'+pcount+' exercise'+(pcount!==1?'s':'')+'</div></button>';
+  });
+  html += '<button class="plan-card new" data-action="goto-plans" style="display:flex;align-items:center;justify-content:center;gap:6px;color:var(--text-dim);border-style:dashed;">'+icon('plus')+'<span>New Plan</span></button>';
+  html += '</div>';
+
+  html += '<div class="section-title"><span>Consistency</span></div><div class="card">'+renderHeatmap(trained,26,false)+
+    '<div style="text-align:right;margin-top:14px;"><button class="btn btn-tag" data-action="goto-history">View full history '+icon('chevronRight')+'</button></div></div>';
+
+  main.innerHTML = html;
+}
+
+function renderHeatmap(trainedSet, weeks, interactive){
+  var countByDate = {};
+  data.workouts.forEach(function(w){
+    if (!w.completedAt) return;
+    var c = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set' && s.done;}).length : 0); },0);
+    countByDate[w.date] = (countByDate[w.date]||0) + c;
+  });
+  var today = new Date();
+  var end = new Date(today);
+  end.setDate(end.getDate() + (6-end.getDay()));
+  var totalDays = weeks*7;
+  var start = new Date(end);
+  start.setDate(start.getDate()-totalDays+1);
+
+  var cells = '';
+  for (var i=0;i<totalDays;i++){
+    var d = new Date(start); d.setDate(start.getDate()+i);
+    if (d > today){ cells += '<div class="heatmap-cell" style="visibility:hidden"></div>'; continue; }
+    var iso = toLocalISO(d);
+    var cnt = countByDate[iso] || 0;
+    var level = cnt>0 ? (cnt>=12?4:cnt>=8?3:cnt>=4?2:1) : 0;
+    var isToday = iso===toLocalISO(today);
+    var isSelected = interactive && ui.historyFilterDate===iso;
+    var cls = 'heatmap-cell' + (isToday?' today':'') + (isSelected?' selected':'');
+    var titleTxt = iso + (cnt ? ': '+cnt+' sets' : '');
+    if (interactive){
+      cells += '<button class="'+cls+'" data-level="'+level+'" title="'+titleTxt+'" data-action="heatmap-day-click" data-date="'+iso+'"></button>';
+    } else {
+      cells += '<div class="'+cls+'" data-level="'+level+'" title="'+titleTxt+'"></div>';
+    }
+  }
+  return '<div class="heatmap-wrap"><div class="heatmap">'+cells+'</div></div>'+
+    '<div class="heatmap-legend"><span>Less</span>'+
+    '<div class="heatmap-cell" data-level="0"></div><div class="heatmap-cell" data-level="1"></div>'+
+    '<div class="heatmap-cell" data-level="2"></div><div class="heatmap-cell" data-level="3"></div>'+
+    '<div class="heatmap-cell" data-level="4"></div><span>More</span></div>';
+}
+
+/* ---------------------------------------------------------------- plans */
+
+function renderProfile(){
+  var main = document.getElementById('main');
+  var p = profile();
+  var trained = trainedDatesSet();
+  var completed = data.workouts.filter(function(w){ return w.completedAt; });
+  var msg = ui.profileMessage;
+  var since = p.createdAt ? new Date(p.createdAt).toLocaleDateString(undefined,{month:'long',year:'numeric'}) : null;
+
+  main.innerHTML =
+    '<button class="btn btn-ghost" data-action="profile-back">'+icon('chevronLeft')+' Back</button>'+
+    '<div class="profile-head">'+
+      '<button class="profile-avatar" data-action="avatar-pick" title="Change picture">'+
+        avatarMarkup('lg')+
+        '<span class="profile-avatar-overlay">'+icon('camera')+'</span>'+
+      '</button>'+
+      '<div class="profile-head-text">'+
+        '<div class="profile-name">'+(displayName() ? esc(displayName()) : 'Your profile')+'</div>'+
+        (p.username ? '<div class="profile-handle">@'+esc(p.username)+'</div>' : '')+
+        (since ? '<div class="profile-since">Training here since '+esc(since)+'</div>' : '')+
+      '</div>'+
+    '</div>'+
+
+    (msg ? '<div class="settings-msg '+(msg.kind==='error'?'error':'ok')+'">'+esc(msg.text)+'</div>' : '')+
+
+    '<div class="profile-avatar-actions">'+
+      '<button class="btn btn-ghost small" data-action="avatar-pick">'+icon('camera')+' '+(p.avatar?'Change picture':'Add picture')+'</button>'+
+      (p.avatar ? '<button class="btn btn-ghost small" data-action="avatar-remove">'+icon('trash')+' Remove</button>' : '')+
+      (p.avatar ? '<span class="profile-avatar-size">'+Math.round(dataUrlBytes(p.avatar)/1024)+' KB stored</span>' : '')+
+    '</div>'+
+
+    '<div class="section-title"><span>Details</span></div>'+
+    '<div class="card">'+
+      '<label class="field-label">Name</label>'+
+      '<input class="input" data-commit="profile-name" placeholder="How you want to be greeted" value="'+esc(p.name||'')+'" maxlength="40">'+
+      '<label class="field-label">Username <span class="field-optional">optional</span></label>'+
+      '<input class="input" style="margin-bottom:0" data-commit="profile-username" placeholder="handle" value="'+esc(p.username||'')+'" maxlength="24">'+
+    '</div>'+
+
+    '<div class="section-title"><span>Your training</span></div>'+
+    '<div class="stat-grid">'+
+      '<div class="stat-card"><div class="stat-num">'+computeStreak(trained)+'</div><div class="stat-lbl">day streak</div></div>'+
+      '<div class="stat-card"><div class="stat-num">'+completed.length+'</div><div class="stat-lbl">workouts</div></div>'+
+      '<div class="stat-card"><div class="stat-num">'+data.exercises.length+'</div><div class="stat-lbl">exercises</div></div>'+
+    '</div>'+
+
+    '<div class="profile-note">Everything here is stored on this device only. There is no account and nothing is uploaded &mdash; your picture and details travel only inside your own backup files.</div>'+
+    '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+      '<button class="btn btn-ghost" data-action="settings-open">'+icon('settings')+' Settings &amp; backup</button>'+
+    '</div>'+
+    '<input type="file" id="avatar-file-input" accept="image/*" style="display:none">';
+}
+
+function renderPlans(){
+  var main = document.getElementById('main');
+  if (ui.selectedPlanId){
+    var plan = data.plans.find(function(p){return p.id===ui.selectedPlanId;});
+    if (!plan){ ui.selectedPlanId = null; renderPlans(); return; }
+
+    var listHtml = '<div class="split-list-head"><h2>Plans</h2><button class="icon-btn" data-action="new-plan">'+icon('plus')+'</button></div>';
+    data.plans.forEach(function(p){
+      listHtml += '<button class="split-item '+(p.id===plan.id?'active':'')+'" data-action="select-plan" data-id="'+p.id+'"><span>'+esc(p.name)+'</span>'+icon('chevronRight')+'</button>';
+    });
+
+    var rowsHtml = '';
+    if (plan.items.length===0){
+      rowsHtml = '<div class="empty-state"><p>No exercises yet.</p><p class="empty-sub">Add exercises to build this plan &mdash; set target weight, reps and rest for each set, just like an active workout. Group them into categories like Warm-up or Cooldown.</p></div>';
+    } else {
+      var hiddenUntilNextCategory = false;
+      plan.items.forEach(function(entry, idx){
+        var k = itemKind(entry);
+        if (k==='category'){
+          hiddenUntilNextCategory = !!entry.collapsed;
+          rowsHtml += renderPlanCategoryHeader(idx, entry, plan);
+          return;
+        }
+        if (k==='break'){
+          /* purely structural: it just ends the category, nothing is drawn */
+          hiddenUntilNextCategory = false;
+          return;
+        }
+        if (hiddenUntilNextCategory) return;
+        rowsHtml += renderPlanExerciseCard(idx);
+        /* a landing strip just past the last member, for pulling an
+           exercise out of the category downwards */
+        if (isLastInCategory(plan.items, idx)){
+          rowsHtml += '<div class="cat-exit-zone" data-drop-exit="'+(idx+1)+'"></div>';
+        }
+      });
+    }
+    rowsHtml += '<div class="drop-zone-end" data-drop-end="1"></div>';
+
+    main.innerHTML =
+      '<div class="split has-selection">'+
+        '<div class="split-list">'+listHtml+'</div>'+
+        '<div class="split-detail">'+
+          '<a href="#" class="back-link mobile-only" data-action="deselect-plan">'+icon('chevronLeft')+' Back to plans</a>'+
+          '<div class="detail-head">'+
+            '<input class="title-input" style="font-size:19px;font-weight:600;flex:1" data-commit="plan-name" data-id="'+plan.id+'" value="'+esc(plan.name)+'">'+
+            '<button class="btn btn-ghost" data-action="confirm-delete-plan" data-id="'+plan.id+'">'+icon('trash')+' Delete</button>'+
+          '</div>'+
+          '<div id="plan-items">'+rowsHtml+'</div>'+
+          '<div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">'+
+            '<button class="btn btn-ghost" data-action="open-plan-picker">'+icon('plus')+' Add Exercise</button>'+
+            '<button class="btn btn-ghost" data-action="plan-add-category">'+icon('plus')+' Add Category</button>'+
+            '<div style="flex:1"></div>'+
+            '<button class="btn btn-primary" data-action="start-plan" data-id="'+plan.id+'" '+(planExerciseCount(plan)===0?'disabled':'')+'>'+icon('play')+' Start Workout</button>'+
+          '</div>'+
+          '<div id="plan-picker" hidden></div>'+
+        '</div>'+
+      '</div>';
+  } else {
+    var body = '';
+    if (data.plans.length===0){
+      body = '<div class="empty-state"><p>No plans yet.</p><p class="empty-sub">Build a reusable plan so you can start a workout in one click.</p><button class="btn btn-primary" data-action="new-plan">'+icon('plus')+' New Plan</button></div>';
+    } else {
+      body = '<div class="plan-grid">' + data.plans.map(function(p){
+        var pc = planExerciseCount(p);
+        return '<button class="plan-card" data-action="select-plan" data-id="'+p.id+'"><div class="plan-card-name">'+esc(p.name)+'</div><div class="plan-card-sub">'+pc+' exercise'+(pc!==1?'s':'')+'</div></button>';
+      }).join('') + '</div>';
+    }
+    main.innerHTML = '<div class="section-title"><span>Plans</span><button class="btn btn-primary small" data-action="new-plan">'+icon('plus')+' New Plan</button></div>' + body;
+  }
+}
+
+function renderPlanCategoryHeader(idx, entry, plan){
+  var count = 0;
+  for (var i=idx+1; i<plan.items.length; i++){
+    var ck = itemKind(plan.items[i]);
+    if (ck==='category' || ck==='break') break;
+    if (ck==='exercise') count++;
+  }
+  return '<div class="cat-header" data-drag-idx="'+idx+'">'+
+    '<button class="drag-handle" title="Drag to reorder">'+icon('grip')+'</button>'+
+    '<button class="cat-caret '+(entry.collapsed?'collapsed':'')+'" data-action="plan-toggle-category" data-idx="'+idx+'" title="'+(entry.collapsed?'Expand':'Collapse')+'">'+icon('chevronDown')+'</button>'+
+    '<input class="cat-name" data-commit="plan-category-name" data-idx="'+idx+'" value="'+esc(entry.name)+'">'+
+    '<span class="cat-count">'+count+' exercise'+(count!==1?'s':'')+'</span>'+
+    '<button class="icon-btn" data-action="plan-remove-category" data-idx="'+idx+'" title="Remove category (keeps exercises)">'+icon('x')+'</button>'+
+  '</div>';
+}
+
+function movePlanItem(idx, dir){
+  var plan = currentPlan();
+  var j = idx+dir;
+  if (j<0 || j>=plan.items.length) return;
+  var tmp = plan.items[idx]; plan.items[idx]=plan.items[j]; plan.items[j]=tmp;
+  save(); renderMain();
+}
+
+/* ---- plan exercise card: mirrors the active-workout card, but edits
+   TARGET values/rests (a preset) rather than logging actual performance.
+   No "done" column and no last-session placeholders here — those only
+   make sense once you're actually logging. ---- */
+
+function renderPlanDefaultRest(idx, item){
+  if (ui.editingPlanRest === idx){
+    return '<div class="ex-default-rest"><span>Default rest:</span>'+
+      '<input id="plan-rest-input" type="number" min="0" step="5" placeholder="sec" value="'+(item.defaultRestSec==null?'':item.defaultRestSec)+'" data-action-enter="commit-plan-rest" data-idx="'+idx+'">'+
+      '<button class="rest-icon-btn" data-action="commit-plan-rest" data-idx="'+idx+'">'+icon('check')+'</button></div>';
+  }
+  return '<div class="ex-default-rest"><span>Default rest: '+(item.defaultRestSec!=null?fmtRest(item.defaultRestSec):'not set')+'</span>'+
+    '<button data-action="edit-plan-rest" data-idx="'+idx+'">Edit</button>'+
+    (item.defaultRestSec!=null?('<button data-action="clear-plan-rest" data-idx="'+idx+'">Clear</button>'):'')+
+  '</div>';
+}
+function planEffectiveRest(item, set){
+  if (set.restSec!==null && set.restSec!==undefined) return set.restSec;
+  if (item.defaultRestSec!==null && item.defaultRestSec!==undefined) return item.defaultRestSec;
+  return null;
+}
+function renderPlanRestCell(idx, sIdx, item, set){
+  var eff = planEffectiveRest(item, set);
+  var isCustom = set.restSec!==null && set.restSec!==undefined;
+  if (ui.editingPlanSetRest === (idx+'-'+sIdx)){
+    return '<div class="rest-cell">'+
+      '<input id="plan-set-rest-input" class="num-input" style="max-width:60px;min-width:50px" type="number" min="0" step="5" placeholder="sec" value="'+(isCustom?set.restSec:(item.defaultRestSec==null?'':item.defaultRestSec))+'" data-action-enter="plan-commit-set-rest" data-idx="'+idx+'" data-set="'+sIdx+'">'+
+      '<button class="rest-icon-btn" data-action="plan-commit-set-rest" data-idx="'+idx+'" data-set="'+sIdx+'">'+icon('check')+'</button>'+
+    '</div>';
+  }
+  if (eff!==null){
+    return '<div class="rest-cell">'+
+      '<button class="rest-pill '+(isCustom?'custom':'')+'" data-action="plan-edit-set-rest" data-idx="'+idx+'" data-set="'+sIdx+'">'+fmtRest(eff)+'</button>'+
+      (isCustom?('<button class="rest-icon-btn" data-action="plan-clear-set-rest" data-idx="'+idx+'" data-set="'+sIdx+'" title="Use default">'+icon('x')+'</button>'):'')+
+    '</div>';
+  }
+  return '<div class="rest-cell"><button class="rest-add" data-action="plan-edit-set-rest" data-idx="'+idx+'" data-set="'+sIdx+'">+ Add rest</button></div>';
+}
+function renderPlanRestBlockRow(idx, sIdx, block, fieldCount){
+  var colspan = fieldCount + 2;
+  var editing = ui.editingPlanRestBlock === (idx+'-'+sIdx);
+  var body;
+  if (editing){
+    body = '<input id="planrestblock-edit-input" class="num-input" style="max-width:70px;min-width:56px;display:inline-block;" type="number" min="0" step="5" placeholder="sec" value="'+(block.seconds==null?'':block.seconds)+'" data-action-enter="plan-commit-rest-block" data-idx="'+idx+'" data-set="'+sIdx+'">'+
+      '<button class="rest-icon-btn" data-action="plan-commit-rest-block" data-idx="'+idx+'" data-set="'+sIdx+'">'+icon('check')+'</button>';
+  } else {
+    body = '<span style="font-family:var(--font-mono);font-size:12.5px;color:var(--text-dim);margin-right:6px;">Rest</span>'+
+      '<button class="rest-pill custom" data-action="plan-edit-rest-block" data-idx="'+idx+'" data-set="'+sIdx+'">'+fmtRest(block.seconds)+'</button>';
+  }
+  return '<tr class="rest-block-row"><td colspan="'+colspan+'" style="text-align:center;">'+body+'</td>'+
+    '<td><button class="rest-icon-btn" data-action="plan-remove-set" data-idx="'+idx+'" data-set="'+sIdx+'">'+icon('trash')+'</button></td></tr>';
+}
+function renderPlanSetRow(idx, sIdx, setNumber, item, fields, set, unit){
+  var cells = '<td>'+(setNumber+1)+'</td>';
+  fields.forEach(function(f){
+    var currentRaw = set.values[f.id];
+    var hasCurrent = currentRaw!==null && currentRaw!==undefined && currentRaw!=='';
+    var currentDisplay = hasCurrent ? fieldDisplayValue(f, currentRaw, unit) : '';
+    if (f.type==='text'){
+      cells += '<td><input class="num-input" data-plan-commit="set-text" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" value="'+esc(currentDisplay)+'" placeholder="target"></td>';
+    } else if (f.type==='time'){
+      /* measured time has no preset by design - you record it during the session */
+      cells += '<td><input class="num-input measured-cell" disabled value="" placeholder="measured" title="Measured during the workout - no preset"></td>';
+    } else if (f.type==='timer'){
+      cells += '<td><input class="num-input" data-plan-commit="set-time" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="mm:ss"></td>';
+    } else {
+      cells += '<td><input class="num-input" data-plan-commit="set-num" data-type="'+f.type+'" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="decimal" value="'+esc(currentDisplay)+'" placeholder="\u2014"></td>';
+    }
+  });
+  cells += '<td>'+renderPlanRestCell(idx, sIdx, item, set)+'</td>';
+  cells += '<td><button class="rest-icon-btn" data-action="plan-remove-set" data-idx="'+idx+'" data-set="'+sIdx+'">'+icon('trash')+'</button></td>';
+  return '<tr>'+cells+'</tr>';
+}
+function renderPlanExerciseCard(idx){
+  var plan = currentPlan();
+  var item = plan.items[idx];
+  var ex = data.exercises.find(function(e){return e.id===item.exerciseId;});
+  var unit = data.settings.weightUnit;
+
+  if (!ex){
+    return '<div class="ex-card" data-drag-idx="'+idx+'"><div class="ex-card-head"><div class="ex-card-name">Deleted exercise</div>'+
+      '<button class="btn btn-ghost" data-action="plan-remove-exercise" data-idx="'+idx+'">'+icon('trash')+' Remove</button></div></div>';
+  }
+
+  var fields = ex.fields;
+  var headerCols = '<th></th>' + fields.map(function(f){ return '<th>'+esc(f.label)+fieldUnitSuffix(f, unit)+'</th>'; }).join('') + '<th>Rest</th><th></th>';
+
+  var setCounter = 0;
+  var rows = item.sets.map(function(s, sIdx){
+    var kind = s.kind || 'set';
+    if (kind==='rest') return renderPlanRestBlockRow(idx, sIdx, s, fields.length);
+    var rowHtml = renderPlanSetRow(idx, sIdx, setCounter, item, fields, s, unit);
+    setCounter++;
+    return rowHtml;
+  }).join('');
+
+  var inCategory = owningCategoryIdx(plan.items, idx) !== -1;
+  return '<div class="ex-card'+(inCategory?' in-category':'')+'" data-drag-idx="'+idx+'">'+
+    '<div class="ex-card-head">'+
+      '<div class="plan-ex-head-left">'+
+        '<button class="drag-handle" title="Drag to reorder or move into a category">'+icon('grip')+'</button>'+
+        '<div class="plan-ex-order">'+
+          '<button class="icon-btn tiny" data-action="plan-move-up" data-idx="'+idx+'" '+(idx===0?'disabled':'')+'>'+icon('chevronUp')+'</button>'+
+          '<button class="icon-btn tiny" data-action="plan-move-down" data-idx="'+idx+'" '+(idx===plan.items.length-1?'disabled':'')+'>'+icon('chevronDown')+'</button>'+
+        '</div>'+
+        '<div><div class="ex-card-name">'+esc(ex.name)+'</div>'+renderPlanDefaultRest(idx, item)+'</div>'+
+      '</div>'+
+      '<button class="btn btn-ghost" data-action="plan-remove-exercise" data-idx="'+idx+'">'+icon('trash')+' Remove</button>'+
+    '</div>'+
+    '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
+      '<button class="btn btn-ghost small" data-action="plan-add-set" data-idx="'+idx+'">'+icon('plus')+' Add Set</button>'+
+      '<button class="btn btn-ghost small" data-action="plan-add-rest-block" data-idx="'+idx+'">'+icon('plus')+' Add Rest</button>'+
+    '</div>'+
+  '</div>';
+}
+
+/* ------------------------------------------------------------ exercises */
+
+function renderExercises(){
+  var main = document.getElementById('main');
+  main.innerHTML =
+    '<div class="split '+(ui.selectedExerciseId?'has-selection':'')+'">'+
+      '<div class="split-list">'+
+        '<div class="split-list-head"><h2>Exercises</h2><button class="icon-btn" data-action="new-exercise">'+icon('plus')+'</button></div>'+
+        '<div class="search-box">'+icon('search')+'<input id="exercise-search-input" placeholder="Search" value="'+esc(ui.exerciseSearch||'')+'"></div>'+
+        '<div id="exercise-list-results"></div>'+
+      '</div>'+
+      '<div class="split-detail" id="exercise-detail">'+renderExerciseDetailHTML()+'</div>'+
+    '</div>';
+  renderExerciseListResults();
+}
+function renderExerciseListResults(){
+  var el = document.getElementById('exercise-list-results');
+  if (!el) return;
+  var q = (ui.exerciseSearch||'').trim().toLowerCase();
+  var list = data.exercises.filter(function(e){
+    return !q || e.name.toLowerCase().indexOf(q)>=0 || (e.tag||'').toLowerCase().indexOf(q)>=0;
+  }).sort(function(a,b){ return a.name.localeCompare(b.name); });
+  if (data.exercises.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 16px;">No exercises yet.</div>'; return; }
+  if (list.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 16px;">No matches.</div>'; return; }
+  el.innerHTML = list.map(function(e){
+    return '<button class="split-item '+(e.id===ui.selectedExerciseId?'active':'')+'" data-action="select-exercise" data-id="'+e.id+'"><span>'+esc(e.name)+'</span>'+icon('chevronRight')+'</button>';
+  }).join('');
+}
+function renderExerciseDetailHTML(){
+  if (!ui.selectedExerciseId){
+    if (data.exercises.length===0){
+      return '<div class="empty-state"><p>No exercises yet.</p><p class="empty-sub">Create your first exercise and choose what it tracks — weight, reps, time, or anything custom.</p><button class="btn btn-primary" data-action="new-exercise">'+icon('plus')+' New Exercise</button></div>';
+    }
+    return '<div class="empty-state"><p>Select an exercise</p><p class="empty-sub">Choose one from the list, or create a new one.</p></div>';
+  }
+  var ex = data.exercises.find(function(e){return e.id===ui.selectedExerciseId;});
+  if (!ex){ ui.selectedExerciseId = null; return renderExerciseDetailHTML(); }
+  return '<a href="#" class="back-link mobile-only" data-action="deselect-exercise">'+icon('chevronLeft')+' Back to exercises</a>'+
+    '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;gap:12px;flex-wrap:wrap;">'+
+      '<div><div style="font-size:20px;font-weight:600;margin-bottom:6px;">'+esc(ex.name)+'</div>'+(ex.tag?('<span class="badge">'+esc(ex.tag)+'</span>'):'')+'</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button class="btn btn-ghost" data-action="edit-exercise" data-id="'+ex.id+'">'+icon('edit')+' Edit</button>'+
+        '<button class="btn btn-ghost" data-action="confirm-delete-exercise" data-id="'+ex.id+'">'+icon('trash')+' Delete</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="field-label">Tracking fields</div>'+
+    '<div class="chip-row">'+ex.fields.map(function(f){
+      return '<div class="chip" style="padding:6px 12px;"><span>'+esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'')+' &middot; '+FIELD_TYPE_NAMES[f.type]+'</span></div>';
+    }).join('')+'</div>'+
+    '<div class="field-label">Default rest</div>'+
+    '<div style="color:var(--text-dim);font-size:14px;">'+(ex.defaultRestSec!=null?fmtRest(ex.defaultRestSec):'Not set')+'</div>';
+}
+
+/* ----------------------------------------------------- exercise modal */
+
+function openExerciseModal(editingExercise, pickerContext){
+  ui.exerciseDraft = editingExercise
+    ? { editingId: editingExercise.id, name: editingExercise.name, tag: editingExercise.tag||'', fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
+    : { editingId: null, name:'', tag:'', fields:[], defaultRestSec:null };
+  ui.pickerContextForModal = pickerContext || null;
+  ui.showCustomFieldForm = false;
+  document.getElementById('exercise-modal').hidden = false;
+  renderExerciseModal();
+}
+function closeExerciseModal(){
+  ui.exerciseDraft = null;
+  ui.pickerContextForModal = null;
+  document.getElementById('exercise-modal').hidden = true;
+}
+function renderExerciseModal(){
+  var wrap = document.getElementById('exercise-modal');
+  var d = ui.exerciseDraft;
+  if (!d) { wrap.innerHTML=''; return; }
+  function hasType(t){ return d.fields.some(function(f){return f.type===t;}); }
+  var tagOptions = Array.from(new Set(data.exercises.map(function(e){return e.tag;}).filter(Boolean)));
+
+  var html = '<div class="modal">'+
+    '<div class="modal-head"><h2>'+(d.editingId?'Edit Exercise':'New Exercise')+'</h2><button class="icon-btn" data-action="ex-modal-close">'+icon('x')+'</button></div>'+
+    '<label class="field-label">Name</label>'+
+    '<input id="ex-name-input" class="input" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
+    '<label class="field-label">Category <span class="field-optional">optional</span></label>'+
+    '<input class="input" list="ex-tag-options" data-commit="ex-tag" placeholder="e.g. Chest, Cardio, Mobility" value="'+esc(d.tag)+'">'+
+    '<datalist id="ex-tag-options">'+tagOptions.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
+    '<label class="field-label">Tracking fields</label>'+
+    '<div class="chip-row">'+
+      d.fields.map(function(f){
+        return '<div class="chip"><span>'+esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'')+'</span><button data-action="ex-remove-field" data-fieldid="'+f.id+'">'+icon('x')+'</button></div>';
+      }).join('')+
+      (d.fields.length===0?'<div class="empty-hint">No fields yet — add at least one below.</div>':'')+
+    '</div>'+
+    '<div class="preset-row">'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="weight" '+(hasType('weight')?'disabled':'')+'>'+icon('plus')+' Weight</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="assisted" '+(hasType('assisted')?'disabled':'')+'>'+icon('plus')+' Assisted</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="reps" '+(hasType('reps')?'disabled':'')+'>'+icon('plus')+' Reps</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="timer" '+(hasType('timer')?'disabled':'')+' title="A duration you pre-set in a plan and count down during the workout">'+icon('plus')+' Time (target)</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="time" '+(hasType('time')?'disabled':'')+' title="A duration you measure and record during the workout, e.g. a max hang">'+icon('plus')+' Time (measured)</button>'+
+      '<button class="btn btn-tag" data-action="ex-toggle-custom">'+icon('plus')+' Custom</button>'+
+    '</div>';
+
+  if (ui.showCustomFieldForm){
+    html += '<div class="custom-field-form">'+
+      '<input id="ex-custom-name" class="input" placeholder="Field name (e.g. RPE, Incline, Band)" data-action-enter="ex-add-custom-field">'+
+      '<div class="row-gap">'+
+        '<select id="ex-custom-type" class="input" style="margin-bottom:0"><option value="number">Number</option><option value="text">Text</option></select>'+
+        '<input id="ex-custom-unit" class="input" style="margin-bottom:0" placeholder="Unit (optional, e.g. %, km)">'+
+      '</div>'+
+      '<button class="btn btn-primary full-width" data-action="ex-add-custom-field">Add field</button>'+
+    '</div>';
+  }
+
+  html += '<label class="field-label">Default rest (seconds) <span class="field-optional">optional</span></label>'+
+    '<input class="input" type="number" min="0" step="5" data-commit="ex-default-rest" placeholder="e.g. 90" value="'+(d.defaultRestSec==null?'':d.defaultRestSec)+'">'+
+    '<div style="display:flex;gap:10px;margin-top:8px;">'+
+      '<button class="btn btn-ghost full-width" data-action="ex-modal-close">Cancel</button>'+
+      '<button id="ex-save-btn" class="btn btn-primary full-width" data-action="ex-modal-save" '+((!d.name.trim()||d.fields.length===0)?'disabled':'')+'>Save Exercise</button>'+
+    '</div>'+
+  '</div>';
+
+  wrap.innerHTML = html;
+  var nameInput = document.getElementById('ex-name-input');
+  if (nameInput){ nameInput.focus(); nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length); }
+}
+
+/* --------------------------------------------------------------- picker */
+
+function openPicker(context){
+  ui.picker = { context: context, query: '' };
+  renderPickerPanel();
+}
+function renderPickerPanel(){
+  var containerId = ui.picker.context==='plan' ? 'plan-picker' : 'workout-picker';
+  var el = document.getElementById(containerId);
+  if (!el) return;
+  el.hidden = false;
+  el.innerHTML =
+    '<div class="card" style="margin-top:14px;background:var(--surface-2)">'+
+      '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'+
+        '<div style="flex:1;min-width:160px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">'+
+          icon('search')+'<input id="picker-search" style="border:none;background:none;flex:1;font-size:14px;min-width:0;" placeholder="Search exercises" value="'+esc(ui.picker.query)+'">'+
+        '</div>'+
+        '<button class="btn btn-ghost" data-action="picker-create-new">'+icon('plus')+' New</button>'+
+        '<button class="icon-btn" data-action="picker-close">'+icon('x')+'</button>'+
+      '</div>'+
+      '<div id="picker-results"></div>'+
+    '</div>';
+  var input = document.getElementById('picker-search');
+  input.focus();
+  renderPickerResults();
+}
+function renderPickerResults(){
+  var el = document.getElementById('picker-results');
+  if (!el) return;
+  var q = ui.picker.query.trim().toLowerCase();
+  var list = data.exercises.filter(function(e){
+    return !q || e.name.toLowerCase().indexOf(q)>=0 || (e.tag||'').toLowerCase().indexOf(q)>=0;
+  });
+  if (data.exercises.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 4px;">Your library is empty &mdash; click "New" to create your first exercise.</div>'; return; }
+  if (list.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 4px;">No matches.</div>'; return; }
+  el.innerHTML = list.map(function(ex){
+    return '<button class="result-row" data-action="picker-pick" data-id="'+ex.id+'">'+
+      '<div><div class="result-row-name">'+esc(ex.name)+'</div><div class="result-row-sub">'+ex.fields.map(function(f){return f.label;}).join(' &middot; ')+'</div></div>'+
+      (ex.tag?('<span class="badge">'+esc(ex.tag)+'</span>'):'')+
+    '</button>';
+  }).join('');
+}
+
+/* --------------------------------------------------------- rest helper */
+
+function effectiveRest(wex, set){
+  if (set.restSec!==null && set.restSec!==undefined) return set.restSec;
+  if (wex.defaultRestSec!==null && wex.defaultRestSec!==undefined) return wex.defaultRestSec;
+  return null;
+}
+function renderDefaultRest(wexIdx, wex){
+  if (ui.editingDefaultRest===wexIdx){
+    return '<div class="ex-default-rest"><span>Default rest:</span>'+
+      '<input id="default-rest-input" type="number" min="0" step="5" placeholder="sec" value="'+(wex.defaultRestSec==null?'':wex.defaultRestSec)+'" data-action-enter="commit-default-rest" data-wex="'+wexIdx+'">'+
+      '<button class="rest-icon-btn" data-action="commit-default-rest" data-wex="'+wexIdx+'">'+icon('check')+'</button></div>';
+  }
+  return '<div class="ex-default-rest"><span>Default rest: '+(wex.defaultRestSec!=null?fmtRest(wex.defaultRestSec):'not set')+'</span>'+
+    '<button data-action="edit-default-rest" data-wex="'+wexIdx+'">Edit</button>'+
+    (wex.defaultRestSec!=null?('<button data-action="clear-default-rest" data-wex="'+wexIdx+'">Clear</button>'):'')+
+  '</div>';
+}
+function renderRestCell(wexIdx, setIdx, wex, set){
+  var eff = effectiveRest(wex, set);
+  var isCustom = set.restSec!==null && set.restSec!==undefined;
+  if (ui.editingRest === (wexIdx+'-'+setIdx)){
+    return '<div class="rest-cell">'+
+      '<input id="rest-edit-input" class="num-input" style="max-width:60px;min-width:50px" type="number" min="0" step="5" placeholder="sec" value="'+(isCustom?set.restSec:(wex.defaultRestSec==null?'':wex.defaultRestSec))+'" data-action-enter="commit-rest" data-wex="'+wexIdx+'" data-set="'+setIdx+'">'+
+      '<button class="rest-icon-btn" data-action="commit-rest" data-wex="'+wexIdx+'" data-set="'+setIdx+'">'+icon('check')+'</button>'+
+    '</div>';
+  }
+  if (eff!==null){
+    return '<div class="rest-cell">'+
+      '<button class="rest-pill '+(isCustom?'custom':'')+'" data-action="edit-rest" data-wex="'+wexIdx+'" data-set="'+setIdx+'">'+fmtRest(eff)+'</button>'+
+      (isCustom?('<button class="rest-icon-btn" data-action="clear-rest" data-wex="'+wexIdx+'" data-set="'+setIdx+'" title="Use default">'+icon('x')+'</button>'):'')+
+      '<button class="rest-icon-btn" data-action="start-timer" data-seconds="'+eff+'" title="Start rest timer">'+icon('play')+'</button>'+
+    '</div>';
+  }
+  return '<div class="rest-cell"><button class="rest-add" data-action="edit-rest" data-wex="'+wexIdx+'" data-set="'+setIdx+'">+ Add rest</button></div>';
+}
+
+/* -------------------------------------------------------- active workout */
+
+function startBlankWorkout(){
+  data.activeWorkout = { id:uid('w'), planId:null, name:'Workout', date:todayISO(), startedAt:Date.now(), completedAt:null, exercises:[] };
+  save(); setView('workout');
+}
+function startFromPlan(planId){
+  var plan = data.plans.find(function(p){return p.id===planId;});
+  if (!plan) return;
+  var wExercises = plan.items.map(function(entry){
+    if (itemKind(entry)==='category'){
+      return { kind:'category', id:uid('cat'), name:entry.name };
+    }
+    if (itemKind(entry)==='break'){
+      return { kind:'break', id:uid('brk') };
+    }
+    var ex = data.exercises.find(function(e){return e.id===entry.exerciseId;});
+    if (!ex) return null;
+    var fields = snapshotFields(ex);
+    var sets = (entry.sets||[]).map(function(s){
+      if ((s.kind||'set')==='rest'){ return { kind:'rest', id:uid('r'), seconds:s.seconds }; }
+      return { kind:'set', id:uid('s'), values:Object.assign({}, s.values), restSec:s.restSec, done:false };
+    });
+    if (sets.length===0){ sets.push({ kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false }); }
+    var effRest = (entry.defaultRestSec!==null && entry.defaultRestSec!==undefined) ? entry.defaultRestSec : (ex.defaultRestSec===undefined?null:ex.defaultRestSec);
+    return { kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:effRest, sets:sets };
+  }).filter(Boolean);
+  data.activeWorkout = { id:uid('w'), planId:plan.id, name:plan.name, date:todayISO(), startedAt:Date.now(), completedAt:null, exercises:wExercises };
+  save(); setView('workout');
+}
+function addExerciseToActiveWorkout(exId){
+  var ex = data.exercises.find(function(e){return e.id===exId;});
+  if (!ex || !data.activeWorkout) return;
+  var fields = snapshotFields(ex);
+  data.activeWorkout.exercises.push({ kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:(ex.defaultRestSec===undefined?null:ex.defaultRestSec), sets:[{kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false}] });
+  save();
+}
+/* ---- Finish flow -------------------------------------------------------
+   Finishing opens a confirmation sheet with up to three choices:
+     1. save the logged values as next session's reference (greyed hints)
+     2. push changed TARGET TIMES back into the source plan
+     3. overwrite the whole source plan template with this session
+   2 and 3 only appear when the workout came from a plan and actually
+   differs from it. ---- */
+
+function normVal(v){ return (v===null||v===undefined||v==='') ? null : v; }
+
+function diffWorkoutVsPlan(w){
+  if (!w.planId) return null;
+  var plan = data.plans.find(function(p){return p.id===w.planId;});
+  if (!plan) return null;
+  var timesChanged = false, structureChanged = false;
+  var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
+  var pItems = (plan.items||[]).filter(function(it){ return itemKind(it)==='exercise'; });
+  /* category headings and their order are part of the template too */
+  function groupSig(list, nameOf, kindOf){
+    return list.map(function(x){
+      var k = kindOf(x);
+      if (k==='category') return 'C:'+nameOf(x);
+      if (k==='break') return 'B';
+      return 'E';
+    }).join('\u0000');
+  }
+  var wCats = groupSig(w.exercises, function(e){return e.name;}, function(e){return e.kind||'exercise';});
+  var pCats = groupSig(plan.items||[], function(it){return it.name;}, itemKind);
+  if (wCats !== pCats) structureChanged = true;
+  if (wEx.length !== pItems.length) structureChanged = true;
+  var n = Math.min(wEx.length, pItems.length);
+  for (var i=0;i<n;i++){
+    var we = wEx[i], pi = pItems[i];
+    if (we.exerciseId !== pi.exerciseId){ structureChanged = true; continue; }
+    if (normVal(we.defaultRestSec) !== normVal(pi.defaultRestSec)) structureChanged = true;
+    var wSets = we.sets || [], pSets = pi.sets || [];
+    if (wSets.length !== pSets.length) structureChanged = true;
+    var m = Math.min(wSets.length, pSets.length);
+    for (var j=0;j<m;j++){
+      var ws = wSets[j], ps = pSets[j];
+      var wk = ws.kind||'set', pk = ps.kind||'set';
+      if (wk !== pk){ structureChanged = true; continue; }
+      if (wk==='rest'){
+        if (normVal(ws.seconds) !== normVal(ps.seconds)) structureChanged = true;
+        continue;
+      }
+      if (normVal(ws.restSec) !== normVal(ps.restSec)) structureChanged = true;
+      we.fields.forEach(function(f){
+        if (f.type==='time') return; /* measured time is never part of the preset */
+        var a = normVal(ws.values ? ws.values[f.id] : null);
+        var b = normVal(ps.values ? ps.values[f.id] : null);
+        if (a !== b){
+          if (f.type==='timer') timesChanged = true;
+          else structureChanged = true;
+        }
+      });
+    }
+  }
+  return { plan: plan, timesChanged: timesChanged, structureChanged: structureChanged };
+}
+
+function planSetsFromWorkoutExercise(we){
+  return (we.sets||[]).map(function(s){
+    if ((s.kind||'set')==='rest') return { kind:'rest', id:uid('r'), seconds:s.seconds };
+    var values = {};
+    we.fields.forEach(function(f){
+      if (f.type==='time') { values[f.id] = null; return; } /* measured stays unset in the preset */
+      values[f.id] = s.values ? s.values[f.id] : null;
+    });
+    return { kind:'set', id:uid('s'), values:values, restSec:s.restSec };
+  });
+}
+
+function applyPlanTimesUpdate(w, plan){
+  var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
+  var pEx = (plan.items||[]).filter(function(it){ return itemKind(it)==='exercise'; });
+  var n = Math.min(wEx.length, pEx.length);
+  for (var i=0;i<n;i++){
+    var we = wEx[i], pi = pEx[i];
+    if (we.exerciseId !== pi.exerciseId) continue;
+    var timerFields = we.fields.filter(function(f){ return f.type==='timer'; });
+    if (!timerFields.length) continue;
+    var wSets = (we.sets||[]).filter(function(s){ return (s.kind||'set')==='set'; });
+    var pSets = (pi.sets||[]).filter(function(s){ return (s.kind||'set')==='set'; });
+    var m = Math.min(wSets.length, pSets.length);
+    for (var j=0;j<m;j++){
+      timerFields.forEach(function(f){
+        if (!pSets[j].values) pSets[j].values = {};
+        pSets[j].values[f.id] = wSets[j].values ? wSets[j].values[f.id] : null;
+      });
+    }
+  }
+}
+
+function applyPlanFullUpdate(w, plan){
+  var items = [];
+  w.exercises.forEach(function(we){
+    var k = we.kind || 'exercise';
+    if (k==='category'){ items.push({ kind:'category', id:uid('cat'), name:we.name, collapsed:false }); return; }
+    if (k==='break'){ items.push(newPlanBreak()); return; }
+    if (k!=='exercise') return; /* top-level rest blocks live inside the session, not the preset */
+    items.push({ kind:'exercise', exerciseId: we.exerciseId, defaultRestSec: (we.defaultRestSec===undefined?null:we.defaultRestSec), sets: planSetsFromWorkoutExercise(we) });
+  });
+  plan.items = normalizePlanItems(items);
+}
+
+function openFinishModal(){
+  var w = data.activeWorkout;
+  if (!w) return;
+  var d = diffWorkoutVsPlan(w);
+  ui.finishDraft = {
+    saveValues: true,
+    updateTimes: false,
+    updateTemplate: false,
+    planName: d ? d.plan.name : null,
+    timesChanged: d ? d.timesChanged : false,
+    structureChanged: d ? d.structureChanged : false
+  };
+  document.getElementById('finish-modal').hidden = false;
+  renderFinishModal();
+}
+function closeFinishModal(){
+  ui.finishDraft = null;
+  document.getElementById('finish-modal').hidden = true;
+}
+function renderFinishModal(){
+  var wrap = document.getElementById('finish-modal');
+  var f = ui.finishDraft;
+  var w = data.activeWorkout;
+  if (!f || !w){ wrap.innerHTML=''; return; }
+  var doneSets = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set' && s.done;}).length : 0); },0);
+
+  function toggleRow(key, title, sub, checked){
+    return '<button class="toggle-row" data-action="finish-toggle" data-key="'+key+'">'+
+      '<span class="toggle-box '+(checked?'on':'')+'">'+(checked?icon('check'):'')+'</span>'+
+      '<span class="toggle-text"><span class="toggle-title">'+title+'</span><span class="toggle-sub">'+sub+'</span></span>'+
+    '</button>';
+  }
+
+  var rows = toggleRow('saveValues', 'Save these values for next time',
+    'Next session shows them as greyed-out hints for this exercise.', f.saveValues);
+
+  if (f.timesChanged){
+    rows += toggleRow('updateTimes', 'Update target times in &ldquo;'+esc(f.planName)+'&rdquo;',
+      'You changed preset times this session. Off keeps the plan&rsquo;s original times.', f.updateTimes);
+  }
+  if (f.structureChanged){
+    rows += toggleRow('updateTemplate', 'Update the whole template',
+      'Save this session&rsquo;s sets, targets and rests back into &ldquo;'+esc(f.planName)+'&rdquo;.', f.updateTemplate);
+  }
+
+  wrap.innerHTML = '<div class="modal">'+
+    '<div class="modal-head"><h2>Finish workout</h2><button class="icon-btn" data-action="finish-cancel">'+icon('x')+'</button></div>'+
+    '<div style="color:var(--text-dim);font-size:13.5px;margin-bottom:16px;">'+doneSets+' set'+(doneSets!==1?'s':'')+' completed &middot; '+fmtElapsed(Date.now()-w.startedAt)+'</div>'+
+    rows+
+    '<div style="display:flex;gap:10px;margin-top:18px;">'+
+      '<button class="btn btn-ghost full-width" data-action="finish-cancel">Back</button>'+
+      '<button class="btn btn-primary full-width" data-action="finish-confirm">Finish</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function finishWorkout(){
+  var w = data.activeWorkout;
+  if (!w) return;
+  var f = ui.finishDraft || { saveValues:true, updateTimes:false, updateTemplate:false };
+  var d = diffWorkoutVsPlan(w);
+  if (d){
+    if (f.updateTemplate) applyPlanFullUpdate(w, d.plan);
+    else if (f.updateTimes) applyPlanTimesUpdate(w, d.plan);
+  }
+  w.completedAt = Date.now();
+  if (!f.saveValues) w.excludeFromReference = true;
+  data.workouts.push(w);
+  data.activeWorkout = null;
+  closeFinishModal();
+  clearRestTimer();
+  save(); setView('home');
+}
+function discardWorkout(){
+  data.activeWorkout = null;
+  clearRestTimer();
+  save(); setView('home');
+}
+
+function renderWorkout(){
+  var main = document.getElementById('main');
+  var w = data.activeWorkout;
+  if (!w){ setView('home'); return; }
+  var totalSets = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set';}).length : 0); },0);
+  var doneSets = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set' && s.done;}).length : 0); },0);
+
+  var html = '<div class="workout-head">'+
+    '<div class="workout-head-left">'+
+      '<button class="icon-btn" data-action="minimize-workout" title="Back to Home">'+icon('chevronLeft')+'</button>'+
+      '<input class="title-input" data-commit="workout-name" value="'+esc(w.name)+'">'+
+    '</div>'+
+    '<div class="workout-head-right">'+
+      '<span class="workout-meta" id="workout-elapsed">'+fmtElapsed(Date.now()-w.startedAt)+'</span>'+
+      '<button class="btn btn-ghost" data-action="confirm-discard-workout">Discard</button>'+
+      '<button class="btn btn-primary" data-action="finish-workout">Finish Workout</button>'+
+    '</div>'+
+  '</div>'+
+  '<div class="workout-progress"><span id="workout-progress-count">'+doneSets+'/'+totalSets+'</span> sets completed</div>';
+
+  if (w.exercises.length===0){
+    html += '<div class="empty-state"><p>No exercises yet.</p><p class="empty-sub">Add your first exercise to start logging.</p></div>';
+  } else {
+    var hiddenUnderCategory = false;
+    w.exercises.forEach(function(block, idx){
+      var kind = block.kind || 'exercise';
+      if (kind==='category'){
+        hiddenUnderCategory = !!block.collapsed;
+        html += renderWorkoutCategoryHeader(idx, block, w);
+        return;
+      }
+      if (kind==='break'){
+        hiddenUnderCategory = false;
+        return;
+      }
+      if (hiddenUnderCategory) return;
+      if (kind==='rest') html += renderTopRestBlock(idx, block);
+      else html += renderExerciseCard(idx);
+    });
+  }
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
+    '<button class="btn btn-ghost" data-action="open-workout-picker">'+icon('plus')+' Add Exercise</button>'+
+    '<button class="btn btn-ghost" data-action="add-rest-between-exercises">'+icon('plus')+' Add Rest</button>'+
+  '</div>'+
+  '<div id="workout-picker" hidden></div>';
+
+  main.innerHTML = html;
+}
+
+function renderWorkoutCategoryHeader(idx, block, w){
+  var total = 0, done = 0;
+  for (var i=idx+1; i<w.exercises.length; i++){
+    var e = w.exercises[i];
+    var k = e.kind || 'exercise';
+    if (k==='category' || k==='break') break;
+    if (k!=='exercise') continue;
+    e.sets.forEach(function(s){
+      if ((s.kind||'set')!=='set') return;
+      total++; if (s.done) done++;
+    });
+  }
+  var complete = total>0 && done===total;
+  return '<div class="cat-header workout '+(complete?'complete':'')+'">'+
+    '<button class="cat-caret '+(block.collapsed?'collapsed':'')+'" data-action="workout-toggle-category" data-wex="'+idx+'">'+icon('chevronDown')+'</button>'+
+    '<span class="cat-title">'+esc(block.name)+'</span>'+
+    '<span class="cat-count">'+done+'/'+total+'</span>'+
+  '</div>';
+}
+
+function renderTopRestBlock(idx, block){
+  var editing = ui.editingTopRest === idx;
+  var body;
+  if (editing){
+    body = '<input id="toprest-edit-input" class="num-input" style="max-width:80px;display:inline-block;" type="number" min="0" step="5" placeholder="sec" value="'+(block.seconds==null?'':block.seconds)+'" data-action-enter="commit-top-rest" data-wex="'+idx+'">'+
+      '<button class="rest-icon-btn" data-action="commit-top-rest" data-wex="'+idx+'">'+icon('check')+'</button>';
+  } else {
+    body = '<span style="font-weight:600;color:var(--text-dim);margin-right:4px;">Rest</span>'+
+      '<button class="rest-pill custom" data-action="edit-top-rest" data-wex="'+idx+'">'+fmtRest(block.seconds)+'</button>'+
+      '<button class="rest-icon-btn" data-action="start-timer" data-seconds="'+block.seconds+'" title="Start rest timer">'+icon('play')+'</button>';
+  }
+  return '<div class="ex-card rest-card">'+body+
+    '<button class="rest-icon-btn" data-action="remove-exercise-block" data-wex="'+idx+'" style="margin-left:10px;" title="Remove">'+icon('trash')+'</button></div>';
+}
+
+function renderExerciseCard(wexIdx){
+  var wex = data.activeWorkout.exercises[wexIdx];
+  var unit = data.settings.weightUnit;
+  var lastEntry = lastEntryFor(wex.exerciseId, data.activeWorkout.id);
+
+  var headerCols = '<th></th>' + wex.fields.map(function(f){
+    return '<th>'+esc(f.label)+fieldUnitSuffix(f, unit)+'</th>';
+  }).join('') + '<th>Rest</th><th></th><th></th>';
+
+  var setCounter = 0;
+  var rows = wex.sets.map(function(item, idx){
+    var kind = item.kind || 'set';
+    if (kind==='rest'){
+      return renderRestBlockRow(wexIdx, idx, item, wex.fields.length);
+    }
+    var rowHtml = renderSetRow(wexIdx, idx, setCounter, wex, item, lastEntry, unit);
+    setCounter++;
+    return rowHtml;
+  }).join('');
+
+  return '<div class="ex-card" id="ex-card-'+wexIdx+'">'+
+    '<div class="ex-card-head"><div><div class="ex-card-name">'+esc(wex.name)+'</div>'+renderDefaultRest(wexIdx, wex)+'</div>'+
+    '<button class="btn btn-ghost" data-action="confirm-remove-exercise" data-wex="'+wexIdx+'">'+icon('trash')+' Remove</button></div>'+
+    '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table>'+
+    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
+      '<button class="btn btn-ghost small" data-action="add-set" data-wex="'+wexIdx+'">'+icon('plus')+' Add Set</button>'+
+      '<button class="btn btn-ghost small" data-action="add-rest-block" data-wex="'+wexIdx+'">'+icon('plus')+' Add Rest</button>'+
+    '</div>'+
+  '</div>';
+}
+
+function renderRestBlockRow(wexIdx, idx, item, fieldCount){
+  var colspan = fieldCount + 2; /* # column + field columns + Rest column */
+  var editing = ui.editingRestBlock === (wexIdx+'-'+idx);
+  var body;
+  if (editing){
+    body = '<input id="restblock-edit-input" class="num-input" style="max-width:70px;min-width:56px;display:inline-block;" type="number" min="0" step="5" placeholder="sec" value="'+(item.seconds==null?'':item.seconds)+'" data-action-enter="commit-rest-block" data-wex="'+wexIdx+'" data-set="'+idx+'">'+
+      '<button class="rest-icon-btn" data-action="commit-rest-block" data-wex="'+wexIdx+'" data-set="'+idx+'">'+icon('check')+'</button>';
+  } else {
+    body = '<span style="font-family:var(--font-mono);font-size:12.5px;color:var(--text-dim);margin-right:6px;">Rest</span>'+
+      '<button class="rest-pill custom" data-action="edit-rest-block" data-wex="'+wexIdx+'" data-set="'+idx+'">'+fmtRest(item.seconds)+'</button>'+
+      '<button class="rest-icon-btn" data-action="start-timer" data-seconds="'+item.seconds+'" title="Start rest timer">'+icon('play')+'</button>';
+  }
+  return '<tr class="rest-block-row"><td colspan="'+colspan+'" style="text-align:center;">'+body+'</td>'+
+    '<td></td>'+
+    '<td><button class="rest-icon-btn" data-action="remove-set" data-wex="'+wexIdx+'" data-set="'+idx+'">'+icon('trash')+'</button></td></tr>';
+}
+
+function renderSetRow(wexIdx, idx, setNumber, wex, set, lastEntry, unit){
+  var lastSets = lastEntry ? lastEntry.sets.filter(function(x){ return (x.kind||'set')==='set'; }) : null;
+  var lastSet = lastSets ? lastSets[setNumber] : null;
+  var cells = '<td>'+(setNumber+1)+'</td>';
+  wex.fields.forEach(function(f){
+    var currentRaw = set.values[f.id];
+    var hasCurrent = currentRaw!==null && currentRaw!==undefined && currentRaw!=='';
+    var currentDisplay = hasCurrent ? fieldDisplayValue(f, currentRaw, unit) : '';
+    var placeholderRaw = lastSet ? lastSet.values[f.id] : null;
+    var placeholderDisplay = (placeholderRaw!==null && placeholderRaw!==undefined && placeholderRaw!=='') ? fieldDisplayValue(f, placeholderRaw, unit) : '';
+    if (f.type==='text'){
+      cells += '<td><input class="num-input" data-commit="set-text" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay)+'"></td>';
+    } else if (f.type==='timer'){
+      var targetSec = (currentRaw!==null && currentRaw!==undefined && currentRaw!=='') ? currentRaw : null;
+      cells += '<td><div class="rest-cell">'+
+        '<input class="num-input" style="max-width:70px;min-width:56px;" data-commit="set-time" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||'mm:ss')+'">'+
+        (targetSec!==null ? ('<button class="rest-icon-btn" data-action="start-timer" data-seconds="'+targetSec+'" title="Start countdown">'+icon('play')+'</button>') : '')+
+      '</div></td>';
+    } else if (f.type==='time'){
+      cells += '<td><input class="num-input" data-commit="set-time" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||'mm:ss')+'"></td>';
+    } else {
+      cells += '<td><input class="num-input" data-commit="set-num" data-type="'+f.type+'" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="decimal" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||'\u2014')+'"></td>';
+    }
+  });
+  cells += '<td>'+renderRestCell(wexIdx, idx, wex, set)+'</td>';
+  cells += '<td><button class="check-btn '+(set.done?'done':'')+'" data-action="toggle-set-done" data-wex="'+wexIdx+'" data-set="'+idx+'">'+icon('check')+'</button></td>';
+  cells += '<td><button class="rest-icon-btn" data-action="remove-set" data-wex="'+wexIdx+'" data-set="'+idx+'">'+icon('trash')+'</button></td>';
+  return '<tr>'+cells+'</tr>';
+}
+
+/* -------------------------------------------------------------- history */
+
+function renderHistory(){
+  var main = document.getElementById('main');
+  if (ui.viewingWorkoutId){
+    var w = data.workouts.find(function(x){return x.id===ui.viewingWorkoutId;});
+    if (!w){ ui.viewingWorkoutId = null; renderHistory(); return; }
+    main.innerHTML = renderWorkoutDetailHTML(w);
+    return;
+  }
+  var trained = trainedDatesSet();
+  var sorted = data.workouts.filter(function(w){return w.completedAt;}).sort(function(a,b){return b.completedAt-a.completedAt;});
+  var shown = ui.historyFilterDate ? sorted.filter(function(w){return w.date===ui.historyFilterDate;}) : sorted;
+
+  var html = '<div class="stat-grid">'+
+    '<div class="stat-card"><div class="stat-num">'+computeStreak(trained)+'</div><div class="stat-lbl">day streak</div></div>'+
+    '<div class="stat-card"><div class="stat-num">'+computeThisMonthCount()+'</div><div class="stat-lbl">this month</div></div>'+
+    '<div class="stat-card"><div class="stat-num">'+sorted.length+'</div><div class="stat-lbl">all time</div></div>'+
+  '</div>'+
+  '<div class="section-title"><span>Consistency</span></div>'+
+  '<div class="card">'+renderHeatmap(trained,52,true)+'</div>';
+
+  if (ui.historyFilterDate){
+    html += '<button class="btn btn-tag" style="margin-top:14px;" data-action="heatmap-day-click" data-date="'+ui.historyFilterDate+'">'+fmtShortDate(ui.historyFilterDate)+' '+icon('x')+'</button>';
+  }
+
+  html += '<div class="section-title"><span>Workouts</span></div>';
+  if (shown.length===0){
+    html += '<div class="empty-state"><p>No workouts logged yet.</p><p class="empty-sub">Finish a workout and it will show up here.</p></div>';
+  } else {
+    html += shown.map(function(w){
+      return '<button class="history-row" data-action="view-workout-detail" data-id="'+w.id+'">'+
+        '<div><div class="history-row-name">'+esc(w.name)+'</div><div class="history-row-sub">'+fmtShortDate(w.date)+' &middot; '+w.exercises.length+' exercises &middot; '+fmtElapsed(w.completedAt-w.startedAt)+'</div></div>'+
+        icon('chevronRight')+'</button>';
+    }).join('');
+  }
+  main.innerHTML = html;
+}
+
+function renderWorkoutDetailHTML(w){
+  var unit = data.settings.weightUnit;
+  var html = '<button class="btn btn-ghost" data-action="back-to-history">'+icon('chevronLeft')+' Back</button>'+
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0;flex-wrap:wrap;gap:12px;">'+
+      '<div><div style="font-size:20px;font-weight:600;">'+esc(w.name)+'</div><div style="font-size:13px;color:var(--text-dim);margin-top:4px;">'+fmtHeaderDate(w.date)+' &middot; '+fmtElapsed(w.completedAt-w.startedAt)+'</div></div>'+
+      '<button class="btn btn-ghost" data-action="confirm-delete-workout" data-id="'+w.id+'">'+icon('trash')+' Delete</button>'+
+    '</div>';
+
+  w.exercises.forEach(function(wex){
+    var wexKind = wex.kind || 'exercise';
+    if (wexKind==='rest'){
+      html += '<div class="ex-card rest-card" style="justify-content:center;color:var(--text-dim);font-family:var(--font-mono);font-size:13px;">Rest &middot; '+fmtRest(wex.seconds)+'</div>';
+      return;
+    }
+    if (wexKind==='category'){
+      html += '<div class="cat-header workout static"><span class="cat-title">'+esc(wex.name)+'</span></div>';
+      return;
+    }
+    if (wexKind==='break') return;
+    var headerCols = '<th></th>' + wex.fields.map(function(f){
+      return '<th>'+esc(f.label)+fieldUnitSuffix(f, unit)+'</th>';
+    }).join('');
+    var setCounter = 0;
+    var rows = wex.sets.map(function(s){
+      var sKind = s.kind || 'set';
+      if (sKind==='rest'){
+        var colspan = 1 + wex.fields.length;
+        return '<tr><td colspan="'+colspan+'" style="text-align:center;color:var(--text-faint);font-family:var(--font-mono);font-size:12.5px;padding:6px;">Rest &middot; '+fmtRest(s.seconds)+'</td></tr>';
+      }
+      var tds = '<td>'+(setCounter+1)+'</td>';
+      setCounter++;
+      wex.fields.forEach(function(f){
+        var v = s.values[f.id];
+        var disp = '\u2014';
+        if (v!==null && v!==undefined && v!==''){
+          if (f.type==='weight') disp = kgToDisplay(v, unit);
+          else if (f.type==='assisted') disp = '\u2212' + kgToDisplay(v, unit);
+          else if (f.type==='time' || f.type==='timer') disp = secToMMSS(v);
+          else disp = v;
+        }
+        tds += '<td style="font-family:var(--font-mono);'+(s.done?'color:var(--good);':'')+'">'+esc(String(disp))+'</td>';
+      });
+      return '<tr>'+tds+'</tr>';
+    }).join('');
+    html += '<div class="ex-card"><div class="ex-card-name" style="margin-bottom:10px;">'+esc(wex.name)+'</div>'+
+      '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  });
+  return html;
+}
+
+/* --------------------------------------------------------------- timer */
+
+function ensureAudio(){
+  if (!runtime.audioCtx){
+    try{ runtime.audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
+  }
+  if (runtime.audioCtx && runtime.audioCtx.state==='suspended'){
+    runtime.audioCtx.resume().catch(function(){});
+  }
+}
+function beep(ctx, delay){
+  if (!ctx) return;
+  var t0 = ctx.currentTime + (delay||0);
+  var o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine'; o.frequency.value = 880;
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(0.25, t0+0.01);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+0.35);
+  o.connect(g); g.connect(ctx.destination);
+  o.start(t0); o.stop(t0+0.4);
+}
+function playCompletionBeep(){
+  if (!runtime.audioCtx) return;
+  beep(runtime.audioCtx, 0);
+  beep(runtime.audioCtx, 0.45);
+}
+function flashTitleIfHidden(){
+  if (!document.hidden) return;
+  document.title = 'Rest done! \u2014 Athleticism';
+  function restore(){ document.title = originalTitle; document.removeEventListener('visibilitychange', restore); }
+  document.addEventListener('visibilitychange', restore);
+}
+/* The rest timer is driven by an absolute end timestamp, never by counting
+   interval ticks. Phones suspend background pages, so a decrementing counter
+   stalls exactly when you leave the app mid-set. Storing endAt means the
+   remaining time is recomputed correctly whenever we come back - including
+   after the page has been killed and reloaded. */
+
+function timerRemainingMs(t){
+  if (!t) return 0;
+  if (t.pausedRemainingMs !== null && t.pausedRemainingMs !== undefined) return t.pausedRemainingMs;
+  return Math.max(0, t.endAt - Date.now());
+}
+function timerIsRunning(t){
+  return !!t && !t.done && (t.pausedRemainingMs === null || t.pausedRemainingMs === undefined);
+}
+function persistTimer(){
+  data.restTimer = runtime.timer;
+  save();
+}
+function clearRestTimer(){
+  clearInterval(runtime.timerHandle);
+  runtime.timerHandle = null;
+  runtime.timer = null;
+  runtime.pendingBeep = false;
+  data.restTimer = null;
+  save();
+  renderTimerBar();
+}
+function startTimer(seconds){
+  ensureAudio();
+  clearInterval(runtime.timerHandle);
+  runtime.pendingBeep = false;
+  runtime.timer = {
+    totalSec: seconds,
+    endAt: Date.now() + seconds*1000,
+    pausedRemainingMs: null,
+    done: false,
+    doneAt: null
+  };
+  persistTimer();
+  renderTimerBar();
+  runtime.timerHandle = setInterval(timerTick, 250);
+}
+function timerTick(){
+  var t = runtime.timer;
+  if (!t){ clearInterval(runtime.timerHandle); runtime.timerHandle = null; return; }
+
+  if (t.done){
+    /* while the app is in the background, keep pushing the auto-dismiss out
+       so a finished rest is still on screen when you come back to it */
+    if (document.hidden){ t.doneAt = Date.now(); return; }
+    if (Date.now() - t.doneAt > 8000) clearRestTimer();
+    return;
+  }
+  if (!timerIsRunning(t)) return;
+
+  if (timerRemainingMs(t) <= 0){
+    t.done = true;
+    t.doneAt = Date.now();
+    persistTimer();
+    if (document.hidden){
+      runtime.pendingBeep = true;   /* audio is blocked while hidden - fire on return */
+      flashTitleIfHidden();
+    } else {
+      playCompletionBeep();
+    }
+    renderTimerBar();
+    return;
+  }
+  renderTimerBar();
+}
+/* Coming back to the app: recompute, settle any completion that happened
+   while we were away, and sound it then. */
+function onVisible(){
+  if (document.hidden) return;
+  if (!runtime.timer) return;
+  ensureAudio();
+  timerTick();
+  if (runtime.pendingBeep){
+    runtime.pendingBeep = false;
+    playCompletionBeep();
+  }
+  renderTimerBar();
+}
+/* Restore a rest that was running when the page was last closed. */
+function restoreTimer(){
+  var t = data.restTimer;
+  if (!t || typeof t.endAt !== 'number') return;
+  var staleMs = Date.now() - (t.doneAt || t.endAt);
+  if (t.done || timerRemainingMs(t) <= 0){
+    /* a rest that finished long ago is not worth resurfacing */
+    if (staleMs > 10*60*1000){ data.restTimer = null; save(); return; }
+    t.done = true;
+    if (!t.doneAt) t.doneAt = t.endAt;
+  }
+  runtime.timer = t;
+  renderTimerBar();
+  clearInterval(runtime.timerHandle);
+  runtime.timerHandle = setInterval(timerTick, 250);
+}
+function renderTimerBar(){
+  var bar = document.getElementById('timerbar');
+  if (!runtime.timer){ bar.className='timerbar'; bar.innerHTML=''; return; }
+  var t = runtime.timer;
+  var running = timerIsRunning(t);
+  bar.className = 'timerbar show' + (t.done?' done':'');
+  bar.innerHTML = '<div class="timerbar-inner">'+
+    '<div class="timerbar-label">'+(t.done?'Rest complete':(running?'Resting':'Paused'))+'</div>'+
+    '<div class="timerbar-time">'+fmtElapsed(timerRemainingMs(t))+'</div>'+
+    (!t.done ? (
+      '<button data-action="timer-adjust" data-delta="-15">&minus;15</button>'+
+      '<button data-action="timer-pause-resume">'+(running?icon('pause'):icon('play'))+'</button>'+
+      '<button data-action="timer-adjust" data-delta="15">+15</button>'
+    ) : '')+
+    '<button data-action="timer-dismiss">'+icon('x')+'</button>'+
+  '</div>';
+}
+
+/* -------------------------------------------------------------- modals */
+
+function daysSince(ts){ return ts ? Math.floor((Date.now()-ts)/86400000) : null; }
+function workoutsSinceExport(){
+  var since = data.lastExportAt || 0;
+  return data.workouts.filter(function(w){ return w.completedAt && w.completedAt > since; }).length;
+}
+/* Nudge only once there is something real to lose. */
+function backupIsStale(){
+  var n = workoutsSinceExport();
+  if (n === 0) return false;
+  var dismissed = data.backupNudgeDismissedAt;
+  if (dismissed && (Date.now()-dismissed) < 7*86400000) return false;
+  if (!data.lastExportAt) return n >= 5;
+  return n >= 8 || daysSince(data.lastExportAt) >= 30;
+}
+function lastExportLine(){
+  if (!data.lastExportAt) return 'Never exported';
+  var d = daysSince(data.lastExportAt);
+  var when = d===0 ? 'today' : (d===1 ? 'yesterday' : d+' days ago');
+  var n = workoutsSinceExport();
+  return 'Last export '+when+(n ? ' \u00b7 '+n+' workout'+(n!==1?'s':'')+' since' : '');
+}
+
+function renderSettingsModal(){
+  var wrap = document.getElementById('settings-modal');
+  var c = dataCounts(data);
+  var imp = ui.importPreview;
+  var msg = ui.settingsMessage;
+  var sharing = canShareFiles();
+
+  var html = '<div class="modal">'+
+    '<div class="modal-head"><h2>Settings</h2><button class="icon-btn" data-action="settings-close">'+icon('x')+'</button></div>'+
+    '<div class="settings-row"><span>Weight unit</span><div class="segmented">'+
+      '<button class="'+(data.settings.weightUnit==='lb'?'active':'')+'" data-action="unit-lb">lb</button>'+
+      '<button class="'+(data.settings.weightUnit==='kg'?'active':'')+'" data-action="unit-kg">kg</button>'+
+    '</div></div>'+
+
+    '<div class="settings-section-label">Backup</div>'+
+    '<div class="settings-note">Your data lives in this browser only. Browsers can clear that storage without warning &mdash; on iPhone especially, unless this page is added to your Home Screen.</div>'+
+    '<div class="settings-stat">'+countsLine(c)+'<br>'+esc(lastExportLine())+'</div>';
+
+  if (msg){
+    html += '<div class="settings-msg '+(msg.kind==='error'?'error':'ok')+'">'+esc(msg.text)+'</div>';
+  }
+
+  if (imp){
+    var ic = dataCounts(imp.data);
+    html += '<div class="import-confirm">'+
+      '<div class="import-confirm-title">Backup loaded &mdash; choose how to apply it</div>'+
+      '<div class="import-confirm-row"><span>From file</span><span>'+countsLine(ic)+'</span></div>'+
+      '<div class="import-confirm-row"><span>Right now</span><span>'+countsLine(c)+'</span></div>'+
+      (imp.exportedAt ? '<div class="import-confirm-row"><span>Backup date</span><span>'+esc(new Date(imp.exportedAt).toLocaleString())+'</span></div>' : '')+
+      '<div class="import-mode">'+
+        '<button class="import-mode-btn" data-action="import-merge">'+
+          '<span class="import-mode-title">Merge</span>'+
+          '<span class="import-mode-sub">Adds anything missing. Nothing you already have is changed or removed.</span>'+
+        '</button>'+
+        '<button class="import-mode-btn danger" data-action="import-replace">'+
+          '<span class="import-mode-title">Replace everything</span>'+
+          '<span class="import-mode-sub">Discards current data and uses the file exactly as it is.</span>'+
+        '</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:10px;margin-top:12px;">'+
+        '<button class="btn btn-ghost full-width" data-action="import-cancel">Cancel</button>'+
+        '<button class="btn btn-ghost full-width" data-action="export-json">Export current first</button>'+
+      '</div>'+
+    '</div>';
+  } else {
+    html += '<div class="settings-row"><div class="settings-row-text"><span>Export data file</span><span class="settings-row-sub">A small .json backup &mdash; best for regular saves and moving between devices</span></div>'+
+      '<div class="settings-row-actions">'+
+        (sharing ? '<button class="btn btn-ghost" data-action="share-json">Share</button>' : '')+
+        '<button class="btn btn-ghost" data-action="export-json">Save</button>'+
+      '</div></div>'+
+    '<div class="settings-row"><div class="settings-row-text"><span>Export portable copy</span><span class="settings-row-sub">An .html archive that opens as a full working copy, offline, with no server</span></div>'+
+      '<div class="settings-row-actions">'+
+        (sharing ? '<button class="btn btn-ghost" data-action="share-html">Share</button>' : '')+
+        '<button class="btn btn-ghost" data-action="export-html">Save</button>'+
+      '</div></div>'+
+    '<div class="settings-row"><div class="settings-row-text"><span>Import backup</span><span class="settings-row-sub">Accepts .json or a portable .html &mdash; you choose merge or replace next</span></div>'+
+      '<button class="btn btn-ghost" data-action="import-pick">Import</button></div>';
+  }
+
+  html += '<div class="settings-section-label">Danger zone</div>'+
+    '<div class="settings-row"><div class="settings-row-text"><span>Reset all data</span><span class="settings-row-sub">Erases everything in this browser</span></div>'+
+      '<button class="btn btn-ghost" data-action="confirm-reset-data">Reset</button></div>'+
+    '<input type="file" id="import-file-input" accept=".json,.html,application/json,text/html" style="display:none">'+
+  '</div>';
+
+  wrap.innerHTML = html;
+}
+
+function renderRestoreModal(){
+  var wrap = document.getElementById('restore-modal');
+  if (!pendingRestore){ wrap.innerHTML=''; wrap.hidden = true; return; }
+  var snapCounts = dataCounts(pendingRestore.data);
+  var liveCounts = dataCounts(data);
+  wrap.innerHTML = '<div class="modal">'+
+    '<div class="modal-head"><h2>Backup file opened</h2></div>'+
+    '<div class="settings-note">This file is a portable backup that carries its own saved data, but this browser already has data of its own. Nothing has been changed yet.</div>'+
+    '<div class="import-confirm-row"><span>In this file</span><span>'+countsLine(snapCounts)+'</span></div>'+
+    '<div class="import-confirm-row"><span>In this browser</span><span>'+countsLine(liveCounts)+'</span></div>'+
+    (pendingRestore.exportedAt ? '<div class="import-confirm-row"><span>Backup date</span><span>'+esc(new Date(pendingRestore.exportedAt).toLocaleString())+'</span></div>' : '')+
+    '<div style="display:flex;gap:10px;margin-top:16px;">'+
+      '<button class="btn btn-ghost full-width" data-action="restore-keep">Keep current</button>'+
+      '<button class="btn btn-primary full-width" data-action="restore-apply">Load backup</button>'+
+    '</div>'+
+  '</div>';
+  wrap.hidden = false;
+}
+
+/* ------------------------------------------------------- confirm-arm ui */
+
+var armedButtons = new WeakSet();
+var armTimers = new WeakMap();
+function armOrConfirm(el, onConfirm){
+  if (armedButtons.has(el)){
+    clearTimeout(armTimers.get(el));
+    armedButtons.delete(el);
+    onConfirm();
+  } else {
+    armedButtons.add(el);
+    el.dataset.originalLabel = el.innerHTML;
+    el.innerHTML = 'Confirm?';
+    el.classList.add('btn-danger');
+    var t = setTimeout(function(){
+      armedButtons.delete(el);
+      el.innerHTML = el.dataset.originalLabel;
+      el.classList.remove('btn-danger');
+    }, 2500);
+    armTimers.set(el, t);
+  }
+}
+
+/* ------------------------------------------------------------- actions */
+
+function handleAction(action, el){
+  switch(action){
+    case 'start-blank': startBlankWorkout(); break;
+    case 'resume-workout': setView('workout'); break;
+    case 'start-plan': startFromPlan(el.dataset.id); break;
+    case 'goto-plans': setView('plans'); break;
+    case 'goto-history': setView('history'); break;
+
+    case 'new-plan': {
+      var p = { id: uid('plan'), name: 'New Plan', items: [] };
+      data.plans.push(p); save();
+      ui.selectedPlanId = p.id;
+      setView('plans');
+      break;
+    }
+    case 'select-plan': ui.selectedPlanId = el.dataset.id; renderMain(); break;
+    case 'deselect-plan': ui.selectedPlanId = null; renderMain(); break;
+    case 'confirm-delete-plan': armOrConfirm(el, function(){
+      data.plans = data.plans.filter(function(p){return p.id!==el.dataset.id;});
+      ui.selectedPlanId = null; save(); renderMain();
+    }); break;
+
+    case 'plan-add-category': {
+      currentPlan().items.push(newPlanCategory());
+      save(); renderMain();
+      break;
+    }
+    case 'plan-toggle-category': {
+      var catItem = currentPlan().items[el.dataset.idx*1];
+      catItem.collapsed = !catItem.collapsed;
+      save(); renderMain();
+      break;
+    }
+    case 'plan-remove-category': {
+      /* removing a heading un-groups its exercises rather than deleting them */
+      var rcPlan = currentPlan();
+      rcPlan.items.splice(el.dataset.idx*1, 1);
+      rcPlan.items = normalizePlanItems(rcPlan.items);
+      save(); renderMain();
+      break;
+    }
+    case 'workout-toggle-category': {
+      var wCat = data.activeWorkout.exercises[el.dataset.wex*1];
+      wCat.collapsed = !wCat.collapsed;
+      save(); renderMain();
+      break;
+    }
+    case 'plan-move-up': movePlanItem(el.dataset.idx*1, -1); break;
+    case 'plan-move-down': movePlanItem(el.dataset.idx*1, 1); break;
+    case 'plan-remove-exercise': {
+      var plan = currentPlan();
+      plan.items.splice(el.dataset.idx*1, 1);
+      plan.items = normalizePlanItems(plan.items);
+      save(); renderMain();
+      break;
+    }
+    case 'edit-plan-rest':
+      ui.editingPlanRest = el.dataset.idx*1;
+      renderMain();
+      var pri = document.getElementById('plan-rest-input'); if (pri) pri.focus();
+      break;
+    case 'clear-plan-rest': {
+      currentPlan().items[el.dataset.idx*1].defaultRestSec = null;
+      save(); renderMain();
+      break;
+    }
+    case 'commit-plan-rest': {
+      var prinput = document.getElementById('plan-rest-input');
+      var prval = prinput.value.trim();
+      currentPlan().items[el.dataset.idx*1].defaultRestSec = prval==='' ? null : Math.max(0, parseInt(prval,10)||0);
+      ui.editingPlanRest = null; save(); renderMain();
+      break;
+    }
+    case 'plan-add-set': {
+      var pItem = currentPlan().items[el.dataset.idx*1];
+      var pEx = data.exercises.find(function(e){return e.id===pItem.exerciseId;});
+      var pFields = pEx ? pEx.fields : [];
+      var pLastSet = null;
+      for (var plsi=pItem.sets.length-1; plsi>=0; plsi--){ if ((pItem.sets[plsi].kind||'set')==='set'){ pLastSet = pItem.sets[plsi]; break; } }
+      var pValues = pLastSet ? Object.assign({}, pLastSet.values) : blankSetValues(pFields);
+      pItem.sets.push({ kind:'set', id: uid('s'), values: pValues, restSec: null });
+      save(); renderMain();
+      break;
+    }
+    case 'plan-add-rest-block': {
+      var pItemR = currentPlan().items[el.dataset.idx*1];
+      var pDefSec = pItemR.defaultRestSec!=null ? pItemR.defaultRestSec : 60;
+      pItemR.sets.push({ kind:'rest', id: uid('r'), seconds: pDefSec });
+      save(); renderMain();
+      break;
+    }
+    case 'plan-remove-set': {
+      currentPlan().items[el.dataset.idx*1].sets.splice(el.dataset.set*1, 1);
+      save(); renderMain();
+      break;
+    }
+    case 'plan-edit-set-rest':
+      ui.editingPlanSetRest = el.dataset.idx+'-'+el.dataset.set;
+      renderMain();
+      var psri = document.getElementById('plan-set-rest-input'); if (psri) psri.focus();
+      break;
+    case 'plan-clear-set-rest': {
+      currentPlan().items[el.dataset.idx*1].sets[el.dataset.set*1].restSec = null;
+      save(); renderMain();
+      break;
+    }
+    case 'plan-commit-set-rest': {
+      var psrInput = document.getElementById('plan-set-rest-input');
+      var psrVal = psrInput.value.trim();
+      currentPlan().items[el.dataset.idx*1].sets[el.dataset.set*1].restSec = psrVal==='' ? null : Math.max(0, parseInt(psrVal,10)||0);
+      ui.editingPlanSetRest = null; save(); renderMain();
+      break;
+    }
+    case 'plan-edit-rest-block':
+      ui.editingPlanRestBlock = el.dataset.idx+'-'+el.dataset.set;
+      renderMain();
+      var prbi = document.getElementById('planrestblock-edit-input'); if (prbi) prbi.focus();
+      break;
+    case 'plan-commit-rest-block': {
+      var prbInput = document.getElementById('planrestblock-edit-input');
+      var prbVal = prbInput.value.trim();
+      currentPlan().items[el.dataset.idx*1].sets[el.dataset.set*1].seconds = prbVal==='' ? 0 : Math.max(0, parseInt(prbVal,10)||0);
+      ui.editingPlanRestBlock = null; save(); renderMain();
+      break;
+    }
+
+    case 'open-plan-picker': openPicker('plan'); break;
+    case 'open-workout-picker': openPicker('workout'); break;
+    case 'picker-close': ui.picker = null; renderMain(); break;
+    case 'picker-create-new': openExerciseModal(null, ui.picker.context); break;
+    case 'picker-pick': {
+      var exId = el.dataset.id;
+      if (ui.picker.context==='plan'){ currentPlan().items.push(newPlanItem(exId)); }
+      else { addExerciseToActiveWorkout(exId); }
+      ui.picker = null; save(); renderMain();
+      break;
+    }
+
+    case 'add-set': {
+      var wex = data.activeWorkout.exercises[el.dataset.wex*1];
+      var lastSetItem = null;
+      for (var lsi=wex.sets.length-1; lsi>=0; lsi--){ if ((wex.sets[lsi].kind||'set')==='set'){ lastSetItem = wex.sets[lsi]; break; } }
+      var values = lastSetItem ? Object.assign({}, lastSetItem.values) : blankSetValues(wex.fields);
+      wex.sets.push({ kind:'set', id: uid('s'), values: values, restSec: null, done: false });
+      save(); renderMain();
+      break;
+    }
+    case 'add-rest-block': {
+      var wexR = data.activeWorkout.exercises[el.dataset.wex*1];
+      var defaultSec = wexR.defaultRestSec!=null ? wexR.defaultRestSec : 60;
+      wexR.sets.push({ kind:'rest', id: uid('r'), seconds: defaultSec });
+      save(); renderMain();
+      break;
+    }
+    case 'remove-set': {
+      var wex2 = data.activeWorkout.exercises[el.dataset.wex*1];
+      wex2.sets.splice(el.dataset.set*1, 1);
+      save(); renderMain();
+      break;
+    }
+    case 'toggle-set-done': {
+      var set = data.activeWorkout.exercises[el.dataset.wex*1].sets[el.dataset.set*1];
+      set.done = !set.done;
+      save();
+      el.classList.toggle('done', set.done);
+      break;
+    }
+
+    case 'edit-rest':
+      ui.editingRest = el.dataset.wex+'-'+el.dataset.set;
+      renderMain();
+      var ri = document.getElementById('rest-edit-input'); if (ri) ri.focus();
+      break;
+    case 'clear-rest': {
+      data.activeWorkout.exercises[el.dataset.wex*1].sets[el.dataset.set*1].restSec = null;
+      save(); renderMain();
+      break;
+    }
+    case 'commit-rest': {
+      var input = document.getElementById('rest-edit-input');
+      var val = input.value.trim();
+      var wex3 = data.activeWorkout.exercises[el.dataset.wex*1];
+      var s3 = wex3.sets[el.dataset.set*1];
+      s3.restSec = val==='' ? null : Math.max(0, parseInt(val,10)||0);
+      ui.editingRest = null; save(); renderMain();
+      break;
+    }
+    case 'start-timer': startTimer(parseInt(el.dataset.seconds,10)); break;
+
+    case 'edit-rest-block':
+      ui.editingRestBlock = el.dataset.wex+'-'+el.dataset.set;
+      renderMain();
+      var rbi = document.getElementById('restblock-edit-input'); if (rbi) rbi.focus();
+      break;
+    case 'commit-rest-block': {
+      var rbinput = document.getElementById('restblock-edit-input');
+      var rbval = rbinput.value.trim();
+      var wexRB = data.activeWorkout.exercises[el.dataset.wex*1];
+      var rbItem = wexRB.sets[el.dataset.set*1];
+      rbItem.seconds = rbval==='' ? 0 : Math.max(0, parseInt(rbval,10)||0);
+      ui.editingRestBlock = null; save(); renderMain();
+      break;
+    }
+
+    case 'edit-default-rest':
+      ui.editingDefaultRest = el.dataset.wex*1;
+      renderMain();
+      var dri = document.getElementById('default-rest-input'); if (dri) dri.focus();
+      break;
+    case 'clear-default-rest': {
+      data.activeWorkout.exercises[el.dataset.wex*1].defaultRestSec = null;
+      save(); renderMain();
+      break;
+    }
+    case 'commit-default-rest': {
+      var dinput = document.getElementById('default-rest-input');
+      var dval = dinput.value.trim();
+      data.activeWorkout.exercises[el.dataset.wex*1].defaultRestSec = dval==='' ? null : Math.max(0, parseInt(dval,10)||0);
+      ui.editingDefaultRest = null; save(); renderMain();
+      break;
+    }
+
+    case 'confirm-remove-exercise': armOrConfirm(el, function(){
+      data.activeWorkout.exercises.splice(el.dataset.wex*1, 1);
+      save(); renderMain();
+    }); break;
+
+    case 'add-rest-between-exercises': {
+      data.activeWorkout.exercises.push({ kind:'rest', id: uid('r'), seconds: 60 });
+      save(); renderMain();
+      break;
+    }
+    case 'remove-exercise-block': {
+      data.activeWorkout.exercises.splice(el.dataset.wex*1, 1);
+      save(); renderMain();
+      break;
+    }
+    case 'edit-top-rest':
+      ui.editingTopRest = el.dataset.wex*1;
+      renderMain();
+      var tri = document.getElementById('toprest-edit-input'); if (tri) tri.focus();
+      break;
+    case 'commit-top-rest': {
+      var trinput = document.getElementById('toprest-edit-input');
+      var trval = trinput.value.trim();
+      data.activeWorkout.exercises[el.dataset.wex*1].seconds = trval==='' ? 0 : Math.max(0, parseInt(trval,10)||0);
+      ui.editingTopRest = null; save(); renderMain();
+      break;
+    }
+
+    case 'confirm-discard-workout': armOrConfirm(el, discardWorkout); break;
+    case 'finish-workout': openFinishModal(); break;
+    case 'finish-cancel': closeFinishModal(); break;
+    case 'finish-toggle': {
+      var fkey = el.dataset.key;
+      ui.finishDraft[fkey] = !ui.finishDraft[fkey];
+      /* full template update supersedes the times-only update */
+      if (fkey==='updateTemplate' && ui.finishDraft.updateTemplate) ui.finishDraft.updateTimes = false;
+      if (fkey==='updateTimes' && ui.finishDraft.updateTimes) ui.finishDraft.updateTemplate = false;
+      renderFinishModal();
+      break;
+    }
+    case 'finish-confirm': finishWorkout(); break;
+    case 'minimize-workout': setView('home'); break;
+
+    case 'new-exercise': openExerciseModal(null, null); break;
+    case 'select-exercise': ui.selectedExerciseId = el.dataset.id; renderMain(); break;
+    case 'deselect-exercise': ui.selectedExerciseId = null; renderMain(); break;
+    case 'edit-exercise': {
+      var exToEdit = data.exercises.find(function(e){return e.id===el.dataset.id;});
+      openExerciseModal(exToEdit, null);
+      break;
+    }
+    case 'confirm-delete-exercise': armOrConfirm(el, function(){
+      var id = el.dataset.id;
+      data.exercises = data.exercises.filter(function(e){return e.id!==id;});
+      data.plans.forEach(function(p){ p.items = p.items.filter(function(it){return it.exerciseId!==id;}); });
+      if (ui.selectedExerciseId===id) ui.selectedExerciseId = null;
+      save(); renderMain();
+    }); break;
+
+    case 'ex-modal-close': closeExerciseModal(); break;
+    case 'ex-add-preset': {
+      var type = el.dataset.type;
+      var labels = {weight:'Weight', assisted:'Assisted', reps:'Reps', timer:'Target Time', time:'Time'};
+      if (!ui.exerciseDraft.fields.some(function(f){return f.type===type;})){
+        ui.exerciseDraft.fields.push({ id: uid('f'), type: type, label: labels[type], unit: '' });
+      }
+      renderExerciseModal();
+      break;
+    }
+    case 'ex-remove-field': {
+      ui.exerciseDraft.fields = ui.exerciseDraft.fields.filter(function(f){return f.id!==el.dataset.fieldid;});
+      renderExerciseModal();
+      break;
+    }
+    case 'ex-toggle-custom': ui.showCustomFieldForm = !ui.showCustomFieldForm; renderExerciseModal(); break;
+    case 'ex-add-custom-field': {
+      var cname = document.getElementById('ex-custom-name').value.trim();
+      if (!cname) break;
+      var ctype = document.getElementById('ex-custom-type').value;
+      var cunit = document.getElementById('ex-custom-unit').value.trim();
+      ui.exerciseDraft.fields.push({ id: uid('f'), type: ctype, label: cname, unit: ctype==='number' ? cunit : '' });
+      ui.showCustomFieldForm = false;
+      renderExerciseModal();
+      break;
+    }
+    case 'ex-modal-save': {
+      var d = ui.exerciseDraft;
+      var ex = { id: d.editingId || uid('ex'), name: d.name.trim(), tag: d.tag.trim(), fields: d.fields, defaultRestSec: d.defaultRestSec };
+      if (d.editingId){
+        data.exercises = data.exercises.map(function(e){ return e.id===ex.id ? ex : e; });
+      } else {
+        data.exercises.push(ex);
+      }
+      save();
+      if (ui.pickerContextForModal){
+        if (ui.pickerContextForModal==='plan') currentPlan().items.push(newPlanItem(ex.id));
+        else addExerciseToActiveWorkout(ex.id);
+        save();
+        ui.picker = null;
+      }
+      if (!d.editingId) ui.selectedExerciseId = ex.id;
+      closeExerciseModal();
+      renderMain();
+      break;
+    }
+
+    case 'open-profile': setView('profile'); break;
+    case 'profile-back': setView(ui.lastTab || 'home'); break;
+    case 'avatar-pick': {
+      var afi = document.getElementById('avatar-file-input');
+      if (afi) afi.click();
+      break;
+    }
+    case 'crop-cancel': closeCropper(); break;
+    case 'crop-reset':
+      if (cropper){ cropper.z = 1; centerCropper(); drawCropper();
+        var zs = document.getElementById('crop-zoom'); if (zs) zs.value = 1; }
+      break;
+    case 'crop-zoom-in': if (cropper) setCropZoom(cropper.z * 1.2); break;
+    case 'crop-zoom-out': if (cropper) setCropZoom(cropper.z / 1.2); break;
+    case 'crop-save': {
+      var cropped = commitCrop();
+      if (cropped.error){
+        ui.profileMessage = { kind:'error', text: cropped.error };
+      } else if (!setAvatar(cropped.dataUrl)){
+        ui.profileMessage = { kind:'error', text:'Not enough room left in this browser to save the picture. Export a backup, then try again.' };
+      } else {
+        ui.profileMessage = { kind:'ok', text:'Picture updated \u2014 stored at '+Math.round(cropped.bytes/1024)+' KB.' };
+      }
+      closeCropper();
+      if (ui.view!=='profile') setView('profile'); else renderMain();
+      break;
+    }
+    case 'avatar-remove': {
+      profile().avatar = null;
+      save();
+      renderAvatarButton();
+      ui.profileMessage = { kind:'ok', text:'Picture removed.' };
+      renderMain();
+      break;
+    }
+
+    case 'settings-open':
+      ui.importPreview = null; ui.settingsMessage = null;
+      renderSettingsModal(); document.getElementById('settings-modal').hidden = false; break;
+    case 'settings-close':
+      ui.importPreview = null; ui.settingsMessage = null;
+      document.getElementById('settings-modal').hidden = true; break;
+    case 'unit-lb': data.settings.weightUnit='lb'; save(); renderSettingsModal(); renderMain(); break;
+    case 'unit-kg': data.settings.weightUnit='kg'; save(); renderSettingsModal(); renderMain(); break;
+
+    case 'export-json': {
+      var okJson = exportJSON();
+      ui.settingsMessage = okJson
+        ? { kind:'ok', text:'Backup saved. Move it somewhere that is not this browser \u2014 Files, iCloud Drive, or your computer.' }
+        : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
+      renderSettingsModal();
+      break;
+    }
+    case 'export-html': {
+      var okHtml = exportPortable();
+      ui.settingsMessage = okHtml
+        ? { kind:'ok', text:'Portable copy saved. Opening that file gives you the app with this data already in it, with no internet needed.' }
+        : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
+      renderSettingsModal();
+      break;
+    }
+    case 'share-json': {
+      shareFile(jsonBackupName(), 'application/json', jsonBackupText(), function(sent){
+        if (sent){
+          markExported();
+          ui.settingsMessage = { kind:'ok', text:'Backup shared.' };
+        }
+        renderSettingsModal();
+      });
+      break;
+    }
+    case 'share-html': {
+      shareFile(portableBackupName(), 'text/html', buildPortableHTML(), function(sent){
+        if (sent){
+          markExported();
+          ui.settingsMessage = { kind:'ok', text:'Portable copy shared.' };
+        }
+        renderSettingsModal();
+      });
+      break;
+    }
+    case 'backup-nudge-dismiss':
+      data.backupNudgeDismissedAt = Date.now();
+      save(); renderMain();
+      break;
+    case 'backup-nudge-export':
+      data.backupNudgeDismissedAt = Date.now();
+      exportJSON();
+      renderMain();
+      break;
+    case 'import-pick': {
+      var fi = document.getElementById('import-file-input');
+      if (fi) fi.click();
+      break;
+    }
+    case 'import-cancel':
+      ui.importPreview = null; ui.settingsMessage = null; renderSettingsModal(); break;
+    case 'import-replace': {
+      applyImportedData(ui.importPreview.data);
+      ui.importPreview = null;
+      ui.settingsMessage = { kind:'ok', text:'Data replaced with the backup.' };
+      renderSettingsModal();
+      renderMain();
+      break;
+    }
+    case 'import-merge': {
+      var addedCounts = mergeImportedData(ui.importPreview.data);
+      ui.importPreview = null;
+      var parts = [];
+      if (addedCounts.exercises) parts.push(addedCounts.exercises+' exercise'+(addedCounts.exercises!==1?'s':''));
+      if (addedCounts.plans) parts.push(addedCounts.plans+' plan'+(addedCounts.plans!==1?'s':''));
+      if (addedCounts.workouts) parts.push(addedCounts.workouts+' workout'+(addedCounts.workouts!==1?'s':''));
+      ui.settingsMessage = parts.length
+        ? { kind:'ok', text:'Merged in '+parts.join(', ')+'. Nothing existing was changed.' }
+        : { kind:'ok', text:'Nothing new to add \u2014 you already have everything in that backup.' };
+      renderSettingsModal();
+      renderMain();
+      break;
+    }
+
+    case 'restore-apply': {
+      applyImportedData(pendingRestore.data);
+      pendingRestore = null;
+      document.getElementById('restore-modal').hidden = true;
+      setView('home');
+      break;
+    }
+    case 'restore-keep':
+      pendingRestore = null;
+      document.getElementById('restore-modal').hidden = true;
+      break;
+
+    case 'confirm-reset-data': armOrConfirm(el, function(){
+      data = defaultData(); save();
+      ui.importPreview = null; ui.settingsMessage = null;
+      document.getElementById('settings-modal').hidden = true;
+      setView('home');
+    }); break;
+
+    case 'timer-pause-resume': {
+      var tmr = runtime.timer;
+      if (!tmr || tmr.done) break;
+      if (timerIsRunning(tmr)){
+        tmr.pausedRemainingMs = timerRemainingMs(tmr);   /* freeze */
+      } else {
+        tmr.endAt = Date.now() + tmr.pausedRemainingMs;  /* rebase off now */
+        tmr.pausedRemainingMs = null;
+      }
+      persistTimer();
+      renderTimerBar();
+      break;
+    }
+    case 'timer-adjust': {
+      var tAdj = runtime.timer;
+      if (!tAdj || tAdj.done) break;
+      var deltaMs = parseInt(el.dataset.delta,10) * 1000;
+      if (timerIsRunning(tAdj)) tAdj.endAt = Math.max(Date.now(), tAdj.endAt + deltaMs);
+      else tAdj.pausedRemainingMs = Math.max(0, tAdj.pausedRemainingMs + deltaMs);
+      persistTimer();
+      renderTimerBar();
+      break;
+    }
+    case 'timer-dismiss':
+      clearRestTimer();
+      break;
+
+    case 'heatmap-day-click':
+      ui.historyFilterDate = (ui.historyFilterDate === el.dataset.date) ? null : el.dataset.date;
+      renderMain();
+      break;
+    case 'view-workout-detail': ui.viewingWorkoutId = el.dataset.id; renderMain(); break;
+    case 'back-to-history': ui.viewingWorkoutId = null; renderMain(); break;
+    case 'confirm-delete-workout': armOrConfirm(el, function(){
+      data.workouts = data.workouts.filter(function(w){return w.id!==el.dataset.id;});
+      ui.viewingWorkoutId = null; save(); renderMain();
+    }); break;
+  }
+}
+
+/* --------------------------------------------------------- commit inputs */
+
+function handlePlanSetCommit(kind, t){
+  var item = currentPlan().items[t.dataset.idx*1];
+  var set = item.sets[t.dataset.set*1];
+  var ex = data.exercises.find(function(e){return e.id===item.exerciseId;});
+  var field = ex ? ex.fields.find(function(f){return f.id===t.dataset.field;}) : null;
+  if (!field) return;
+  if (kind==='set-num'){
+    var raw = t.value.trim();
+    if (raw===''){ set.values[field.id] = null; }
+    else {
+      var n = parseFloat(raw);
+      if (isNaN(n)){ set.values[field.id] = null; t.value=''; }
+      else {
+        if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
+        else if (field.type==='assisted') set.values[field.id] = displayToKg(Math.abs(n), data.settings.weightUnit);
+        else if (field.type==='reps') set.values[field.id] = Math.round(n);
+        else set.values[field.id] = n;
+        t.value = fieldDisplayValue(field, set.values[field.id], data.settings.weightUnit);
+      }
+    }
+  } else if (kind==='set-time'){
+    var raw2 = t.value.trim();
+    var sec = raw2==='' ? null : mmssToSec(raw2);
+    set.values[field.id] = sec;
+    t.value = sec===null ? '' : secToMMSS(sec);
+  } else if (kind==='set-text'){
+    set.values[field.id] = t.value;
+  }
+  save();
+}
+
+function onFocusOut(e){
+  var t = e.target;
+  var planCommit = t.dataset ? t.dataset.planCommit : null;
+  if (planCommit){ handlePlanSetCommit(planCommit, t); return; }
+  var commit = t.dataset ? t.dataset.commit : null;
+  if (!commit) return;
+  switch(commit){
+    case 'profile-name': {
+      var pn = profile();
+      pn.name = t.value.trim().slice(0,40);
+      if (pn.name && !pn.createdAt) pn.createdAt = Date.now();
+      t.value = pn.name;
+      save(); renderAvatarButton();
+      break;
+    }
+    case 'profile-username': {
+      var pu = profile();
+      pu.username = t.value.trim().replace(/^@+/,'').replace(/\s+/g,'').slice(0,24);
+      if (pu.username && !pu.createdAt) pu.createdAt = Date.now();
+      t.value = pu.username;
+      save(); renderAvatarButton();
+      break;
+    }
+    case 'plan-category-name': {
+      var catEntry = currentPlan().items[t.dataset.idx*1];
+      if (catEntry){ catEntry.name = t.value.trim() || 'Untitled Category'; t.value = catEntry.name; save(); }
+      break;
+    }
+    case 'plan-name': {
+      var plan = data.plans.find(function(p){return p.id===t.dataset.id;});
+      if (plan){ plan.name = t.value.trim() || 'Untitled Plan'; t.value = plan.name; save(); }
+      break;
+    }
+    case 'ex-tag': ui.exerciseDraft.tag = t.value; break;
+    case 'ex-default-rest': {
+      var val = t.value.trim();
+      ui.exerciseDraft.defaultRestSec = val==='' ? null : Math.max(0, parseInt(val,10)||0);
+      t.value = ui.exerciseDraft.defaultRestSec==null ? '' : ui.exerciseDraft.defaultRestSec;
+      break;
+    }
+    case 'workout-name': {
+      if (data.activeWorkout){ data.activeWorkout.name = t.value.trim() || 'Workout'; t.value = data.activeWorkout.name; save(); }
+      break;
+    }
+    case 'set-num': {
+      var wex = data.activeWorkout.exercises[t.dataset.wex*1];
+      var set = wex.sets[t.dataset.set*1];
+      var field = wex.fields.find(function(f){return f.id===t.dataset.field;});
+      var raw = t.value.trim();
+      if (raw===''){ set.values[field.id] = null; }
+      else {
+        var n = parseFloat(raw);
+        if (isNaN(n)){ set.values[field.id] = null; t.value=''; }
+        else {
+          if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
+          else if (field.type==='assisted') set.values[field.id] = displayToKg(Math.abs(n), data.settings.weightUnit);
+          else if (field.type==='reps') set.values[field.id] = Math.round(n);
+          else set.values[field.id] = n;
+          t.value = fieldDisplayValue(field, set.values[field.id], data.settings.weightUnit);
+        }
+      }
+      save();
+      break;
+    }
+    case 'set-time': {
+      var wex2 = data.activeWorkout.exercises[t.dataset.wex*1];
+      var set2 = wex2.sets[t.dataset.set*1];
+      var field2 = wex2.fields.find(function(f){return f.id===t.dataset.field;});
+      var raw2 = t.value.trim();
+      var sec = raw2==='' ? null : mmssToSec(raw2);
+      set2.values[field2.id] = sec;
+      t.value = sec===null ? '' : secToMMSS(sec);
+      save();
+      break;
+    }
+    case 'set-text': {
+      var wex3 = data.activeWorkout.exercises[t.dataset.wex*1];
+      var set3 = wex3.sets[t.dataset.set*1];
+      set3.values[t.dataset.field] = t.value;
+      save();
+      break;
+    }
+  }
+}
+
+function onInput(e){
+  var t = e.target;
+  if (t.id==='ex-name-input'){
+    ui.exerciseDraft.name = t.value;
+    var btn = document.getElementById('ex-save-btn');
+    if (btn) btn.disabled = !(t.value.trim() && ui.exerciseDraft.fields.length);
+    return;
+  }
+  if (t.id==='picker-search'){ ui.picker.query = t.value; renderPickerResults(); return; }
+  if (t.id==='exercise-search-input'){ ui.exerciseSearch = t.value; renderExerciseListResults(); return; }
+}
+
+function onChange(e){
+  if (e.target.id==='ex-custom-type'){
+    var unitInput = document.getElementById('ex-custom-unit');
+    if (unitInput) unitInput.style.display = e.target.value==='number' ? '' : 'none';
+  }
+  if (e.target.id==='avatar-file-input'){
+    var avFile = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!avFile) return;
+    loadImageFromFile(avFile, function(res){
+      if (res.error){
+        ui.profileMessage = { kind:'error', text: res.error };
+        renderMain();
+        return;
+      }
+      openCropper(res.img);
+    });
+    return;
+  }
+  if (e.target.id==='import-file-input'){
+    var file = e.target.files && e.target.files[0];
+    e.target.value = ''; /* allow re-picking the same file */
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var res = parseBackupText(String(reader.result));
+      if (!res.ok){
+        ui.importPreview = null;
+        ui.settingsMessage = { kind:'error', text: res.error };
+      } else {
+        ui.importPreview = { data: res.data, exportedAt: res.exportedAt };
+        ui.settingsMessage = null;
+      }
+      renderSettingsModal();
+    };
+    reader.onerror = function(){
+      ui.importPreview = null;
+      ui.settingsMessage = { kind:'error', text:'Could not read that file.' };
+      renderSettingsModal();
+    };
+    reader.readAsText(file);
+  }
+}
+
+function onKeyDown(e){
+  if (e.key==='Enter'){
+    var el = e.target.closest('[data-action-enter]');
+    if (el){ e.preventDefault(); handleAction(el.dataset.actionEnter, el); return; }
+  }
+  if (e.key==='Escape'){
+    var settingsModal = document.getElementById('settings-modal');
+    var exModal = document.getElementById('exercise-modal');
+    var finModal = document.getElementById('finish-modal');
+    var cropModal = document.getElementById('cropper-modal');
+    if (!cropModal.hidden){ closeCropper(); return; }
+    if (!exModal.hidden){ closeExerciseModal(); return; }
+    if (!finModal.hidden){ closeFinishModal(); return; }
+    if (!settingsModal.hidden){ settingsModal.hidden = true; return; }
+    if (ui.editingRest || ui.editingDefaultRest!==null){ ui.editingRest=null; ui.editingDefaultRest=null; renderMain(); return; }
+  }
+}
+
+function onClick(e){
+  var btn = e.target.closest('[data-action]');
+  if (btn){
+    if (btn.tagName==='A') e.preventDefault();
+    handleAction(btn.dataset.action, btn);
+    return;
+  }
+  if (e.target.id==='settings-modal') e.target.hidden = true;
+  if (e.target.id==='exercise-modal') closeExerciseModal();
+  if (e.target.id==='finish-modal') closeFinishModal();
+  if (e.target.id==='cropper-modal') closeCropper();
+}
+
+/* ------------------------------------------------------------------ init */
+
+/* ---- Drag to reorder / move between categories ---------------------------
+   Uses Pointer Events rather than HTML5 drag-and-drop, because the latter
+   does not fire on iOS Safari. Works with mouse and touch from one code path.
+   Dragging a category heading carries its member exercises with it. ---- */
+
+var drag = null;
+
+function planDragTargets(){
+  var els = document.querySelectorAll('#plan-items [data-drag-idx]');
+  var list = [];
+  for (var i=0;i<els.length;i++){
+    var r = els[i].getBoundingClientRect();
+    list.push({ el: els[i], idx: els[i].dataset.dragIdx*1, top: r.top, bottom: r.bottom, mid: r.top + r.height/2 });
+  }
+  return list;
+}
+function clearDropMarkers(){
+  var m = document.querySelectorAll('.drop-before, .drop-after, .exit-active');
+  for (var i=0;i<m.length;i++) m[i].classList.remove('drop-before','drop-after','exit-active');
+}
+/* exit zones sit just past a category's last member; hitting one means
+   "below the heading, but outside it" */
+function exitZoneAt(clientY){
+  var zones = document.querySelectorAll('#plan-items [data-drop-exit]');
+  for (var i=0;i<zones.length;i++){
+    var r = zones[i].getBoundingClientRect();
+    if (clientY >= r.top && clientY <= r.bottom) return { el: zones[i], idx: zones[i].dataset.dropExit*1 };
+  }
+  return null;
+}
+function computeDropIndex(clientY, targets){
+  for (var i=0;i<targets.length;i++){
+    if (clientY < targets[i].mid) return targets[i].idx;
+  }
+  return currentPlan().items.length;
+}
+function onPointerDown(e){
+  if (ui.view!=='plans' || !ui.selectedPlanId) return;
+  var handle = e.target.closest ? e.target.closest('.drag-handle') : null;
+  if (!handle) return;
+  var host = handle.closest('[data-drag-idx]');
+  if (!host) return;
+  e.preventDefault();
+  var items = currentPlan().items;
+  var fromIdx = host.dataset.dragIdx*1;
+  drag = {
+    fromIdx: fromIdx,
+    blockLen: planBlockLength(items, fromIdx),
+    isCategory: itemKind(items[fromIdx])==='category',
+    host: host,
+    startY: e.clientY,
+    active: false,
+    dropIdx: null,
+    exit: false
+  };
+  document.addEventListener('pointermove', onPointerMove, {passive:false});
+  document.addEventListener('pointerup', onPointerUp);
+  document.addEventListener('pointercancel', onPointerUp);
+}
+function onPointerMove(e){
+  if (!drag) return;
+  if (!drag.active){
+    if (Math.abs(e.clientY - drag.startY) < 5) return; /* ignore taps */
+    drag.active = true;
+    drag.host.classList.add('dragging');
+    document.body.classList.add('is-dragging');
+    if (!drag.isCategory) document.body.classList.add('dragging-exercise');
+  }
+  e.preventDefault();
+  clearDropMarkers();
+
+  /* an exit zone wins over the normal midpoint calculation when hovered */
+  var exit = drag.isCategory ? null : exitZoneAt(e.clientY);
+  if (exit){
+    drag.dropIdx = exit.idx;
+    drag.exit = true;
+    exit.el.classList.add('exit-active');
+    return;
+  }
+  drag.exit = false;
+
+  var targets = planDragTargets();
+  var idx = computeDropIndex(e.clientY, targets);
+  /* can't drop a block inside itself */
+  if (idx > drag.fromIdx && idx < drag.fromIdx + drag.blockLen) idx = drag.fromIdx;
+  drag.dropIdx = idx;
+  var match = null;
+  for (var i=0;i<targets.length;i++){ if (targets[i].idx===idx){ match = targets[i]; break; } }
+  if (match) match.el.classList.add('drop-before');
+  else {
+    var endZone = document.querySelector('[data-drop-end]');
+    if (endZone) endZone.classList.add('drop-after');
+  }
+}
+function onPointerUp(){
+  document.removeEventListener('pointermove', onPointerMove);
+  document.removeEventListener('pointerup', onPointerUp);
+  document.removeEventListener('pointercancel', onPointerUp);
+  if (!drag) return;
+  var d = drag;
+  drag = null;
+  document.body.classList.remove('is-dragging','dragging-exercise');
+  clearDropMarkers();
+  if (d.host) d.host.classList.remove('dragging');
+  if (d.active && d.dropIdx!==null && (d.dropIdx!==d.fromIdx || d.exit)){
+    movePlanBlock(d.fromIdx, d.dropIdx, d.exit);
+  }
+}
+document.addEventListener('pointerdown', onPointerDown);
+
+document.addEventListener('click', onClick);
+document.addEventListener('input', onInput);
+document.addEventListener('change', onChange);
+document.addEventListener('focusout', onFocusOut);
+document.addEventListener('keydown', onKeyDown);
+
+document.getElementById('tabs').addEventListener('click', function(e){
+  var b = e.target.closest('.tab-btn');
+  if (!b) return;
+  setView(b.dataset.tab);
+});
+document.querySelector('[data-action="settings-open"]').innerHTML = icon('settings');
+
+function tick(){
+  if (data.activeWorkout){
+    if (ui.view!=='workout') updateInProgressBar();
+    else {
+      var elapsedEl = document.getElementById('workout-elapsed');
+      if (elapsedEl) elapsedEl.textContent = fmtElapsed(Date.now()-data.activeWorkout.startedAt);
+    }
+  }
+}
+setInterval(tick, 1000);
+
+document.addEventListener('visibilitychange', onVisible);
+window.addEventListener('pageshow', onVisible);
+window.addEventListener('focus', onVisible);
+
+renderSettingsModal();
+renderAvatarButton();
+setView('home');
+restoreTimer();
+if (pendingRestore) renderRestoreModal();
+
+})();
+</script>
+</body>
+</html>
