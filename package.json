@@ -1,0 +1,14 @@
+{
+  "name": "athleticism",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A workout tracker that lives on your device. No account, no sync, no subscription.",
+  "scripts": {
+    "apk": "cap sync android && cd android && JAVA_HOME=${JAVA_HOME:-/opt/homebrew/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home} ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.2",
+    "@capacitor/cli": "^8.5.2",
+    "@capacitor/core": "^8.5.2"
+  }
+}

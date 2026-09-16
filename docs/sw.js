@@ -11,27 +11,32 @@
 
 var CACHE_VERSION = 'v2';
 var SHELL = 'athleticism-shell-' + CACHE_VERSION;
-var FONTS = 'athleticism-fonts-' + CACHE_VERSION;
 
+/* Fonts are precached, not left to the first online load: a page only asks for
+   the subsets its text needs, so an exercise name in a new script would
+   otherwise hit a font that was never fetched. */
 var SHELL_FILES = [
   './',
   './index.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
-  './icons/icon-maskable-512.png'
+  './icons/icon-maskable-512.png',
+  './fonts/baloo2-latin.woff2',
+  './fonts/baloo2-latin-ext.woff2',
+  './fonts/baloo2-vietnamese.woff2',
+  './fonts/baloo2-devanagari.woff2',
+  './fonts/nunito-latin.woff2',
+  './fonts/nunito-latin-ext.woff2',
+  './fonts/nunito-vietnamese.woff2',
+  './fonts/nunito-cyrillic.woff2',
+  './fonts/nunito-cyrillic-ext.woff2'
 ];
 
-/* Cached one at a time. addAll() is all-or-nothing, so a single missing icon
-   would leave the app with no offline copy at all. */
 self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open(SHELL).then(function (cache) {
-      return Promise.all(SHELL_FILES.map(function (f) {
-        return cache.add(f).catch(function () {
-          console.warn('Athleticism SW: could not precache', f);
-        });
-      }));
+    caches.open(SHELL).then(function (c) {
+      return c.addAll(SHELL_FILES);
     }).then(function () {
       return self.skipWaiting();
     })
@@ -42,7 +47,7 @@ self.addEventListener('activate', function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
       return Promise.all(keys.map(function (k) {
-        if (k !== SHELL && k !== FONTS) return caches.delete(k);
+        if (k !== SHELL) return caches.delete(k);
       }));
     }).then(function () {
       return self.clients.claim();
@@ -50,49 +55,17 @@ self.addEventListener('activate', function (e) {
   );
 });
 
-function offlinePage() {
-  return new Response(
-    '<!DOCTYPE html><meta name="viewport" content="width=device-width,initial-scale=1">' +
-    '<body style="font-family:system-ui;padding:40px;text-align:center;background:#FFF6EC;color:#2A2233">' +
-    '<h1>Offline</h1><p>Open Athleticism once with a connection and it will work offline from then on.</p>',
-    { headers: { 'Content-Type': 'text/html' } }
-  );
-}
-
-/* Every path through this returns a real Response. Resolving with undefined is
-   what produced "Safari can't open the page" - respondWith(undefined) is a
-   network error, and iOS renders it as though the site were unreachable. */
-function serve(e, cacheName, isNavigation) {
-  var req = e.request;
+function staleWhileRevalidate(req, cacheName) {
   return caches.open(cacheName).then(function (cache) {
-    return cache.match(req, { ignoreSearch: true }).then(function (hit) {
+    return cache.match(req).then(function (hit) {
       var net = fetch(req).then(function (res) {
         if (res && (res.ok || res.type === 'opaque')) cache.put(req, res.clone());
         return res;
       }).catch(function () {
-        return null;
+        return hit;                      /* offline: whatever we already have */
       });
-
-      if (hit) {
-        e.waitUntil(net);               /* refresh in the background */
-        return hit;
-      }
-      return net.then(function (res) {
-        if (res) return res;
-        if (!isNavigation) return Response.error();
-        /* A navigation we've never cached under this exact URL - a query
-           string, a trailing slash, whatever iOS decided to add. Any copy of
-           the app shell answers it correctly. */
-        return cache.match('./index.html').then(function (shell) {
-          if (shell) return shell;
-          return cache.match('./').then(function (root) {
-            return root || offlinePage();
-          });
-        });
-      });
+      return hit || net;
     });
-  }).catch(function () {
-    return isNavigation ? offlinePage() : Response.error();
   });
 }
 
@@ -100,22 +73,19 @@ self.addEventListener('fetch', function (e) {
   var req = e.request;
   if (req.method !== 'GET') return;
 
-  var url;
-  try { url = new URL(req.url); } catch (err) { return; }
-
-  /* Google Fonts. Cached on first online load so the rounded type survives
-     offline; without this the app silently falls back to the system font. */
-  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(serve(e, FONTS, false));
-    return;
-  }
-
+  var url = new URL(req.url);
   if (url.origin !== location.origin) return;
 
+  /* Navigations always resolve to the app shell, so a deep link or a refresh
+     works with no connection. */
   if (req.mode === 'navigate') {
-    e.respondWith(serve(e, SHELL, true));
+    e.respondWith(
+      staleWhileRevalidate(req, SHELL).catch(function () {
+        return caches.match('./index.html', { cacheName: SHELL });
+      })
+    );
     return;
   }
 
-  e.respondWith(serve(e, SHELL, false));
+  e.respondWith(staleWhileRevalidate(req, SHELL));
 });

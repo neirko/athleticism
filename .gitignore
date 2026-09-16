@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+
+# Node / Capacitor
+node_modules/
+package-lock.json
+
+# Android build output (the android/ folder itself IS committed)
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/capacitor-cordova-android-plugins/
+*.apk
+*.aab
+*.keystore
+
+# Python
+__pycache__/
+*.pyc

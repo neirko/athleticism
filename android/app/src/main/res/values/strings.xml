@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Athleticism</string>
+    <string name="title_activity_main">Athleticism</string>
+    <string name="package_name">com.athleticism.app</string>
+    <string name="custom_url_scheme">com.athleticism.app</string>
+</resources>

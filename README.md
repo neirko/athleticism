@@ -8,7 +8,7 @@ skill holds, breakdance. Every exercise defines its own tracking fields
 (weight, reps, measured time, RIR/RPE, or anything custom), so a bench press
 and a handstand hold are the same kind of object.
 
-**Live:** https://YOUR-USERNAME.github.io/athleticism/
+**Live:** https://neirko.github.io/athleticism/
 
 ---
 
@@ -19,15 +19,22 @@ docs/                  the app. GitHub Pages serves this folder,
   index.html           and Capacitor bundles it into the APK.
   manifest.json        One source of truth, two consumers.
   sw.js
+  fonts/               Nunito + Baloo 2, self-hosted (SIL OFL)
   icons/
+android/               Capacitor's Android project
+capacitor.config.json
+package.json
 tools/
   icon.py              regenerates the app icons from SVG
   legacy-build/        how index.html was originally generated (see below)
 ```
 
 `docs/index.html` is a single self-contained file — all CSS, JavaScript, the
-mascot artwork and the app icons are inline. It works opened straight off disk,
-which is what makes the portable backup format possible.
+mascot artwork and the app icons are inline. The one exception is the fonts,
+which sit in `docs/fonts/`. It works opened straight off disk, which is what
+makes the portable backup format possible. A portable backup has no `fonts/`
+folder beside it, so the export points its copy at Google Fonts instead: the
+rounded type when it's opened online, the system font when it isn't.
 
 ### About `tools/legacy-build/`
 
@@ -67,33 +74,29 @@ Settings → Pages → Source: *Deploy from a branch* → Branch: `main`, folder
 
 ## Android APK
 
-The plan is Capacitor, which wraps `docs/` in a real Android app. The web files
-ship inside the APK, so it works with no network from first launch and needs no
-hosting at all.
+Capacitor wraps `docs/` in a real Android app (app ID `com.athleticism.app`,
+set in `capacitor.config.json`). The web files ship inside the APK, so it works
+with no network from first launch and needs no hosting at all.
+
+Android Studio isn't needed. The build needs JDK 21 and the Android SDK in
+`~/Library/Android/sdk`. Gradle finds the SDK through `android/local.properties`,
+which is untracked; on a fresh clone, recreate it with
+`echo "sdk.dir=$HOME/Library/Android/sdk" > android/local.properties`.
 
 ```bash
-npm init -y
-npm install @capacitor/core @capacitor/cli @capacitor/android
-npx cap init Athleticism com.yourname.athleticism --web-dir=docs
-npx cap add android
-npx cap sync
+brew install openjdk@21
+npm install
 ```
 
-Then open `android/` in Android Studio and use Build → Build APK(s), or from
-the command line:
+After any change to `docs/`, rebuild with:
 
 ```bash
-cd android && ./gradlew assembleDebug
+npm run apk
 ```
 
-The APK lands in `android/app/build/outputs/apk/debug/`.
-
-**Known gap before this is worth doing:** the fonts are still loaded from
-Google Fonts. The service worker caches them after the first online load, so
-the PWA is fine — but the APK has no service worker, so offline it would fall
-back to a system font and look wrong. Download the Nunito and Baloo 2 woff2
-files into `docs/fonts/`, swap the `<link>` in `index.html` for a local
-`@font-face` block, and the last external dependency is gone for both.
+That copies `docs/` into the Android project and runs `./gradlew assembleDebug`.
+It uses Homebrew's JDK 21 unless `JAVA_HOME` is already set. The APK lands in
+`android/app/build/outputs/apk/debug/`.
 
 ---
 
@@ -104,7 +107,7 @@ entered on:
 
 | Where | Stored under |
 |---|---|
-| Laptop browser | `your-username.github.io` |
+| Laptop browser | `neirko.github.io` |
 | iPhone home screen | same origin, same store as Safari |
 | Android APK | the app's own WebView storage |
 
