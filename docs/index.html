@@ -54,6 +54,10 @@
 html,body{height:100%;}
 /* An app, not a document: no pinch or double-tap zoom, no sideways drift. */
 html{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+/* Installed to an iPhone home screen the page rubber-bands past its own top,
+   which slides the sticky header down and shows bare background above it.
+   There is nothing underneath worth revealing, so refuse the overscroll. */
+html,body{overscroll-behavior-y:none;}
 html,body{touch-action:pan-x pan-y;}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);font-weight:600;
   font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none;}
@@ -83,9 +87,16 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .tab-btn:hover{background:var(--surface-2);color:var(--text);}
 .tab-btn.active{color:var(--accent-deep);background:var(--accent-soft);}
 .tab-fab{display:none;}
-.topbar-right{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+/* The group may shrink so the pill inside it can ellipsis; the two round
+   buttons hold their size, so only the pill gives way. */
+.topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:0;}
+.topbar-right > .icon-btn,.topbar-right > .avatar-btn{flex-shrink:0;}
 .inprogress-pill{display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;
-  border-radius:20px;padding:8px 14px 8px 12px;font-size:13px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--accent-deep);}
+  border-radius:20px;padding:8px 14px 8px 12px;font-size:13px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--accent-deep);
+  min-width:0;overflow:hidden;}
+.inprogress-pill .ip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.inprogress-pill .ip-name::after{content:"\00b7";margin:0 6px;opacity:.7;}
+.inprogress-pill .ip-time{flex-shrink:0;font-variant-numeric:tabular-nums;}
 .inprogress-pill:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent-deep);}
 .inprogress-pill[hidden]{display:none;}
 .inprogress-pill .dot{width:8px;height:8px;border-radius:50%;background:#fff;flex-shrink:0;animation:pulse-dot 1.6s ease-in-out infinite;}
@@ -242,7 +253,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .workout-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:16px;flex-wrap:wrap;}
 .workout-head-left{display:flex;align-items:center;gap:10px;min-width:0;flex:1;}
 .workout-head-left .title-input{font-family:var(--font-display);font-size:26px;font-weight:800;flex:1;min-width:80px;}
-.workout-head-right{display:flex;align-items:center;gap:12px;}
+.workout-head-right{display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-width:0;}
 .workout-meta{font-size:14px;font-weight:800;color:var(--accent-deep);background:var(--accent-soft);
   border-radius:20px;padding:5px 12px;white-space:nowrap;}
 .workout-progress{font-size:13.5px;font-weight:700;color:var(--text-dim);margin-bottom:22px;}
@@ -509,7 +520,10 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .tab-fab.shooting{background:var(--grape);box-shadow:0 4px 0 #4B3BA8;}
   .main{padding:20px 14px calc(104px + env(safe-area-inset-bottom));}
   .timerbar{bottom:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:0;border-radius:24px 24px 0 0;}
+  /* the workout name is on the workout screen anyway, so the pill can be
+     trimmed here rather than shoving the settings and profile icons off */
   .inprogress-pill{padding:7px 11px;font-size:12px;}
+  .inprogress-pill .ip-name{display:none;}
   .home-greeting{font-size:22px;}
   .cta-card{flex-direction:column;align-items:stretch;text-align:center;padding:20px;gap:10px;}
   .cta-card::before{width:118px;height:118px;margin:0 auto;}
@@ -531,7 +545,10 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .num-input{min-width:0;max-width:none;padding:9px 4px;}
   .rest-pill{padding:4px 7px;font-size:12px;}
   .workout-head{flex-direction:column;align-items:stretch;gap:10px;}
-  .workout-head-right{justify-content:space-between;}
+  /* three items plus gaps overran 360px-wide screens by a hair - enough for
+     Finish Workout to lose its right margin against the edge */
+  .workout-head-right{justify-content:space-between;gap:8px;}
+  .workout-head-right .btn{padding-left:14px;padding-right:14px;}
   .workout-head-left .title-input{font-size:21px;min-width:0;}
   .section-title{font-size:17px;}
 }
@@ -707,7 +724,7 @@ body.photos-hidden .photo-veil{display:flex;}
 <div class="modal-overlay" id="finish-modal" hidden></div>
 <div class="modal-overlay" id="restore-modal" hidden></div>
 <div class="modal-overlay" id="cropper-modal" hidden></div>
-<input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display:none">
+<input type="file" id="photo-file-input" accept="image/*" style="display:none">
 <div class="modal-overlay" id="exercise-modal" hidden></div>
 
 <script>
@@ -1419,9 +1436,12 @@ function photoImgTag(id, size, cls){
 
 /* ---- capture ------------------------------------------------------------ */
 
-/* #photo-file-input is asked for the camera directly; phones without one fall
-   back to the library on their own. It lives in the static body markup so the
-   dock's round button can reach it too. */
+/* #photo-file-input deliberately carries no capture attribute. With one the
+   phone opens straight into the camera and the photo library is unreachable,
+   and plenty of progress shots are taken by someone else, or already sitting
+   in Photos. Without it iOS offers Photo Library / Take Photo / Choose File
+   and Android its equivalent chooser. It lives in the static body markup so
+   the dock's round button can reach it too. */
 function startPhotoCapture(poseId){
   ui.photoDraftPose = poseId || (ui.photoPose || photoPoses()[0].id);
   var input = document.getElementById('photo-file-input');
@@ -2255,7 +2275,8 @@ function updateInProgressBar(){
   var live = !!data.activeWorkout && ui.view!=='workout';
   if (live){
     btn.hidden = false;
-    btn.innerHTML = '<span class="dot"></span> ' + esc(data.activeWorkout.name) + ' &middot; ' + fmtElapsed(Date.now()-data.activeWorkout.startedAt);
+    btn.innerHTML = '<span class="dot"></span><span class="ip-name">' + esc(data.activeWorkout.name) +
+      '</span><span class="ip-time">' + fmtElapsed(Date.now()-data.activeWorkout.startedAt) + '</span>';
   } else {
     btn.hidden = true;
   }
