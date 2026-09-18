@@ -480,7 +480,13 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .tabs{position:fixed;left:0;right:0;bottom:0;z-index:45;gap:0;
     background:var(--surface);border-top:2px solid var(--border);
     padding:6px 4px calc(6px + env(safe-area-inset-bottom));
-    box-shadow:0 -6px 20px rgba(42,34,51,.07);}
+    box-shadow:0 -6px 20px rgba(42,34,51,.07);
+    transition:transform .2s ease,opacity .2s ease;}
+  /* Typing: the dock would only be a second bar stacked on the keyboard, and
+     switching pages mid-edit is not something anyone wants. It steps aside. */
+  body.kb-open .tabs{transform:translateY(120%);opacity:0;pointer-events:none;}
+  body.kb-open .timerbar{bottom:0;padding-bottom:env(safe-area-inset-bottom);}
+  body.kb-open .main{padding-bottom:calc(28px + env(safe-area-inset-bottom));}
   .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;
     font-size:11px;font-weight:800;border-radius:12px;}
   .tab-btn.active{background:none;color:var(--accent);}
@@ -4193,6 +4199,47 @@ document.addEventListener('focusout', function(e){
 });
 window.addEventListener('scroll', function(){ if (infoPop.el) hideFieldInfo(); }, true);
 window.addEventListener('resize', function(){ if (infoPop.el) positionFieldInfo(); });
+
+/* ------------------------------------------------- keyboard-aware dock */
+function isTextField(el){
+  if (!el) return false;
+  if (el.isContentEditable) return true;
+  if (el.tagName === 'TEXTAREA') return true;
+  if (el.tagName !== 'INPUT') return false;
+  return !/^(button|submit|reset|checkbox|radio|range|color|file|image)$/i.test(el.type || 'text');
+}
+
+/* Keeps the field being typed into clear of the keyboard, which the dock used
+   to do by proxy. visualViewport is the part of the page the keyboard leaves. */
+function keepFieldVisible(el){
+  if (!isTextField(el)) return;
+  var vv = window.visualViewport;
+  var top = vv ? vv.offsetTop : 0;
+  var bottom = top + (vv ? vv.height : window.innerHeight);
+  var r = el.getBoundingClientRect();
+  if (r.bottom > bottom - 12 || r.top < top + 8){
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }
+}
+
+var kbTimer = null;
+function setKeyboardOpen(on){
+  clearTimeout(kbTimer);
+  /* Re-rendering a card blurs and refocuses its input. Showing the dock a beat
+     late keeps it from flashing in and out while you edit. */
+  kbTimer = setTimeout(function(){
+    document.body.classList.toggle('kb-open', on);
+    if (on) keepFieldVisible(document.activeElement);
+  }, on ? 0 : 140);
+}
+
+document.addEventListener('focusin', function(e){ if (isTextField(e.target)) setKeyboardOpen(true); });
+document.addEventListener('focusout', function(e){ if (isTextField(e.target)) setKeyboardOpen(false); });
+if (window.visualViewport){
+  window.visualViewport.addEventListener('resize', function(){
+    if (document.body.classList.contains('kb-open')) keepFieldVisible(document.activeElement);
+  });
+}
 
 /* iOS ignores user-scalable=no, so stop the pinch gesture itself. */
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
