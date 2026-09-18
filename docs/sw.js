@@ -9,7 +9,7 @@
 
    Bump CACHE_VERSION whenever you deploy. It's what evicts the old files. */
 
-var CACHE_VERSION = 'v6';
+var CACHE_VERSION = 'v7';
 var SHELL = 'athleticism-shell-' + CACHE_VERSION;
 
 /* Fonts are precached, not left to the first online load: a page only asks for

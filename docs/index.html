@@ -885,7 +885,7 @@ function esc(s){
 var DEFAULT_POSES = [{id:'front',label:'Front'},{id:'side',label:'Side'},{id:'back',label:'Back'}];
 
 function defaultData(){
-  return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, backupNudgeDismissedAt:null,
+  return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, lastPhotoExportAt:null, backupNudgeDismissedAt:null, persistRequested:false,
     progressPhotos:[], photoPoses: DEFAULT_POSES.map(function(p){ return {id:p.id, label:p.label}; }),
     settings:{weightUnit:'lb', progressTab:'sessions', blurPhotos:false} };
 }
@@ -932,6 +932,54 @@ function save(){
   try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
   catch(e){ console.error('Athleticism: save failed', e); }
 }
+
+/* ---- Durable storage ----------------------------------------------------
+   By default a browser treats local data as disposable: it may drop it when
+   the device runs short of space, or after a long stretch without a visit.
+   navigator.storage.persist() asks it not to. An installed home-screen copy
+   is usually granted it without a prompt.
+
+   It is no defence against someone clearing site data by hand, and the
+   Android app never needed it - its storage belongs to the app. Exporting a
+   real file is still the only actual guarantee. */
+
+var storagePersisted = null;   /* null until the browser has answered */
+
+function storageCanPersist(){
+  try{ return !!(navigator.storage && navigator.storage.persist && navigator.storage.persisted); }
+  catch(e){ return false; }
+}
+function refreshPersisted(cb){
+  if (!storageCanPersist()){ storagePersisted = false; if (cb) cb(false); return; }
+  navigator.storage.persisted().then(function(v){
+    storagePersisted = !!v;
+    if (cb) cb(storagePersisted);
+  })['catch'](function(){ storagePersisted = false; if (cb) cb(false); });
+}
+function requestPersisted(cb){
+  if (!storageCanPersist()){ if (cb) cb(false); return; }
+  navigator.storage.persist().then(function(v){
+    storagePersisted = !!v;
+    if (cb) cb(storagePersisted);
+  })['catch'](function(){ if (cb) cb(false); });
+}
+/* Asked for once, the first time there is something worth keeping. Chrome
+   decides silently; Firefox may prompt, which is why this waits for a moment
+   where the user has just made something rather than firing on page load. */
+function ensurePersisted(){
+  if (data.persistRequested || !storageCanPersist()) return;
+  data.persistRequested = true;
+  save();
+  requestPersisted(function(){});
+}
+function persistStateLine(){
+  if (!storageCanPersist()) return 'This browser does not offer it.';
+  if (storagePersisted === null) return 'Checking…';
+  return storagePersisted
+    ? 'Granted. This browser will not clear your data to reclaim space.'
+    : 'Not granted. This browser may clear your data when space runs low.';
+}
+
 /* ---- Backup & restore ---------------------------------------------------
    localStorage is not permanent. iOS Safari in particular can evict site
    data for pages that are not installed to the Home Screen, so exporting a
@@ -945,7 +993,9 @@ function backupPayload(){
   /* device-local state that should not travel with the data */
   delete snapshot.restTimer;
   delete snapshot.lastExportAt;
+  delete snapshot.lastPhotoExportAt;
   delete snapshot.backupNudgeDismissedAt;
+  delete snapshot.persistRequested;
   /* Photo bytes are only here when stagePhotoBlobs() has just put them there,
      which happens when "Include Progress Photos" is on. */
   if (pendingPhotoBlobs) snapshot.photoBlobs = pendingPhotoBlobs;
@@ -1006,6 +1056,13 @@ function markExported(){
   data.backupNudgeDismissedAt = null;
   save();
 }
+/* Only a file that actually carries the images counts - a data-only backup
+   leaves the photos entirely unprotected. */
+function markPhotosExported(){
+  data.lastPhotoExportAt = Date.now();
+  data.backupNudgeDismissedAt = null;
+  save();
+}
 function shareFile(filename, mime, content, done){
   var file;
   try { file = new File([content], filename, {type: mime}); }
@@ -1021,9 +1078,10 @@ function portableBackupName(){ return 'athleticism-backup-'+backupStamp()+'.html
 
 function exportJSON(cb){
   stagePhotoBlobs(includePhotosInBackup(), function(){
+    var carried = !!pendingPhotoBlobs;
     var ok = downloadFile(jsonBackupName(), 'application/json', jsonBackupText());
     pendingPhotoBlobs = null;
-    if (ok) markExported();
+    if (ok){ markExported(); if (carried) markPhotosExported(); }
     if (cb) cb(ok);
   });
 }
@@ -1090,9 +1148,10 @@ function buildPortableHTML(){
 }
 function exportPortable(cb){
   stagePhotoBlobs(includePhotosInBackup(), function(){
+    var carried = !!pendingPhotoBlobs;
     var ok = downloadFile(portableBackupName(), 'text/html', buildPortableHTML());
     pendingPhotoBlobs = null;
-    if (ok) markExported();
+    if (ok){ markExported(); if (carried) markPhotosExported(); }
     if (cb) cb(ok);
   });
 }
@@ -1420,6 +1479,7 @@ function commitPhotoCrop(){
     photoThumbCache[id] = enc.thumb;
     cacheFull(id, enc.full);
     save();
+    ensurePersisted();
     ui.photoPose = c.pose;
     ui.photoMessage = { kind:'ok', text:'Photo saved to '+poseLabel(c.pose)+'.' };
     closeCropper();
@@ -2190,11 +2250,10 @@ function renderHome(){
   var who = displayName();
   if (who) html += '<div class="home-greeting">'+esc(greeting())+', '+esc(who.split(/\s+/)[0])+'</div>';
   if (backupIsStale()){
-    var n = workoutsSinceExport();
     html += '<div class="backup-nudge">'+
       '<div class="backup-nudge-text">'+
         '<strong>Back Up Your Data</strong>'+
-        '<span>'+n+' workout'+(n!==1?'s':'')+' logged since your last export. Browsers can clear local data without warning.</span>'+
+        '<span>'+esc(sinceExportPhrase())+' since your last export. Browsers can clear local data without warning.</span>'+
       '</div>'+
       '<div class="backup-nudge-actions">'+
         '<button class="btn btn-primary small" data-action="backup-nudge-export">Export Now</button>'+
@@ -3597,6 +3656,11 @@ function photoDetailHTML(){
     '<input class="input" data-commit="photo-note" data-id="'+esc(p.id)+'" placeholder="Weight, how you felt, anything" value="'+esc(p.note||'')+'" maxlength="140">';
 }
 
+/* "same day apart" reads wrong, so that case gets its own wording. */
+function compareSpanLabel(a, b){
+  var txt = fmtSpan(Math.abs(b.takenAt - a.takenAt));
+  return txt === 'same day' ? 'Taken the same day' : txt + ' apart';
+}
 function photoCompareHTML(){
   var pose = ui.photoPose || (photoById(ui.compareA) || {}).pose || photoPoses()[0].id;
   var list = photosFor(pose);              /* newest first */
@@ -3631,7 +3695,7 @@ function photoCompareHTML(){
       '<div class="cmp-col">'+photoImgTag(a.id,'full')+'<span class="cmp-cap"><b>'+esc(fmtShortDate(a.date))+'</b>'+esc(parseISO(a.date).getFullYear())+'</span></div>'+
       '<div class="cmp-col">'+photoImgTag(b.id,'full')+'<span class="cmp-cap"><b>'+esc(fmtShortDate(b.date))+'</b>'+esc(parseISO(b.date).getFullYear())+'</span></div>'+
     '</div>'+
-    '<div class="cmp-gap">'+esc(fmtSpan(Math.abs(b.takenAt-a.takenAt)))+' apart</div>'+
+    '<div class="cmp-gap">'+esc(compareSpanLabel(a,b))+'</div>'+
     '<label class="field-label">Left</label>'+strip('a', a)+
     '<label class="field-label">Right</label>'+strip('b', b);
 }
@@ -3902,21 +3966,43 @@ function workoutsSinceExport(){
   var since = data.lastExportAt || 0;
   return data.workouts.filter(function(w){ return w.completedAt && w.completedAt > since; }).length;
 }
+/* A photo only counts as exported once a file carried the image itself:
+   the zip, or a backup with photos switched on. */
+function photosSinceExport(){
+  var since = data.lastPhotoExportAt || 0;
+  return allPhotos().filter(function(p){ return (p.takenAt||0) > since; }).length;
+}
 /* Nudge only once there is something real to lose. */
 function backupIsStale(){
-  var n = workoutsSinceExport();
-  if (n === 0) return false;
+  var n = workoutsSinceExport(), pn = photosSinceExport();
+  if (n === 0 && pn === 0) return false;
   var dismissed = data.backupNudgeDismissedAt;
   if (dismissed && (Date.now()-dismissed) < 7*86400000) return false;
+  /* photos arrive far more slowly than sets do, and there is no way to
+     recreate one, so a smaller count already earns the reminder */
+  if (pn >= 3) return true;
   if (!data.lastExportAt) return n >= 5;
   return n >= 8 || daysSince(data.lastExportAt) >= 30;
+}
+function sinceExportPhrase(){
+  var n = workoutsSinceExport(), pn = photosSinceExport(), parts = [];
+  if (n) parts.push(n+' workout'+(n!==1?'s':''));
+  if (pn) parts.push(pn+' progress photo'+(pn!==1?'s':''));
+  return parts.join(' and ');
 }
 function lastExportLine(){
   if (!data.lastExportAt) return 'Never exported';
   var d = daysSince(data.lastExportAt);
   var when = d===0 ? 'today' : (d===1 ? 'yesterday' : d+' days ago');
-  var n = workoutsSinceExport();
-  return 'Last export '+when+(n ? ' \u00b7 '+n+' workout'+(n!==1?'s':'')+' since' : '');
+  var phrase = sinceExportPhrase();
+  return 'Last export '+when+(phrase ? ' \u00b7 '+phrase+' since' : '');
+}
+
+function closeSettings(){
+  ui.importPreview = null;
+  ui.settingsMessage = null;
+  document.getElementById('settings-modal').hidden = true;
+  renderMain();
 }
 
 function renderSettingsModal(){
@@ -3939,6 +4025,14 @@ function renderSettingsModal(){
         '<button class="'+(!data.settings.blurPhotos?'active':'')+'" data-action="blur-photos-toggle" data-on="0">Off</button>'+
         '<button class="'+(data.settings.blurPhotos?'active':'')+'" data-action="blur-photos-toggle" data-on="1">On</button>'+
       '</div></div>'+
+
+    '<div class="settings-section-label">Storage</div>'+
+    '<div class="settings-row"><div class="settings-row-text"><span>Protect From Automatic Clearing</span>'+
+      '<span class="settings-row-sub">'+esc(persistStateLine())+'</span></div>'+
+      (storageCanPersist() && storagePersisted !== true
+        ? '<button class="btn btn-ghost" data-action="request-persist">Protect</button>'
+        : '')+
+    '</div>'+
 
     '<div class="settings-section-label">Backup</div>'+
     '<div class="settings-note">Your data lives in this browser only. Browsers can clear that storage without warning &mdash; on iPhone especially, unless this page is added to your Home Screen.</div>'+
@@ -4431,10 +4525,23 @@ function handleAction(action, el){
 
     case 'settings-open':
       ui.importPreview = null; ui.settingsMessage = null;
-      renderSettingsModal(); document.getElementById('settings-modal').hidden = false; break;
-    case 'settings-close':
-      ui.importPreview = null; ui.settingsMessage = null;
-      document.getElementById('settings-modal').hidden = true; break;
+      renderSettingsModal(); document.getElementById('settings-modal').hidden = false;
+      /* the answer arrives a tick later; redraw the row once it does */
+      refreshPersisted(function(){
+        if (!document.getElementById('settings-modal').hidden) renderSettingsModal();
+      });
+      break;
+    case 'settings-close': closeSettings(); break;
+    case 'request-persist': {
+      data.persistRequested = true; save();
+      requestPersisted(function(granted){
+        ui.settingsMessage = granted
+          ? { kind:'ok', text:'Protected. This browser will not clear your data to reclaim space \u2014 though clearing site data by hand still would, so keep exporting.' }
+          : { kind:'error', text:'This browser turned the request down. It usually grants it once the app is installed to your home screen.' };
+        renderSettingsModal();
+      });
+      break;
+    }
     case 'unit-lb': data.settings.weightUnit='lb'; save(); renderSettingsModal(); renderMain(); break;
     case 'unit-kg': data.settings.weightUnit='kg'; save(); renderSettingsModal(); renderMain(); break;
 
@@ -4459,10 +4566,12 @@ function handleAction(action, el){
     case 'share-json': {
       stagePhotoBlobs(includePhotosInBackup(), function(){
         var jsonText = jsonBackupText();
+        var jsonCarried = !!pendingPhotoBlobs;
         pendingPhotoBlobs = null;
         shareFile(jsonBackupName(), 'application/json', jsonText, function(sent){
           if (sent){
             markExported();
+            if (jsonCarried) markPhotosExported();
             ui.settingsMessage = { kind:'ok', text:'Backup shared.' };
           }
           renderSettingsModal();
@@ -4473,10 +4582,12 @@ function handleAction(action, el){
     case 'share-html': {
       stagePhotoBlobs(includePhotosInBackup(), function(){
         var htmlText = buildPortableHTML();
+        var htmlCarried = !!pendingPhotoBlobs;
         pendingPhotoBlobs = null;
         shareFile(portableBackupName(), 'text/html', htmlText, function(sent){
           if (sent){
             markExported();
+            if (htmlCarried) markPhotosExported();
             ui.settingsMessage = { kind:'ok', text:'Portable copy shared.' };
           }
           renderSettingsModal();
@@ -4490,6 +4601,8 @@ function handleAction(action, el){
       break;
     case 'backup-nudge-export':
       data.backupNudgeDismissedAt = Date.now();
+      /* if photos are what is unprotected, the file has to carry them */
+      if (photosSinceExport() > 0) ui.backupIncludePhotos = true;
       exportJSON(function(){ renderMain(); });
       break;
     case 'import-pick': {
@@ -4652,7 +4765,9 @@ function handleAction(action, el){
         if (!bytes){
           ui.settingsMessage = { kind:'error', text:'Could not build the photo archive.' };
         } else {
-          ui.settingsMessage = downloadFile(photosZipName(), 'application/zip', bytes)
+          var zipOk = downloadFile(photosZipName(), 'application/zip', bytes);
+          if (zipOk) markPhotosExported();
+          ui.settingsMessage = zipOk
             ? { kind:'ok', text:'Photo archive saved \u2014 dated .jpg files in a .zip. It is for keeping, not for importing back.' }
             : { kind:'error', text:'Could not create the file.' };
         }
@@ -4672,7 +4787,10 @@ function handleAction(action, el){
         ui.settingsMessage = null;
         renderSettingsModal();
         shareFile(photosZipName(), 'application/zip', bytes, function(sent){
-          if (sent) ui.settingsMessage = { kind:'ok', text:'Photo archive shared.' };
+          if (sent){
+            markPhotosExported();
+            ui.settingsMessage = { kind:'ok', text:'Photo archive shared.' };
+          }
           renderSettingsModal();
         });
       });
@@ -4903,7 +5021,7 @@ function onKeyDown(e){
     if (!cropModal.hidden){ closeCropper(); return; }
     if (!exModal.hidden){ closeExerciseModal(); return; }
     if (!finModal.hidden){ closeFinishModal(); return; }
-    if (!settingsModal.hidden){ settingsModal.hidden = true; return; }
+    if (!settingsModal.hidden){ closeSettings(); return; }
     if (ui.editingRest || ui.editingDefaultRest!==null){ ui.editingRest=null; ui.editingDefaultRest=null; renderMain(); return; }
   }
 }
@@ -4915,7 +5033,7 @@ function onClick(e){
     handleAction(btn.dataset.action, btn);
     return;
   }
-  if (e.target.id==='settings-modal') e.target.hidden = true;
+  if (e.target.id==='settings-modal') closeSettings();
   if (e.target.id==='exercise-modal') closeExerciseModal();
   if (e.target.id==='finish-modal') closeFinishModal();
   if (e.target.id==='cropper-modal') closeCropper();
@@ -5205,6 +5323,8 @@ if (window.visualViewport){
 
 /* iOS ignores user-scalable=no, so stop the pinch gesture itself. */
 document.addEventListener('gesturestart', function(e){ e.preventDefault(); }, {passive:false});
+
+refreshPersisted(function(){});
 
 if (pendingRestore) renderRestoreModal();
 
