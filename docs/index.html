@@ -487,21 +487,26 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   body.kb-open .tabs{transform:translateY(120%);opacity:0;pointer-events:none;}
   body.kb-open .timerbar{bottom:0;padding-bottom:env(safe-area-inset-bottom);}
   body.kb-open .main{padding-bottom:calc(28px + env(safe-area-inset-bottom));}
-  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 2px;
-    font-size:11px;font-weight:800;border-radius:12px;}
-  .tab-btn.active{background:none;color:var(--accent);}
+  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px;
+    margin:0 2px;font-size:11px;font-weight:800;border-radius:14px;
+    transition:background .14s ease,color .14s ease;}
+  /* colour alone is easy to miss at a glance on a dock, so the live tab also
+     carries the same soft pill the desktop tabs use */
+  .tab-btn.active{background:var(--accent-soft);color:var(--accent-deep);}
+  .tab-btn:active{transform:scale(.94);}
   .tab-btn::before{content:"";display:block;width:25px;height:25px;background-color:currentColor;
     -webkit-mask:center/contain no-repeat var(--ic);mask:center/contain no-repeat var(--ic);}
   .tab-btn[data-tab="home"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3%2010.6%2012%203.2l9%207.4%22%2F%3E%3Cpath%20d%3D%22M5.6%209.6V20.5h12.8V9.6%22%2F%3E%3Cpath%20d%3D%22M9.6%2020.5v-6h4.8v6%22%2F%3E%3C%2Fsvg%3E");}
   .tab-btn[data-tab="plans"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Crect%20x%3D%224.5%22%20y%3D%223.2%22%20width%3D%2215%22%20height%3D%2217.6%22%20rx%3D%222.4%22%2F%3E%3Cpath%20d%3D%22M8.6%208.4h6.8M8.6%2012h6.8M8.6%2015.6h4%22%2F%3E%3C%2Fsvg%3E");}
   .tab-btn[data-tab="exercises"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.2%209.4v5.2M6.6%206.6v10.8M17.4%206.6v10.8M20.8%209.4v5.2M6.6%2012h10.8%22%2F%3E%3C%2Fsvg%3E");}
-  .tab-btn[data-tab="history"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Ccircle%20cx%3D%2212%22%20cy%3D%2212%22%20r%3D%228.8%22%2F%3E%3Cpath%20d%3D%22M12%206.8V12l3.6%202.2%22%2F%3E%3C%2Fsvg%3E");}
+  .tab-btn[data-tab="progress"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.4%2016.6%209%2011l3.6%203.6L20.6%206.6%22%2F%3E%3Cpath%20d%3D%22M15.4%206.6h5.2v5.2%22%2F%3E%3Cpath%20d%3D%22M3.4%2020.6h17.2%22%2F%3E%3C%2Fsvg%3E");}
   .tab-fab{display:flex;align-items:center;justify-content:center;width:60px;height:60px;flex-shrink:0;
     margin:-26px 6px 0;border:4px solid var(--surface);border-radius:50%;background:var(--accent);color:#fff;
     box-shadow:0 4px 0 var(--accent-deep);transition:transform .08s ease,box-shadow .08s ease;}
   .tab-fab svg{width:27px;height:27px;}
   .tab-fab:active{transform:translateY(4px);box-shadow:none;}
   .tab-fab.resuming{background:var(--good);box-shadow:0 4px 0 var(--good-deep);}
+  .tab-fab.shooting{background:var(--grape);box-shadow:0 4px 0 #4B3BA8;}
   .main{padding:20px 14px calc(104px + env(safe-area-inset-bottom));}
   .timerbar{bottom:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:0;border-radius:24px 24px 0 0;}
   .inprogress-pill{padding:7px 11px;font-size:12px;}
@@ -590,6 +595,87 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .chart-toggle .field-label{margin:0;color:var(--text-dim);}
 .chart-toggle .cat-caret{margin-left:auto;}
 
+/* --------------------------------------------------- progress / photos */
+.prog-seg{display:flex;background:var(--surface-2);border:2px solid var(--border);border-radius:22px;
+  padding:4px;gap:4px;margin-bottom:18px;}
+.prog-seg button{flex:1;border:none;background:none;padding:9px 10px;border-radius:18px;font-size:14px;
+  font-weight:800;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:7px;}
+.prog-seg button svg{width:16px;height:16px;}
+.prog-seg button.active{background:var(--surface);color:var(--text);box-shadow:var(--ledge);}
+
+.pose-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin-bottom:6px;
+  -webkit-overflow-scrolling:touch;scrollbar-width:none;}
+.pose-row::-webkit-scrollbar{display:none;}
+.pose-chip{flex:0 0 auto;background:var(--surface);border:2px solid var(--border);border-radius:18px;
+  padding:7px 14px;font-size:13.5px;font-weight:800;color:var(--text-dim);box-shadow:var(--ledge);
+  display:inline-flex;align-items:center;gap:6px;}
+.pose-chip.active{background:var(--accent-soft);border-color:var(--accent-soft-border);color:var(--accent-deep);}
+.pose-chip .pose-count{font-size:11.5px;font-weight:800;opacity:.7;}
+.pose-chip.add{border-style:dashed;color:var(--text-faint);box-shadow:none;}
+
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(102px,1fr));gap:9px;margin-bottom:20px;}
+.photo-tile{position:relative;padding:0;border:2px solid var(--border);border-radius:var(--radius-md);
+  overflow:hidden;background:var(--surface-2);aspect-ratio:3/4;box-shadow:var(--ledge);display:block;}
+.photo-tile img{display:block;width:100%;height:100%;object-fit:cover;background:var(--surface-2);}
+.photo-tile-meta{position:absolute;left:0;right:0;bottom:0;background:rgba(42,34,51,.72);color:#fff;
+  font-size:11px;font-weight:800;padding:5px 7px;text-align:left;line-height:1.3;}
+.photo-tile-pose{display:block;font-size:10px;font-weight:700;opacity:.8;}
+.photo-month{font-size:13px;font-weight:800;color:var(--text-dim);margin:4px 0 10px;
+  text-transform:uppercase;letter-spacing:.06em;}
+
+body.photos-hidden .photo-tile img,
+body.photos-hidden .photo-detail-img img,
+body.photos-hidden .cmp-col img{filter:blur(18px);}
+.photo-veil{display:none;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius-md);
+  padding:14px;font-size:13.5px;font-weight:800;color:var(--text-dim);margin-bottom:14px;}
+body.photos-hidden .photo-veil{display:flex;}
+
+.photo-detail-img{border:2px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;
+  background:var(--surface-2);box-shadow:var(--ledge);margin-bottom:14px;}
+.photo-detail-img img{display:block;width:100%;max-height:62vh;object-fit:contain;background:var(--surface-2);}
+.photo-detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  flex-wrap:wrap;margin:16px 0 12px;}
+.photo-detail-date{font-family:var(--font-display);font-size:22px;font-weight:800;line-height:1.15;}
+.photo-detail-sub{font-size:13px;font-weight:700;color:var(--text-dim);margin-top:3px;}
+.photo-nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-bottom:16px;}
+
+.cmp-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px;}
+.cmp-col{display:flex;flex-direction:column;gap:8px;}
+.cmp-col img{display:block;width:100%;aspect-ratio:3/4;object-fit:cover;border:2px solid var(--border);
+  border-radius:var(--radius-md);background:var(--surface-2);}
+.cmp-cap{font-size:12.5px;font-weight:800;color:var(--text-dim);text-align:center;line-height:1.4;}
+.cmp-cap b{display:block;font-size:14px;color:var(--text);font-weight:800;}
+.cmp-gap{text-align:center;font-size:13.5px;font-weight:800;color:var(--accent-deep);
+  background:var(--accent-soft);border-radius:18px;padding:8px 12px;margin:10px 0 18px;}
+.cmp-strip{display:flex;gap:7px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none;}
+.cmp-strip::-webkit-scrollbar{display:none;}
+.cmp-thumb{flex:0 0 58px;padding:0;border:2px solid var(--border);border-radius:10px;overflow:hidden;
+  background:var(--surface-2);aspect-ratio:3/4;}
+.cmp-thumb img{display:block;width:100%;height:100%;object-fit:cover;}
+.cmp-thumb.active{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft-border);}
+
+.photo-note-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.photo-storage{font-size:12px;font-weight:700;color:var(--text-faint);}
+.photo-warn{background:var(--surface-2);border:2px solid var(--border);border-radius:var(--radius-md);
+  padding:13px 15px;font-size:12.5px;font-weight:700;color:var(--text-dim);line-height:1.55;margin-bottom:16px;}
+.photo-warn b{color:var(--text);font-weight:800;}
+
+/* portrait crop stage, used by progress photos rather than the round avatar */
+.crop-stage.portrait{border-radius:var(--radius-md);}
+.crop-mask.rect{border-radius:var(--radius-sm);box-shadow:none;}
+.crop-mask.rect::after{border-radius:var(--radius-sm);border-width:2px;}
+.crop-ghost-row{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:12px;
+  font-size:12.5px;font-weight:800;color:var(--text-dim);}
+.crop-ghost-row input[type=range]{width:96px;accent-color:var(--accent);}
+
+@media (max-width:760px){
+  .photo-grid{grid-template-columns:repeat(auto-fill,minmax(94px,1fr));gap:8px;}
+  .prog-seg button{font-size:13.5px;padding:9px 6px;}
+  .photo-detail-date{font-size:20px;}
+  .cmp-grid{gap:8px;}
+}
+
 </style>
 </head>
 <body>
@@ -602,7 +688,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
       <button class="tab-btn" data-tab="plans">Plans</button>
       <button class="tab-fab" id="tab-fab" data-action="start-blank" title="Start a workout" aria-label="Start a workout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3.2 9.4v5.2M6.6 6.6v10.8M17.4 6.6v10.8M20.8 9.4v5.2M6.6 12h10.8"/></svg></button>
       <button class="tab-btn" data-tab="exercises">Exercises</button>
-      <button class="tab-btn" data-tab="history">History</button>
+      <button class="tab-btn" data-tab="progress">Progress</button>
     </nav>
     <div class="topbar-right">
       <button id="inprogress-btn" class="inprogress-pill" data-action="resume-workout" hidden></button>
@@ -620,6 +706,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 <div class="modal-overlay" id="finish-modal" hidden></div>
 <div class="modal-overlay" id="restore-modal" hidden></div>
 <div class="modal-overlay" id="cropper-modal" hidden></div>
+<input type="file" id="photo-file-input" accept="image/*" capture="environment" style="display:none">
 <div class="modal-overlay" id="exercise-modal" hidden></div>
 
 <script>
@@ -676,9 +763,16 @@ var ICONS = {
   grip:'<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   user:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   camera:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  clock:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>',
+  eye:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3.2"/></svg>',
+  compare:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="4.4" width="7.6" height="15.2" rx="1.8"/><rect x="13.8" y="4.4" width="7.6" height="15.2" rx="1.8"/><path d="M12 2.4v19.2"/></svg>',
   folder:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>'
 };
 function icon(name){ return ICONS[name] || ''; }
+
+/* The dock's round button swaps artwork with its job. */
+var FAB_BARBELL_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3.2 9.4v5.2M6.6 6.6v10.8M17.4 6.6v10.8M20.8 9.4v5.2M6.6 12h10.8"/></svg>';
+var FAB_CAMERA_SVG = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 18.4a1.8 1.8 0 0 1-1.8 1.8H3.8A1.8 1.8 0 0 1 2 18.4V8.6a1.8 1.8 0 0 1 1.8-1.8h3.4l1.8-2.6h6l1.8 2.6h3.4A1.8 1.8 0 0 1 22 8.6z"/><circle cx="12" cy="13" r="3.6"/></svg>';
 
 /* ------------------------------------------------------------- utils */
 
@@ -786,8 +880,14 @@ function esc(s){
 
 /* --------------------------------------------------------- persistence */
 
+/* Declared here rather than beside the rest of the photo code because
+   defaultData() runs while the file is still being evaluated. */
+var DEFAULT_POSES = [{id:'front',label:'Front'},{id:'side',label:'Side'},{id:'back',label:'Back'}];
+
 function defaultData(){
-  return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, backupNudgeDismissedAt:null, settings:{weightUnit:'lb'} };
+  return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, backupNudgeDismissedAt:null,
+    progressPhotos:[], photoPoses: DEFAULT_POSES.map(function(p){ return {id:p.id, label:p.label}; }),
+    settings:{weightUnit:'lb', progressTab:'sessions', blurPhotos:false} };
 }
 function loadData(){
   try{
@@ -820,8 +920,10 @@ var pendingRestore = null;
   if (!payload || !Array.isArray(payload.exercises)) return;
   var isEmpty = (data.exercises||[]).length===0 && (data.plans||[]).length===0 && (data.workouts||[]).length===0;
   if (isEmpty){
+    var seedBlobs = takePhotoBlobs(payload);
     data = Object.assign(defaultData(), payload);
     try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }catch(e){}
+    if (seedBlobs) absorbPhotoBlobs(seedBlobs, function(){ paintPhotos(); });
   } else {
     pendingRestore = snap;
   }
@@ -844,6 +946,10 @@ function backupPayload(){
   delete snapshot.restTimer;
   delete snapshot.lastExportAt;
   delete snapshot.backupNudgeDismissedAt;
+  /* Photo bytes are only here when stagePhotoBlobs() has just put them there,
+     which happens when "Include Progress Photos" is on. */
+  if (pendingPhotoBlobs) snapshot.photoBlobs = pendingPhotoBlobs;
+  else delete snapshot.photoBlobs;
   return {
     app: 'Athleticism',
     backupFormat: BACKUP_FORMAT,
@@ -913,10 +1019,13 @@ function jsonBackupText(){ return JSON.stringify(backupPayload(), null, 2); }
 function jsonBackupName(){ return 'athleticism-backup-'+backupStamp()+'.json'; }
 function portableBackupName(){ return 'athleticism-backup-'+backupStamp()+'.html'; }
 
-function exportJSON(){
-  var ok = downloadFile(jsonBackupName(), 'application/json', jsonBackupText());
-  if (ok) markExported();
-  return ok;
+function exportJSON(cb){
+  stagePhotoBlobs(includePhotosInBackup(), function(){
+    var ok = downloadFile(jsonBackupName(), 'application/json', jsonBackupText());
+    pendingPhotoBlobs = null;
+    if (ok) markExported();
+    if (cb) cb(ok);
+  });
 }
 /* Serialise a clean copy of this page with the current data embedded, so the
    backup file is itself a fully working copy of the app. */
@@ -979,10 +1088,13 @@ function buildPortableHTML(){
 
   return '<!DOCTYPE html>\n' + clone.outerHTML;
 }
-function exportPortable(){
-  var ok = downloadFile(portableBackupName(), 'text/html', buildPortableHTML());
-  if (ok) markExported();
-  return ok;
+function exportPortable(cb){
+  stagePhotoBlobs(includePhotosInBackup(), function(){
+    var ok = downloadFile(portableBackupName(), 'text/html', buildPortableHTML());
+    pendingPhotoBlobs = null;
+    if (ok) markExported();
+    if (cb) cb(ok);
+  });
 }
 /* Accepts a .json backup, or a portable .html backup (data pulled out of
    its embedded block). */
@@ -1042,6 +1154,20 @@ function mergeImportedData(payload){
     added.workouts++;
   });
 
+  /* photos are additive the same way, and their bytes go to IndexedDB */
+  allPhotos().forEach(function(p){ seen['pic:'+p.id] = true; });
+  var incomingBlobs = takePhotoBlobs(payload);
+  (payload.progressPhotos||[]).forEach(function(p){
+    if (!p || !p.id || seen['pic:'+p.id]) return;
+    seen['pic:'+p.id] = true;
+    allPhotos().push(p);
+  });
+  (payload.photoPoses||[]).forEach(function(po){
+    if (!po || !po.id) return;
+    if (!photoPoses().filter(function(x){ return x.id===po.id; }).length) photoPoses().push(po);
+  });
+  if (incomingBlobs) absorbPhotoBlobs(incomingBlobs, function(){ renderMain(); });
+
   /* identity is not additive - only adopt it if this device has none */
   if (payload.profile){
     var mine = profile();
@@ -1055,6 +1181,7 @@ function mergeImportedData(payload){
 }
 
 function applyImportedData(payload){
+  var incoming = takePhotoBlobs(payload);
   clearInterval(runtime.timerHandle);
   runtime.timerHandle = null;
   runtime.timer = null;
@@ -1068,6 +1195,437 @@ function applyImportedData(payload){
   save();
   migratePlanItems();
   renderAvatarButton();
+  /* whatever the old install had in IndexedDB is now unreferenced */
+  if (incoming) absorbPhotoBlobs(incoming, function(){ reconcilePhotoStore(); renderMain(); });
+  else reconcilePhotoStore();
+}
+
+/* ---- Progress photos ----------------------------------------------------
+   Photo bytes do NOT live in `data`. save() re-serialises the whole blob on
+   every set you tick off, and localStorage tops out around 5MB, so a gallery
+   in there would be both slow and quickly full. Only the metadata rides along
+   in `data.progressPhotos`; the images themselves sit in IndexedDB keyed by
+   photo id, where the quota is orders of magnitude larger.
+
+   Each photo stores two JPEG data URLs: `full` (900x1200, what you look at)
+   and `thumb` (225x300, what the grid draws). Data URLs rather than Blobs
+   because they drop straight into an <img src> and into a backup file with
+   no object-URL lifetime to get wrong.
+
+   Rendering stays synchronous: views emit <img data-photo="id"> with no src,
+   and paintPhotos() fills them in as IndexedDB answers - the same shape as
+   paintCharts(). */
+
+var PHOTO_DB_NAME = 'athleticism_photos';
+var PHOTO_STORE = 'blobs';
+var PHOTO_W = 900, PHOTO_H = 1200;          /* stored full size, 3:4 portrait */
+var PHOTO_THUMB_W = 225, PHOTO_THUMB_H = 300;
+var PHOTO_QUALITY = 0.82, PHOTO_THUMB_QUALITY = 0.7;
+
+function photoPoses(){
+  if (!Array.isArray(data.photoPoses) || !data.photoPoses.length){
+    data.photoPoses = DEFAULT_POSES.map(function(p){ return {id:p.id, label:p.label}; });
+  }
+  return data.photoPoses;
+}
+function poseLabel(id){
+  var hit = photoPoses().filter(function(p){ return p.id===id; })[0];
+  return hit ? hit.label : id;
+}
+function allPhotos(){
+  if (!Array.isArray(data.progressPhotos)) data.progressPhotos = [];
+  return data.progressPhotos;
+}
+/* newest first, optionally narrowed to one pose */
+function photosFor(poseId){
+  return allPhotos().filter(function(p){ return !poseId || p.pose===poseId; })
+    .sort(function(a,b){ return b.takenAt - a.takenAt; });
+}
+function photoById(id){ return allPhotos().filter(function(p){ return p.id===id; })[0] || null; }
+
+/* ---- IndexedDB ---------------------------------------------------------- */
+
+var photoDbHandle = null, photoDbBroken = false;
+
+function withPhotoDB(cb){
+  if (photoDbBroken){ cb(null); return; }
+  if (photoDbHandle){ cb(photoDbHandle); return; }
+  var req;
+  try { req = indexedDB.open(PHOTO_DB_NAME, 1); }
+  catch(e){ photoDbBroken = true; cb(null); return; }
+  req.onupgradeneeded = function(){
+    var db = req.result;
+    if (!db.objectStoreNames.contains(PHOTO_STORE)) db.createObjectStore(PHOTO_STORE, {keyPath:'id'});
+  };
+  req.onsuccess = function(){ photoDbHandle = req.result; cb(photoDbHandle); };
+  req.onerror = function(){ photoDbBroken = true; cb(null); };
+  req.onblocked = function(){ photoDbBroken = true; cb(null); };
+}
+function photoPut(rec, cb){
+  withPhotoDB(function(db){
+    if (!db){ cb(false); return; }
+    try{
+      var tx = db.transaction(PHOTO_STORE, 'readwrite');
+      tx.objectStore(PHOTO_STORE).put(rec);
+      tx.oncomplete = function(){ cb(true); };
+      tx.onerror = function(){ cb(false); };
+      tx.onabort = function(){ cb(false); };
+    }catch(e){ cb(false); }
+  });
+}
+function photoGet(id, cb){
+  withPhotoDB(function(db){
+    if (!db){ cb(null); return; }
+    try{
+      var req = db.transaction(PHOTO_STORE, 'readonly').objectStore(PHOTO_STORE).get(id);
+      req.onsuccess = function(){ cb(req.result || null); };
+      req.onerror = function(){ cb(null); };
+    }catch(e){ cb(null); }
+  });
+}
+function photoDrop(id, cb){
+  withPhotoDB(function(db){
+    if (!db){ cb(false); return; }
+    try{
+      var tx = db.transaction(PHOTO_STORE, 'readwrite');
+      tx.objectStore(PHOTO_STORE).delete(id);
+      tx.oncomplete = function(){ cb(true); };
+      tx.onerror = function(){ cb(false); };
+    }catch(e){ cb(false); }
+  });
+}
+/* Reads the stored records for a list of ids, in order. Used by both exports. */
+function photoGetMany(ids, cb){
+  var out = [], i = 0;
+  (function next(){
+    if (i >= ids.length){ cb(out); return; }
+    photoGet(ids[i++], function(rec){
+      if (rec) out.push(rec);
+      next();
+    });
+  })();
+}
+
+/* ---- image cache + late binding ----------------------------------------- */
+
+var photoThumbCache = {};
+var photoFullCache = {}, photoFullOrder = [];
+
+function cacheFull(id, dataUrl){
+  if (!photoFullCache[id]) photoFullOrder.push(id);
+  photoFullCache[id] = dataUrl;
+  while (photoFullOrder.length > 4){
+    var drop = photoFullOrder.shift();
+    if (drop !== id) delete photoFullCache[drop];
+  }
+}
+function forgetPhoto(id){
+  delete photoThumbCache[id];
+  delete photoFullCache[id];
+  photoFullOrder = photoFullOrder.filter(function(x){ return x!==id; });
+}
+/* Fills every <img data-photo> the current view emitted. Safe to call after
+   any render: images already carrying a src are skipped. */
+function paintPhotos(){
+  var els = document.querySelectorAll('img[data-photo]');
+  if (!els.length) return;
+  Array.prototype.forEach.call(els, function(el){
+    if (el.getAttribute('src')) return;
+    var id = el.dataset.photo;
+    var want = el.dataset.photoSize === 'full' ? 'full' : 'thumb';
+    var cached = want==='full' ? photoFullCache[id] : photoThumbCache[id];
+    if (cached){ el.src = cached; return; }
+    photoGet(id, function(rec){
+      if (!rec) return;
+      var url = want==='full' ? (rec.full || rec.thumb) : (rec.thumb || rec.full);
+      if (!url) return;
+      if (want==='full') cacheFull(id, rec.full || rec.thumb);
+      else photoThumbCache[id] = rec.thumb || rec.full;
+      /* the view may have been re-rendered while IndexedDB was answering */
+      var live = document.querySelectorAll('img[data-photo="'+id+'"][data-photo-size="'+want+'"]');
+      Array.prototype.forEach.call(live, function(n){ if (!n.getAttribute('src')) n.src = url; });
+    });
+  });
+}
+function photoImgTag(id, size, cls){
+  return '<img class="'+(cls||'')+'" data-photo="'+esc(id)+'" data-photo-size="'+size+'" alt="">';
+}
+
+/* ---- capture ------------------------------------------------------------ */
+
+/* #photo-file-input is asked for the camera directly; phones without one fall
+   back to the library on their own. It lives in the static body markup so the
+   dock's round button can reach it too. */
+function startPhotoCapture(poseId){
+  ui.photoDraftPose = poseId || (ui.photoPose || photoPoses()[0].id);
+  var input = document.getElementById('photo-file-input');
+  if (input) input.click();
+}
+/* The previous shot in the same pose, loaded so it can be ghosted under the
+   crop frame. Lining each month's photo up with the last is the whole point. */
+function loadPoseGhost(poseId, cb){
+  var prev = photosFor(poseId)[0];
+  if (!prev){ cb(null); return; }
+  photoGet(prev.id, function(rec){
+    if (!rec || !rec.full){ cb(null); return; }
+    var img = new Image();
+    img.onload = function(){ cb(img); };
+    img.onerror = function(){ cb(null); };
+    img.src = rec.full;
+  });
+}
+/* Re-encode the cropped region twice: once at full size, once as a thumbnail. */
+function encodePhoto(c){
+  function render(w, h, q){
+    var out = document.createElement('canvas');
+    out.width = w; out.height = h;
+    var ctx = out.getContext('2d');
+    var f = c.base * c.z;
+    ctx.drawImage(c.img, (-c.ox)/f, (-c.oy)/f, c.viewW/f, c.viewH/f, 0, 0, w, h);
+    return out.toDataURL('image/jpeg', q);
+  }
+  try{
+    var full = render(PHOTO_W, PHOTO_H, PHOTO_QUALITY);
+    if (!full || full.indexOf('data:image') !== 0) return { error:'Could not process that image.' };
+    return { full: full, thumb: render(PHOTO_THUMB_W, PHOTO_THUMB_H, PHOTO_THUMB_QUALITY) };
+  }catch(e){
+    return { error:'Could not process that image.' };
+  }
+}
+function commitPhotoCrop(){
+  var c = cropper;
+  if (!c) return;
+  var enc = encodePhoto(c);
+  if (enc.error){
+    ui.photoMessage = { kind:'error', text: enc.error };
+    closeCropper(); renderMain();
+    return;
+  }
+  var id = uid('pic');
+  var now = new Date();
+  photoPut({ id:id, full:enc.full, thumb:enc.thumb }, function(ok){
+    if (!ok){
+      ui.photoMessage = { kind:'error', text:'This browser would not store the photo. It may be out of space, or in private browsing.' };
+      closeCropper(); renderMain();
+      return;
+    }
+    allPhotos().push({
+      id: id,
+      date: toLocalISO(now),
+      takenAt: now.getTime(),
+      pose: c.pose,
+      note: '',
+      bytes: dataUrlBytes(enc.full) + dataUrlBytes(enc.thumb)
+    });
+    photoThumbCache[id] = enc.thumb;
+    cacheFull(id, enc.full);
+    save();
+    ui.photoPose = c.pose;
+    ui.photoMessage = { kind:'ok', text:'Photo saved to '+poseLabel(c.pose)+'.' };
+    closeCropper();
+    renderMain();
+  });
+}
+function deletePhoto(id){
+  photoDrop(id, function(){
+    data.progressPhotos = allPhotos().filter(function(p){ return p.id!==id; });
+    forgetPhoto(id);
+    if (ui.viewingPhotoId===id) ui.viewingPhotoId = null;
+    if (ui.compareA===id) ui.compareA = null;
+    if (ui.compareB===id) ui.compareB = null;
+    save();
+    renderMain();
+  });
+}
+function photoLibraryBytes(){
+  return allPhotos().reduce(function(n,p){ return n + (p.bytes||0); }, 0);
+}
+function fmtBytes(n){
+  if (n < 1024) return n+' B';
+  if (n < 1024*1024) return Math.round(n/1024)+' KB';
+  return (n/(1024*1024)).toFixed(1)+' MB';
+}
+function fmtSpan(ms){
+  var days = Math.round(ms/86400000);
+  if (days < 1) return 'same day';
+  if (days === 1) return '1 day';
+  if (days < 45) return days+' days';
+  var months = Math.round(days/30.44);
+  if (months < 18) return months+' month'+(months!==1?'s':'');
+  var years = Math.floor(days/365.25), rem = Math.round((days - years*365.25)/30.44);
+  return years+' year'+(years!==1?'s':'') + (rem ? ' '+rem+' month'+(rem!==1?'s':'') : '');
+}
+
+/* ---- Photo export -------------------------------------------------------
+   Two separate jobs, deliberately:
+
+   1. The backup toggle. Ticking "Include progress photos" inlines every image
+      as base64 inside the .json or portable .html, so importing that file puts
+      them back in the app. It is off by default because it turns a backup you
+      can email into one you cannot.
+   2. Export Progress Photos. A .zip of dated .jpg files for your photo
+      library, your computer, anywhere. It is an archive, not a restore point -
+      the app does not read it back.
+
+   The zip is written by hand with no compression (JPEGs are already
+   compressed, so deflate would buy nothing) which keeps the app a single file
+   with no dependency to fetch. */
+
+var CRC_TABLE = null;
+function crcTable(){
+  if (CRC_TABLE) return CRC_TABLE;
+  CRC_TABLE = new Uint32Array(256);
+  for (var n=0;n<256;n++){
+    var c = n;
+    for (var k=0;k<8;k++) c = (c & 1) ? (0xEDB88320 ^ (c >>> 1)) : (c >>> 1);
+    CRC_TABLE[n] = c >>> 0;
+  }
+  return CRC_TABLE;
+}
+function crc32(bytes){
+  var t = crcTable(), c = 0xFFFFFFFF;
+  for (var i=0;i<bytes.length;i++) c = t[(c ^ bytes[i]) & 0xFF] ^ (c >>> 8);
+  return (c ^ 0xFFFFFFFF) >>> 0;
+}
+function dataUrlToBytes(dataUrl){
+  var bin = atob(dataUrl.slice(dataUrl.indexOf(',')+1));
+  var out = new Uint8Array(bin.length);
+  for (var i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+function dosDateTime(d){
+  return {
+    time: ((d.getHours() & 31) << 11) | ((d.getMinutes() & 63) << 5) | ((d.getSeconds()/2) & 31),
+    date: (((d.getFullYear()-1980) & 127) << 9) | (((d.getMonth()+1) & 15) << 5) | (d.getDate() & 31)
+  };
+}
+/* files: [{ name, bytes, at }] -> Uint8Array holding a STORE-method zip */
+function buildZip(files){
+  var enc = files.map(function(f){
+    var name = [];
+    for (var i=0;i<f.name.length;i++) name.push(f.name.charCodeAt(i) & 0x7F);
+    return { name: new Uint8Array(name), bytes: f.bytes, crc: crc32(f.bytes), dt: dosDateTime(f.at || new Date()) };
+  });
+  var local = 0, central = 0;
+  enc.forEach(function(f){ local += 30 + f.name.length + f.bytes.length; central += 46 + f.name.length; });
+  var buf = new Uint8Array(local + central + 22);
+  var dv = new DataView(buf.buffer);
+  var off = 0, offsets = [];
+
+  enc.forEach(function(f){
+    offsets.push(off);
+    dv.setUint32(off, 0x04034b50, true);
+    dv.setUint16(off+4, 20, true); dv.setUint16(off+6, 0, true);
+    dv.setUint16(off+8, 0, true);
+    dv.setUint16(off+10, f.dt.time, true); dv.setUint16(off+12, f.dt.date, true);
+    dv.setUint32(off+14, f.crc, true);
+    dv.setUint32(off+18, f.bytes.length, true); dv.setUint32(off+22, f.bytes.length, true);
+    dv.setUint16(off+26, f.name.length, true); dv.setUint16(off+28, 0, true);
+    off += 30;
+    buf.set(f.name, off); off += f.name.length;
+    buf.set(f.bytes, off); off += f.bytes.length;
+  });
+
+  var cdStart = off;
+  enc.forEach(function(f, i){
+    dv.setUint32(off, 0x02014b50, true);
+    dv.setUint16(off+4, 20, true); dv.setUint16(off+6, 20, true);
+    dv.setUint16(off+8, 0, true); dv.setUint16(off+10, 0, true);
+    dv.setUint16(off+12, f.dt.time, true); dv.setUint16(off+14, f.dt.date, true);
+    dv.setUint32(off+16, f.crc, true);
+    dv.setUint32(off+20, f.bytes.length, true); dv.setUint32(off+24, f.bytes.length, true);
+    dv.setUint16(off+28, f.name.length, true);
+    dv.setUint16(off+30, 0, true); dv.setUint16(off+32, 0, true);
+    dv.setUint16(off+34, 0, true); dv.setUint16(off+36, 0, true);
+    dv.setUint32(off+38, 0, true);
+    dv.setUint32(off+42, offsets[i], true);
+    off += 46;
+    buf.set(f.name, off); off += f.name.length;
+  });
+
+  dv.setUint32(off, 0x06054b50, true);
+  dv.setUint16(off+4, 0, true); dv.setUint16(off+6, 0, true);
+  dv.setUint16(off+8, enc.length, true); dv.setUint16(off+10, enc.length, true);
+  dv.setUint32(off+12, off - cdStart, true); dv.setUint32(off+16, cdStart, true);
+  dv.setUint16(off+20, 0, true);
+  return buf;
+}
+function photoFileName(p){
+  var safe = String(poseLabel(p.pose)).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || 'photo';
+  return p.date + '-' + safe + '-' + p.id.slice(-4) + '.jpg';
+}
+function photosZipName(){ return 'athleticism-photos-'+backupStamp()+'.zip'; }
+/* cb(Uint8Array|null) */
+function buildPhotosZip(cb){
+  var metas = allPhotos().slice().sort(function(a,b){ return a.takenAt - b.takenAt; });
+  if (!metas.length){ cb(null); return; }
+  photoGetMany(metas.map(function(p){ return p.id; }), function(recs){
+    var byId = {};
+    recs.forEach(function(r){ byId[r.id] = r; });
+    var files = [];
+    metas.forEach(function(p){
+      var rec = byId[p.id];
+      if (!rec || !rec.full) return;
+      files.push({ name: photoFileName(p), bytes: dataUrlToBytes(rec.full), at: new Date(p.takenAt) });
+    });
+    if (!files.length){ cb(null); return; }
+    try { cb(buildZip(files)); }
+    catch(e){ console.error('Athleticism: zip failed', e); cb(null); }
+  });
+}
+
+/* ---- photos inside a data backup ---------------------------------------- */
+
+var pendingPhotoBlobs = null;   /* set just before backupPayload() is called */
+
+/* cb() once pendingPhotoBlobs reflects `include` */
+function stagePhotoBlobs(include, cb){
+  if (!include || !allPhotos().length){ pendingPhotoBlobs = null; cb(); return; }
+  photoGetMany(allPhotos().map(function(p){ return p.id; }), function(recs){
+    pendingPhotoBlobs = recs.length ? recs : null;
+    cb();
+  });
+}
+function includePhotosInBackup(){ return !!ui.backupIncludePhotos; }
+
+/* Writes imported images back into IndexedDB, then clears the key so the
+   base64 never reaches localStorage. */
+function takePhotoBlobs(payload){
+  var blobs = payload && payload.photoBlobs;
+  if (payload) delete payload.photoBlobs;
+  return Array.isArray(blobs) && blobs.length ? blobs : null;
+}
+function absorbPhotoBlobs(blobs, cb){
+  if (!Array.isArray(blobs) || !blobs.length){ cb(0); return; }
+  var i = 0, n = 0;
+  (function next(){
+    if (i >= blobs.length){ cb(n); return; }
+    var rec = blobs[i++];
+    if (!rec || !rec.id){ next(); return; }
+    photoPut(rec, function(ok){ if (ok) n++; next(); });
+  })();
+}
+/* Drops stored images that no metadata entry points at any more - after a
+   replace-import, or a reset. */
+function reconcilePhotoStore(){
+  withPhotoDB(function(db){
+    if (!db) return;
+    try{
+      var keep = {};
+      allPhotos().forEach(function(p){ keep[p.id] = true; });
+      var store = db.transaction(PHOTO_STORE, 'readwrite').objectStore(PHOTO_STORE);
+      var req = store.getAllKeys ? store.getAllKeys() : null;
+      if (!req) return;
+      req.onsuccess = function(){
+        (req.result||[]).forEach(function(k){ if (!keep[k]) store.delete(k); });
+      };
+    }catch(e){}
+  });
+}
+function photoBackupNote(){
+  var n = allPhotos().length;
+  if (!n) return '';
+  return n+' photo'+(n!==1?'s':'')+' &middot; '+fmtBytes(photoLibraryBytes());
 }
 
 /* ---- Profile ------------------------------------------------------------
@@ -1138,10 +1696,13 @@ function loadImageFromFile(file, cb){
 }
 
 /* ---- Crop / reposition --------------------------------------------------
-   A square viewport with a circular mask. The image is panned and zoomed
-   under it, then only the visible square is re-encoded at AVATAR_PX. The
-   viewport can never show empty space: offsets are clamped so the image
-   always covers it, and zoom is floored at "just covers". */
+   A viewport with the image panned and zoomed under it; only what the
+   viewport shows is re-encoded. The viewport can never show empty space:
+   offsets are clamped so the image always covers it, and zoom is floored at
+   "just covers". Two shapes share the machinery - a square with a circular
+   mask for the avatar, and a 3:4 portrait for progress photos, which can also
+   ghost the previous shot in the same pose over the frame so the angles
+   match month to month. */
 
 var CROP_VIEW = 288;
 var CROP_MAX_ZOOM = 4;
@@ -1153,27 +1714,27 @@ function cropDims(){
 }
 function clampCropper(){
   var c = cropper, d = cropDims();
-  c.ox = Math.min(0, Math.max(c.view - d.w, c.ox));
-  c.oy = Math.min(0, Math.max(c.view - d.h, c.oy));
+  c.ox = Math.min(0, Math.max(c.viewW - d.w, c.ox));
+  c.oy = Math.min(0, Math.max(c.viewH - d.h, c.oy));
 }
 function centerCropper(){
   var c = cropper, d = cropDims();
-  c.ox = (c.view - d.w) / 2;
-  c.oy = (c.view - d.h) / 2;
+  c.ox = (c.viewW - d.w) / 2;
+  c.oy = (c.viewH - d.h) / 2;
   clampCropper();
 }
 function setCropZoom(z){
   var c = cropper;
   var nz = Math.max(1, Math.min(CROP_MAX_ZOOM, z));
   if (nz === c.z) return;
-  var mid = c.view / 2;
+  var midX = c.viewW / 2, midY = c.viewH / 2;
   var d0 = cropDims();
-  var rx = (mid - c.ox) / d0.w;
-  var ry = (mid - c.oy) / d0.h;
+  var rx = (midX - c.ox) / d0.w;
+  var ry = (midY - c.oy) / d0.h;
   c.z = nz;
   var d1 = cropDims();
-  c.ox = mid - rx * d1.w;
-  c.oy = mid - ry * d1.h;
+  c.ox = midX - rx * d1.w;
+  c.oy = midY - ry * d1.h;
   clampCropper();
   drawCropper();
   var slider = document.getElementById('crop-zoom');
@@ -1185,37 +1746,71 @@ function drawCropper(){
   var canvas = document.getElementById('crop-canvas');
   if (!canvas) return;
   var dpr = window.devicePixelRatio || 1;
-  if (canvas.width !== Math.round(c.view*dpr)){
-    canvas.width = Math.round(c.view*dpr);
-    canvas.height = Math.round(c.view*dpr);
+  if (canvas.width !== Math.round(c.viewW*dpr) || canvas.height !== Math.round(c.viewH*dpr)){
+    canvas.width = Math.round(c.viewW*dpr);
+    canvas.height = Math.round(c.viewH*dpr);
   }
   var ctx = canvas.getContext('2d');
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  ctx.clearRect(0, 0, c.view, c.view);
+  ctx.clearRect(0, 0, c.viewW, c.viewH);
   var d = cropDims();
   ctx.drawImage(c.img, c.ox, c.oy, d.w, d.h);
+  if (c.ghost && c.ghostAlpha > 0){
+    /* the ghost is framed by the same cover rule, so it lines up with what a
+       correctly-aligned new photo would look like */
+    var gs = Math.max(c.viewW / c.ghost.width, c.viewH / c.ghost.height);
+    var gw = c.ghost.width * gs, gh = c.ghost.height * gs;
+    ctx.globalAlpha = c.ghostAlpha;
+    ctx.drawImage(c.ghost, (c.viewW - gw)/2, (c.viewH - gh)/2, gw, gh);
+    ctx.globalAlpha = 1;
+  }
 }
-function openCropper(img){
-  /* the stage must match the canvas exactly or the circular mask would no
-     longer correspond to the square we actually export */
-  var view = Math.max(200, Math.min(CROP_VIEW, window.innerWidth - 88));
-  cropper = { img: img, view: view, z: 1, ox: 0, oy: 0, pointers: {}, pinchDist: 0, pinchZoom: 1 };
-  cropper.base = view / Math.min(img.width, img.height);
+function cropStageSize(mode){
+  if (mode === 'photo'){
+    var h = Math.min(Math.round(window.innerHeight * 0.42), 372);
+    var w = Math.round(h * 0.75);
+    var maxW = window.innerWidth - 88;
+    if (w > maxW){ w = Math.max(150, maxW); h = Math.round(w / 0.75); }
+    return { w: w, h: h };
+  }
+  var side = Math.max(200, Math.min(CROP_VIEW, window.innerWidth - 88));
+  return { w: side, h: side };
+}
+function openCropper(img, opts){
+  opts = opts || {};
+  var mode = opts.mode === 'photo' ? 'photo' : 'avatar';
+  /* the stage must match the canvas exactly or the mask would no longer
+     correspond to the region we actually export */
+  var size = cropStageSize(mode);
+  cropper = { img: img, mode: mode, pose: opts.pose || null,
+    ghost: opts.ghost || null, ghostAlpha: opts.ghost ? 0.45 : 0,
+    viewW: size.w, viewH: size.h, z: 1, ox: 0, oy: 0,
+    pointers: {}, pinchDist: 0, pinchZoom: 1 };
+  cropper.base = Math.max(size.w / img.width, size.h / img.height);
   centerCropper();
+  var isPhoto = mode === 'photo';
   var wrap = document.getElementById('cropper-modal');
   wrap.innerHTML = '<div class="modal cropper-modal">'+
-    '<div class="modal-head"><h2>Adjust Picture</h2><button class="icon-btn" data-action="crop-cancel">'+icon('x')+'</button></div>'+
-    '<div class="crop-stage" style="width:'+view+'px;height:'+view+'px"><canvas id="crop-canvas" style="width:'+view+'px;height:'+view+'px"></canvas><div class="crop-mask"></div></div>'+
-    '<div class="crop-hint">Drag to reposition. Pinch or use the slider to zoom.</div>'+
+    '<div class="modal-head"><h2>'+(isPhoto ? 'Frame Your Photo' : 'Adjust Picture')+'</h2>'+
+      '<button class="icon-btn" data-action="crop-cancel">'+icon('x')+'</button></div>'+
+    '<div class="crop-stage'+(isPhoto?' portrait':'')+'" style="width:'+size.w+'px;height:'+size.h+'px">'+
+      '<canvas id="crop-canvas" style="width:'+size.w+'px;height:'+size.h+'px"></canvas>'+
+      '<div class="crop-mask'+(isPhoto?' rect':'')+'"></div></div>'+
+    '<div class="crop-hint">'+
+      (cropper.ghost ? 'Your last '+esc(poseLabel(cropper.pose)).toLowerCase()+' shot is laid over the frame. Line yourself up with it.'
+                     : 'Drag to reposition. Pinch or use the slider to zoom.')+
+    '</div>'+
     '<div class="crop-zoom-row">'+
       '<button class="icon-btn" data-action="crop-zoom-out" title="Zoom out">&minus;</button>'+
       '<input id="crop-zoom" type="range" min="1" max="'+CROP_MAX_ZOOM+'" step="0.01" value="1">'+
       '<button class="icon-btn" data-action="crop-zoom-in" title="Zoom in">+</button>'+
     '</div>'+
+    (cropper.ghost ? '<div class="crop-ghost-row"><span>Overlay</span>'+
+      '<input id="crop-ghost" type="range" min="0" max="0.85" step="0.05" value="0.45"></div>' : '')+
     '<div style="display:flex;gap:10px;margin-top:16px;">'+
       '<button class="btn btn-ghost full-width" data-action="crop-reset">Reset</button>'+
       '<button class="btn btn-ghost full-width" data-action="crop-cancel">Cancel</button>'+
-      '<button class="btn btn-primary full-width" data-action="crop-save">Use Photo</button>'+
+      '<button class="btn btn-primary full-width" data-action="crop-save">'+(isPhoto?'Save Photo':'Use Photo')+'</button>'+
     '</div>'+
   '</div>';
   wrap.hidden = false;
@@ -1234,6 +1829,14 @@ function attachCropperGestures(){
   var slider = document.getElementById('crop-zoom');
   if (slider){
     slider.addEventListener('input', function(){ setCropZoom(slider.value*1); });
+  }
+  var ghostSlider = document.getElementById('crop-ghost');
+  if (ghostSlider){
+    ghostSlider.addEventListener('input', function(){
+      if (!cropper) return;
+      cropper.ghostAlpha = ghostSlider.value*1;
+      drawCropper();
+    });
   }
   function pointerList(){
     var ids = Object.keys(cropper.pointers);
@@ -1296,7 +1899,7 @@ function commitCrop(){
     var f = c.base * c.z;
     var sx = (-c.ox) / f;
     var sy = (-c.oy) / f;
-    var sSide = c.view / f;
+    var sSide = c.viewW / f;
     ctx.drawImage(c.img, sx, sy, sSide, sSide, 0, 0, AVATAR_PX, AVATAR_PX);
 
     var q = AVATAR_QUALITY;
@@ -1468,6 +2071,16 @@ var ui = {
   importPreview: null,
   settingsMessage: null,
   profileMessage: null,
+  photoMessage: null,
+  photoPose: null,
+  photoDraftPose: null,
+  viewingPhotoId: null,
+  compareOpen: false,
+  compareA: null,
+  compareB: null,
+  addingPose: false,
+  photosRevealed: false,
+  backupIncludePhotos: false,
   lastTab: 'home'
 };
 var runtime = { timer: null, timerHandle: null, audioCtx: null, pendingBeep: false };
@@ -1516,8 +2129,10 @@ function setView(view){
   ui.editingPlanRestBlock = null;
   ui.editingRestBlock = null;
   ui.editingTopRest = null;
+  if (view!=='progress'){ ui.viewingPhotoId = null; ui.compareOpen = false; ui.addingPose = false; }
   if (view!=='profile' && view!=='workout') ui.lastTab = view;
   if (view!=='profile') ui.profileMessage = null;
+  ui.photoMessage = null;
   document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b.dataset.tab===view); });
   renderMain();
   renderAvatarButton();
@@ -1528,11 +2143,13 @@ function renderMain(){
     case 'home': renderHome(); break;
     case 'plans': renderPlans(); break;
     case 'exercises': renderExercises(); break;
-    case 'history': renderHistory(); break;
+    case 'progress': renderProgress(); break;
     case 'workout': renderWorkout(); break;
     case 'profile': renderProfile(); break;
   }
   paintCharts();
+  syncPhotoBlur();
+  paintPhotos();
 }
 function updateInProgressBar(){
   var btn = document.getElementById('inprogress-btn');
@@ -1546,10 +2163,16 @@ function updateInProgressBar(){
   /* The round button in the mobile dock resumes a live session, or starts one. */
   var fab = document.getElementById('tab-fab');
   if (fab){
-    fab.dataset.action = data.activeWorkout ? 'resume-workout' : 'start-blank';
+    /* On the Photos pane the round button takes a photo instead - but never at
+       the cost of the way back into a session that is already running. */
+    var shooting = !data.activeWorkout && ui.view==='progress' && progressTab()==='photos'
+                   && !ui.viewingPhotoId && !ui.compareOpen && !ui.viewingWorkoutId;
+    fab.dataset.action = shooting ? 'photo-add' : (data.activeWorkout ? 'resume-workout' : 'start-blank');
     fab.classList.toggle('resuming', !!data.activeWorkout);
-    var label = data.activeWorkout ? 'Resume workout' : 'Start a workout';
+    fab.classList.toggle('shooting', shooting);
+    var label = shooting ? 'Add a progress photo' : (data.activeWorkout ? 'Resume workout' : 'Start a workout');
     fab.title = label; fab.setAttribute('aria-label', label);
+    fab.innerHTML = shooting ? FAB_CAMERA_SVG : FAB_BARBELL_SVG;
   }
 }
 
@@ -2870,16 +3493,180 @@ function renderSetRow(wexIdx, idx, setNumber, wex, set, lastEntry, unit){
   return '<tr>'+cells+'</tr>';
 }
 
-/* -------------------------------------------------------------- history */
 
-function renderHistory(){
+/* ---- the Photos half of the Progress tab -------------------------------- */
+
+function photosBlurred(){ return !!data.settings.blurPhotos && !ui.photosRevealed; }
+function syncPhotoBlur(){ document.body.classList.toggle('photos-hidden', photosBlurred()); }
+
+function poseChipsHTML(){
+  var poses = photoPoses();
+  var all = allPhotos();
+  var html = '<div class="pose-row">';
+  html += '<button class="pose-chip '+(ui.photoPose?'':'active')+'" data-action="photo-pose" data-pose="">All'+
+    '<span class="pose-count">'+all.length+'</span></button>';
+  poses.forEach(function(p){
+    var n = all.filter(function(x){ return x.pose===p.id; }).length;
+    html += '<button class="pose-chip '+(ui.photoPose===p.id?'active':'')+'" data-action="photo-pose" data-pose="'+esc(p.id)+'">'+
+      esc(p.label)+'<span class="pose-count">'+n+'</span></button>';
+  });
+  if (ui.addingPose){
+    html += '<span class="pose-chip"><input class="input" id="new-pose-input" style="margin:0;padding:2px 6px;width:104px;border:none;background:none;" '+
+      'placeholder="Angle name" maxlength="18" data-action-enter="pose-add-commit"></span>'+
+      '<button class="pose-chip" data-action="pose-add-commit">Add</button>'+
+      '<button class="pose-chip" data-action="pose-add-cancel">'+icon('x')+'</button>';
+  } else {
+    html += '<button class="pose-chip add" data-action="pose-add">'+icon('plus')+'Angle</button>';
+  }
+  return html + '</div>';
+}
+
+function photosPaneHTML(){
+  var pose = ui.photoPose;
+  var list = photosFor(pose);
+  var msg = ui.photoMessage;
+  var html = '';
+
+  if (msg) html += '<div class="settings-msg '+(msg.kind==='error'?'error':'ok')+'">'+esc(msg.text)+'</div>';
+
+  html += poseChipsHTML();
+
+  html += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">'+
+    '<button class="btn btn-primary" data-action="photo-add">'+icon('camera')+' Add Photo</button>'+
+    (list.length>1 ? '<button class="btn btn-ghost" data-action="photo-compare-open">'+icon('compare')+' Compare</button>' : '')+
+    (allPhotos().length ? '<span class="photo-storage">'+allPhotos().length+' photo'+(allPhotos().length!==1?'s':'')+' &middot; '+fmtBytes(photoLibraryBytes())+'</span>' : '')+
+  '</div>';
+
+  if (photosBlurred() && list.length){
+    html += '<button class="photo-veil" data-action="photos-reveal">'+icon('eye')+' Photos are hidden &mdash; tap to show</button>';
+  }
+
+  if (!list.length){
+    html += '<div class="empty-state"><p>'+(pose ? 'No '+esc(poseLabel(pose)).toLowerCase()+' photos yet.' : 'No progress photos yet.')+'</p>'+
+      '<p class="empty-sub">Take one from the same spot each time. The previous shot is laid over the frame when you crop, so the angles line up.</p></div>';
+  } else {
+    var lastMonth = null;
+    list.forEach(function(p){
+      var d = parseISO(p.date);
+      var mk = d.getFullYear()+'-'+d.getMonth();
+      if (mk !== lastMonth){
+        if (lastMonth !== null) html += '</div>';
+        html += '<div class="photo-month">'+esc(d.toLocaleDateString(undefined,{month:'long',year:'numeric'}))+'</div><div class="photo-grid">';
+        lastMonth = mk;
+      }
+      html += '<button class="photo-tile" data-action="photo-open" data-id="'+esc(p.id)+'">'+
+        photoImgTag(p.id, 'thumb')+
+        '<span class="photo-tile-meta">'+esc(fmtShortDate(p.date))+
+        '<span class="photo-tile-pose">'+esc(poseLabel(p.pose))+'</span></span></button>';
+    });
+    html += '</div>';
+  }
+
+  html += '<div class="photo-warn"><b>Photos are not in your regular backups.</b> They are stored separately from the rest of your data, '+
+    'so a .json or portable backup skips them unless you tick &ldquo;Include progress photos&rdquo; in Settings. '+
+    'Settings &rarr; Export Progress Photos saves them as a .zip of dated images you can keep anywhere.</div>';
+
+  return html;
+}
+
+function photoDetailHTML(){
+  var p = photoById(ui.viewingPhotoId);
+  if (!p){ ui.viewingPhotoId = null; return photosPaneHTML(); }
+  var sameP = photosFor(p.pose);
+  var idx = sameP.map(function(x){return x.id;}).indexOf(p.id);
+  var newer = idx > 0 ? sameP[idx-1] : null;
+  var older = idx < sameP.length-1 ? sameP[idx+1] : null;
+  var first = sameP[sameP.length-1];
+
+  return '<button class="btn btn-ghost" data-action="photo-close">'+icon('chevronLeft')+' Photos</button>'+
+    (photosBlurred() ? '<button class="photo-veil" style="margin-top:14px;" data-action="photos-reveal">'+icon('eye')+' Photos are hidden &mdash; tap to show</button>' : '')+
+    '<div class="photo-detail-head">'+
+      '<div><div class="photo-detail-date">'+esc(fmtHeaderDate(p.date))+'</div>'+
+        '<div class="photo-detail-sub">'+esc(poseLabel(p.pose))+
+        (first && first.id!==p.id ? ' &middot; '+esc(fmtSpan(p.takenAt-first.takenAt))+' after your first' : ' &middot; your first in this angle')+
+        '</div></div>'+
+      '<button class="btn btn-ghost" data-action="confirm-delete-photo" data-id="'+esc(p.id)+'">'+icon('trash')+' Delete</button>'+
+    '</div>'+
+    '<div class="photo-detail-img">'+photoImgTag(p.id, 'full')+'</div>'+
+    '<div class="photo-nav">'+
+      (older ? '<button class="btn btn-ghost small" data-action="photo-open" data-id="'+esc(older.id)+'">'+icon('chevronLeft')+' '+esc(fmtShortDate(older.date))+'</button>' : '<span></span>')+
+      (sameP.length>1 ? '<button class="btn btn-tag" data-action="photo-compare-open" data-id="'+esc(p.id)+'">'+icon('compare')+' Compare</button>' : '<span></span>')+
+      (newer ? '<button class="btn btn-ghost small" data-action="photo-open" data-id="'+esc(newer.id)+'">'+esc(fmtShortDate(newer.date))+' '+icon('chevronRight')+'</button>' : '<span></span>')+
+    '</div>'+
+    '<label class="field-label">Note <span class="field-optional">Optional</span></label>'+
+    '<input class="input" data-commit="photo-note" data-id="'+esc(p.id)+'" placeholder="Weight, how you felt, anything" value="'+esc(p.note||'')+'" maxlength="140">';
+}
+
+function photoCompareHTML(){
+  var pose = ui.photoPose || (photoById(ui.compareA) || {}).pose || photoPoses()[0].id;
+  var list = photosFor(pose);              /* newest first */
+  if (list.length < 2){
+    ui.compareOpen = false;
+    return photosPaneHTML();
+  }
+  /* default to the widest span available in this angle */
+  var a = photoById(ui.compareA), b = photoById(ui.compareB);
+  if (!a || a.pose!==pose) a = list[list.length-1];
+  if (!b || b.pose!==pose || b.id===a.id) b = list[0];
+  ui.compareA = a.id; ui.compareB = b.id;
+
+  function strip(which, chosen){
+    return '<div class="cmp-strip">' + list.slice().reverse().map(function(p){
+      return '<button class="cmp-thumb '+(p.id===chosen.id?'active':'')+'" data-action="compare-pick" '+
+        'data-side="'+which+'" data-id="'+esc(p.id)+'" title="'+esc(fmtShortDate(p.date))+'">'+
+        photoImgTag(p.id, 'thumb')+'</button>';
+    }).join('') + '</div>';
+  }
+
+  var poses = photoPoses().filter(function(x){ return photosFor(x.id).length >= 2; });
+  var poseRow = poses.length > 1 ? '<div class="pose-row">' + poses.map(function(x){
+      return '<button class="pose-chip '+(x.id===pose?'active':'')+'" data-action="compare-pose" data-pose="'+esc(x.id)+'">'+esc(x.label)+'</button>';
+    }).join('') + '</div>' : '';
+
+  return '<button class="btn btn-ghost" data-action="compare-close">'+icon('chevronLeft')+' Photos</button>'+
+    '<div class="section-title" style="margin-top:16px;"><span>'+esc(poseLabel(pose))+'</span></div>'+
+    poseRow +
+    (photosBlurred() ? '<button class="photo-veil" data-action="photos-reveal">'+icon('eye')+' Photos are hidden &mdash; tap to show</button>' : '')+
+    '<div class="cmp-grid">'+
+      '<div class="cmp-col">'+photoImgTag(a.id,'full')+'<span class="cmp-cap"><b>'+esc(fmtShortDate(a.date))+'</b>'+esc(parseISO(a.date).getFullYear())+'</span></div>'+
+      '<div class="cmp-col">'+photoImgTag(b.id,'full')+'<span class="cmp-cap"><b>'+esc(fmtShortDate(b.date))+'</b>'+esc(parseISO(b.date).getFullYear())+'</span></div>'+
+    '</div>'+
+    '<div class="cmp-gap">'+esc(fmtSpan(Math.abs(b.takenAt-a.takenAt)))+' apart</div>'+
+    '<label class="field-label">Left</label>'+strip('a', a)+
+    '<label class="field-label">Right</label>'+strip('b', b);
+}
+
+/* ---- Progress tab ------------------------------------------------------- */
+
+function progressTab(){
+  var t = data.settings.progressTab;
+  return t==='photos' ? 'photos' : 'sessions';
+}
+function renderProgress(){
   var main = document.getElementById('main');
   if (ui.viewingWorkoutId){
     var w = data.workouts.find(function(x){return x.id===ui.viewingWorkoutId;});
-    if (!w){ ui.viewingWorkoutId = null; renderHistory(); return; }
+    if (!w){ ui.viewingWorkoutId = null; renderProgress(); return; }
     main.innerHTML = renderWorkoutDetailHTML(w);
     return;
   }
+  if (ui.compareOpen){ main.innerHTML = photoCompareHTML(); return; }
+  if (ui.viewingPhotoId){ main.innerHTML = photoDetailHTML(); return; }
+
+  var tab = progressTab();
+  main.innerHTML =
+    '<div class="prog-seg">'+
+      '<button class="'+(tab==='sessions'?'active':'')+'" data-action="progress-tab" data-seg="sessions">'+icon('clock')+'Sessions</button>'+
+      '<button class="'+(tab==='photos'?'active':'')+'" data-action="progress-tab" data-seg="photos">'+icon('camera')+'Photos</button>'+
+    '</div>' +
+    (tab==='photos' ? photosPaneHTML() : sessionsPaneHTML());
+}
+
+/* -------------------------------------------------------------- history */
+
+/* The workout half of the Progress tab. renderProgress() owns the wrapper and
+   the workout-detail case; this only builds the body. */
+function sessionsPaneHTML(){
   var trained = trainedDatesSet();
   var sorted = data.workouts.filter(function(w){return w.completedAt;}).sort(function(a,b){return b.completedAt-a.completedAt;});
   var shown = ui.historyFilterDate ? sorted.filter(function(w){return w.date===ui.historyFilterDate;}) : sorted;
@@ -2906,7 +3693,7 @@ function renderHistory(){
         icon('chevronRight')+'</button>';
     }).join('');
   }
-  main.innerHTML = html;
+  return html;
 }
 
 function renderWorkoutDetailHTML(w){
@@ -3146,6 +3933,13 @@ function renderSettingsModal(){
       '<button class="'+(data.settings.weightUnit==='kg'?'active':'')+'" data-action="unit-kg">kg</button>'+
     '</div></div>'+
 
+    '<div class="settings-row"><div class="settings-row-text"><span>Hide Progress Photos</span>'+
+      '<span class="settings-row-sub">Blurs them until you tap to reveal, for handing your phone to someone</span></div>'+
+      '<div class="segmented">'+
+        '<button class="'+(!data.settings.blurPhotos?'active':'')+'" data-action="blur-photos-toggle" data-on="0">Off</button>'+
+        '<button class="'+(data.settings.blurPhotos?'active':'')+'" data-action="blur-photos-toggle" data-on="1">On</button>'+
+      '</div></div>'+
+
     '<div class="settings-section-label">Backup</div>'+
     '<div class="settings-note">Your data lives in this browser only. Browsers can clear that storage without warning &mdash; on iPhone especially, unless this page is added to your Home Screen.</div>'+
     '<div class="settings-stat">'+countsLine(c)+'<br>'+esc(lastExportLine())+'</div>';
@@ -3177,7 +3971,16 @@ function renderSettingsModal(){
       '</div>'+
     '</div>';
   } else {
-    html += '<div class="settings-row"><div class="settings-row-text"><span>Export Data File</span><span class="settings-row-sub">A small .json backup &mdash; best for regular saves and moving between devices</span></div>'+
+    html += (allPhotos().length
+      ? '<div class="settings-row"><div class="settings-row-text"><span>Include Progress Photos</span>'+
+          '<span class="settings-row-sub">Off keeps backups small and quick. On inlines '+photoBackupNote()+
+          ' into both exports below, so importing that file brings the photos back too</span></div>'+
+        '<div class="segmented">'+
+          '<button class="'+(!ui.backupIncludePhotos?'active':'')+'" data-action="photo-backup-toggle" data-on="0">Off</button>'+
+          '<button class="'+(ui.backupIncludePhotos?'active':'')+'" data-action="photo-backup-toggle" data-on="1">On</button>'+
+        '</div></div>'
+      : '')+
+    '<div class="settings-row"><div class="settings-row-text"><span>Export Data File</span><span class="settings-row-sub">A small .json backup &mdash; best for regular saves and moving between devices</span></div>'+
       '<div class="settings-row-actions">'+
         (sharing ? '<button class="btn btn-ghost" data-action="share-json">Share</button>' : '')+
         '<button class="btn btn-ghost" data-action="export-json">Save</button>'+
@@ -3189,6 +3992,19 @@ function renderSettingsModal(){
       '</div></div>'+
     '<div class="settings-row"><div class="settings-row-text"><span>Import Backup</span><span class="settings-row-sub">Accepts .json or a portable .html &mdash; you choose merge or replace next</span></div>'+
       '<button class="btn btn-ghost" data-action="import-pick">Import</button></div>';
+
+    if (allPhotos().length){
+      html += '<div class="settings-section-label">Progress Photos</div>'+
+        '<div class="settings-note">Photos live in their own store, not in the data blob above, which is what keeps logging a set fast. '+
+          'That also means a backup skips them unless you switch the toggle on.</div>'+
+        '<div class="settings-stat">'+photoBackupNote()+'</div>'+
+        '<div class="settings-row"><div class="settings-row-text"><span>Export Progress Photos</span>'+
+          '<span class="settings-row-sub">A .zip of dated .jpg files for your photo library or computer &mdash; an archive to keep, not a file the app reads back</span></div>'+
+          '<div class="settings-row-actions">'+
+            (sharing ? '<button class="btn btn-ghost" data-action="share-photos">Share</button>' : '')+
+            '<button class="btn btn-ghost" data-action="export-photos">Save</button>'+
+          '</div></div>';
+    }
   }
 
   html += '<div class="settings-section-label">Danger Zone</div>'+
@@ -3250,7 +4066,10 @@ function handleAction(action, el){
     case 'resume-workout': setView('workout'); break;
     case 'start-plan': startFromPlan(el.dataset.id); break;
     case 'goto-plans': setView('plans'); break;
-    case 'goto-history': setView('history'); break;
+    case 'goto-history':
+      data.settings.progressTab = 'sessions'; save();
+      setView('progress');
+      break;
 
     case 'new-plan': {
       var p = { id: uid('plan'), name: 'New Plan', items: [] };
@@ -3588,6 +4407,7 @@ function handleAction(action, el){
     case 'crop-zoom-in': if (cropper) setCropZoom(cropper.z * 1.2); break;
     case 'crop-zoom-out': if (cropper) setCropZoom(cropper.z / 1.2); break;
     case 'crop-save': {
+      if (cropper && cropper.mode==='photo'){ commitPhotoCrop(); break; }
       var cropped = commitCrop();
       if (cropped.error){
         ui.profileMessage = { kind:'error', text: cropped.error };
@@ -3619,38 +4439,48 @@ function handleAction(action, el){
     case 'unit-kg': data.settings.weightUnit='kg'; save(); renderSettingsModal(); renderMain(); break;
 
     case 'export-json': {
-      var okJson = exportJSON();
-      ui.settingsMessage = okJson
-        ? { kind:'ok', text:'Backup saved. Move it somewhere that is not this browser \u2014 Files, iCloud Drive, or your computer.' }
-        : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
-      renderSettingsModal();
-      break;
-    }
-    case 'export-html': {
-      var okHtml = exportPortable();
-      ui.settingsMessage = okHtml
-        ? { kind:'ok', text:'Portable copy saved. Opening that file gives you the app with this data already in it, with no internet needed.' }
-        : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
-      renderSettingsModal();
-      break;
-    }
-    case 'share-json': {
-      shareFile(jsonBackupName(), 'application/json', jsonBackupText(), function(sent){
-        if (sent){
-          markExported();
-          ui.settingsMessage = { kind:'ok', text:'Backup shared.' };
-        }
+      exportJSON(function(okJson){
+        ui.settingsMessage = okJson
+          ? { kind:'ok', text:'Backup saved. Move it somewhere that is not this browser \u2014 Files, iCloud Drive, or your computer.' }
+          : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
         renderSettingsModal();
       });
       break;
     }
-    case 'share-html': {
-      shareFile(portableBackupName(), 'text/html', buildPortableHTML(), function(sent){
-        if (sent){
-          markExported();
-          ui.settingsMessage = { kind:'ok', text:'Portable copy shared.' };
-        }
+    case 'export-html': {
+      exportPortable(function(okHtml){
+        ui.settingsMessage = okHtml
+          ? { kind:'ok', text:'Portable copy saved. Opening that file gives you the app with this data already in it, with no internet needed.' }
+          : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
         renderSettingsModal();
+      });
+      break;
+    }
+    case 'share-json': {
+      stagePhotoBlobs(includePhotosInBackup(), function(){
+        var jsonText = jsonBackupText();
+        pendingPhotoBlobs = null;
+        shareFile(jsonBackupName(), 'application/json', jsonText, function(sent){
+          if (sent){
+            markExported();
+            ui.settingsMessage = { kind:'ok', text:'Backup shared.' };
+          }
+          renderSettingsModal();
+        });
+      });
+      break;
+    }
+    case 'share-html': {
+      stagePhotoBlobs(includePhotosInBackup(), function(){
+        var htmlText = buildPortableHTML();
+        pendingPhotoBlobs = null;
+        shareFile(portableBackupName(), 'text/html', htmlText, function(sent){
+          if (sent){
+            markExported();
+            ui.settingsMessage = { kind:'ok', text:'Portable copy shared.' };
+          }
+          renderSettingsModal();
+        });
       });
       break;
     }
@@ -3660,8 +4490,7 @@ function handleAction(action, el){
       break;
     case 'backup-nudge-export':
       data.backupNudgeDismissedAt = Date.now();
-      exportJSON();
-      renderMain();
+      exportJSON(function(){ renderMain(); });
       break;
     case 'import-pick': {
       var fi = document.getElementById('import-file-input');
@@ -3707,6 +4536,7 @@ function handleAction(action, el){
 
     case 'confirm-reset-data': armOrConfirm(el, function(){
       data = defaultData(); save();
+      reconcilePhotoStore();   /* metadata is empty now, so this empties the store */
       ui.importPreview = null; ui.settingsMessage = null;
       document.getElementById('settings-modal').hidden = true;
       setView('home');
@@ -3738,6 +4568,116 @@ function handleAction(action, el){
     case 'timer-dismiss':
       clearRestTimer();
       break;
+
+    case 'progress-tab': {
+      data.settings.progressTab = el.dataset.seg==='photos' ? 'photos' : 'sessions';
+      ui.viewingWorkoutId = null;
+      ui.photoMessage = null;
+      save(); renderMain(); updateInProgressBar();
+      break;
+    }
+    case 'photo-add': {
+      if (ui.view!=='progress' || progressTab()!=='photos'){
+        data.settings.progressTab = 'photos'; save();
+        if (ui.view!=='progress') setView('progress'); else renderMain();
+      }
+      startPhotoCapture(ui.photoPose);
+      break;
+    }
+    case 'photo-pose':
+      ui.photoPose = el.dataset.pose || null;
+      ui.addingPose = false;
+      renderMain();
+      break;
+    case 'pose-add': {
+      ui.addingPose = true; renderMain();
+      var poseInput = document.getElementById('new-pose-input');
+      if (poseInput) poseInput.focus();
+      break;
+    }
+    case 'pose-add-cancel': ui.addingPose = false; renderMain(); break;
+    case 'pose-add-commit': {
+      var npi = document.getElementById('new-pose-input');
+      var poseName = npi ? npi.value.trim().slice(0,18) : '';
+      ui.addingPose = false;
+      if (poseName){
+        var pid = poseName.toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') || uid('pose');
+        if (!photoPoses().filter(function(x){ return x.id===pid; }).length){
+          photoPoses().push({ id: pid, label: poseName });
+          save();
+        }
+        ui.photoPose = pid;
+      }
+      renderMain();
+      break;
+    }
+    case 'photo-open':
+      ui.viewingPhotoId = el.dataset.id; ui.compareOpen = false;
+      renderMain(); updateInProgressBar();
+      break;
+    case 'photo-close': ui.viewingPhotoId = null; renderMain(); updateInProgressBar(); break;
+    case 'photos-reveal': ui.photosRevealed = true; renderMain(); break;
+    case 'photo-compare-open': {
+      var seedPhoto = el.dataset.id ? photoById(el.dataset.id) : null;
+      if (seedPhoto){ ui.photoPose = seedPhoto.pose; ui.compareB = seedPhoto.id; ui.compareA = null; }
+      ui.viewingPhotoId = null;
+      ui.compareOpen = true;
+      renderMain(); updateInProgressBar();
+      break;
+    }
+    case 'compare-close': ui.compareOpen = false; renderMain(); updateInProgressBar(); break;
+    case 'compare-pose':
+      ui.photoPose = el.dataset.pose; ui.compareA = null; ui.compareB = null;
+      renderMain();
+      break;
+    case 'compare-pick':
+      if (el.dataset.side==='a') ui.compareA = el.dataset.id; else ui.compareB = el.dataset.id;
+      renderMain();
+      break;
+    case 'confirm-delete-photo': armOrConfirm(el, function(){ deletePhoto(el.dataset.id); }); break;
+
+    case 'photo-backup-toggle':
+      ui.backupIncludePhotos = el.dataset.on === '1';
+      renderSettingsModal();
+      break;
+    case 'blur-photos-toggle':
+      data.settings.blurPhotos = el.dataset.on === '1';
+      if (!data.settings.blurPhotos) ui.photosRevealed = false;
+      save(); renderSettingsModal(); renderMain();
+      break;
+    case 'export-photos': {
+      ui.settingsMessage = { kind:'ok', text:'Packing your photos\u2026' };
+      renderSettingsModal();
+      buildPhotosZip(function(bytes){
+        if (!bytes){
+          ui.settingsMessage = { kind:'error', text:'Could not build the photo archive.' };
+        } else {
+          ui.settingsMessage = downloadFile(photosZipName(), 'application/zip', bytes)
+            ? { kind:'ok', text:'Photo archive saved \u2014 dated .jpg files in a .zip. It is for keeping, not for importing back.' }
+            : { kind:'error', text:'Could not create the file.' };
+        }
+        renderSettingsModal();
+      });
+      break;
+    }
+    case 'share-photos': {
+      ui.settingsMessage = { kind:'ok', text:'Packing your photos\u2026' };
+      renderSettingsModal();
+      buildPhotosZip(function(bytes){
+        if (!bytes){
+          ui.settingsMessage = { kind:'error', text:'Could not build the photo archive.' };
+          renderSettingsModal();
+          return;
+        }
+        ui.settingsMessage = null;
+        renderSettingsModal();
+        shareFile(photosZipName(), 'application/zip', bytes, function(sent){
+          if (sent) ui.settingsMessage = { kind:'ok', text:'Photo archive shared.' };
+          renderSettingsModal();
+        });
+      });
+      break;
+    }
 
     case 'heatmap-day-click':
       ui.historyFilterDate = (ui.historyFilterDate === el.dataset.date) ? null : el.dataset.date;
@@ -3807,6 +4747,11 @@ function onFocusOut(e){
       if (pu.username && !pu.createdAt) pu.createdAt = Date.now();
       t.value = pu.username;
       save(); renderAvatarButton();
+      break;
+    }
+    case 'photo-note': {
+      var ph = photoById(t.dataset.id);
+      if (ph){ ph.note = t.value.trim().slice(0,140); t.value = ph.note; save(); }
       break;
     }
     case 'plan-category-name': {
@@ -3900,6 +4845,23 @@ function onChange(e){
         return;
       }
       openCropper(res.img);
+    });
+    return;
+  }
+  if (e.target.id==='photo-file-input'){
+    var picFile = e.target.files && e.target.files[0];
+    e.target.value = '';
+    if (!picFile) return;
+    var pose = ui.photoDraftPose || photoPoses()[0].id;
+    loadImageFromFile(picFile, function(res){
+      if (res.error){
+        ui.photoMessage = { kind:'error', text: res.error };
+        renderMain();
+        return;
+      }
+      loadPoseGhost(pose, function(ghost){
+        openCropper(res.img, { mode:'photo', pose: pose, ghost: ghost });
+      });
     });
     return;
   }

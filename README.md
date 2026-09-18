@@ -8,6 +8,10 @@ skill holds, breakdance. Every exercise defines its own tracking fields
 (weight, reps, measured time, RIR/RPE, or anything custom), so a bench press
 and a handstand hold are the same kind of object.
 
+Progress photos live under **Progress → Photos**, tagged by angle (front, side,
+back, or your own). When you crop a new one, the last shot in that angle is
+laid over the frame so the months actually line up.
+
 **Live:** https://neirko.github.io/athleticism/
 
 ---
@@ -110,6 +114,19 @@ entered on:
 | Laptop browser | `neirko.github.io` |
 | iPhone home screen | same origin, same store as Safari |
 | Android APK | the app's own WebView storage |
+
+Progress photos are the one exception to "it's all one blob". Everything else
+is a single JSON string in `localStorage`, which `save()` rewrites every time
+you tick off a set — fine for text, hopeless for images, and `localStorage`
+tops out around 5MB anyway. So photo **metadata** (date, angle, note) stays in
+that blob, and the JPEGs themselves go in **IndexedDB** under
+`athleticism_photos`, where the quota is far larger. Two consequences:
+
+- A `.json` or portable `.html` backup **skips photos** unless you switch
+  *Settings → Include Progress Photos* on, which inlines them as base64. Off is
+  the default, because on turns a backup you can email into one you can't.
+- *Settings → Export Progress Photos* writes a `.zip` of dated `.jpg` files.
+  That one is an archive for your photo library — the app does not read it back.
 
 So the phone app and the laptop do **not** share data, and changing the site
 address orphans anything already logged. Moving between them is what
