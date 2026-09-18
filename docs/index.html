@@ -490,7 +490,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .brand svg{width:30px;height:30px;}
   .tabs{position:fixed;left:0;right:0;bottom:0;z-index:45;gap:0;
     background:var(--surface);border-top:2px solid var(--border);
-    padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+    padding:6px 2px calc(6px + env(safe-area-inset-bottom));
     box-shadow:0 -6px 20px rgba(42,34,51,.07);
     transition:transform .2s ease,opacity .2s ease;}
   /* Typing: the dock would only be a second bar stacked on the keyboard, and
@@ -498,9 +498,13 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   body.kb-open .tabs{transform:translateY(120%);opacity:0;pointer-events:none;}
   body.kb-open .timerbar{bottom:0;padding-bottom:env(safe-area-inset-bottom);}
   body.kb-open .main{padding-bottom:calc(28px + env(safe-area-inset-bottom));}
-  .tab-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px;
-    margin:0 2px;font-size:11px;font-weight:800;border-radius:14px;
+  /* min-width:0 so flex:1 really does divide the dock evenly - without it a
+     long label floors its own button and shoves the last tab off the edge
+     once the system font scale grows. The label then truncates in place. */
+  .tab-btn{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 1px;
+    margin:0 1px;font-size:11px;font-weight:800;border-radius:14px;
     transition:background .14s ease,color .14s ease;}
+  .tab-btn > span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
   /* colour alone is easy to miss at a glance on a dock, so the live tab also
      carries the same soft pill the desktop tabs use */
   .tab-btn.active{background:var(--accent-soft);color:var(--accent-deep);}
@@ -512,7 +516,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .tab-btn[data-tab="exercises"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.2%209.4v5.2M6.6%206.6v10.8M17.4%206.6v10.8M20.8%209.4v5.2M6.6%2012h10.8%22%2F%3E%3C%2Fsvg%3E");}
   .tab-btn[data-tab="progress"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.4%2016.6%209%2011l3.6%203.6L20.6%206.6%22%2F%3E%3Cpath%20d%3D%22M15.4%206.6h5.2v5.2%22%2F%3E%3Cpath%20d%3D%22M3.4%2020.6h17.2%22%2F%3E%3C%2Fsvg%3E");}
   .tab-fab{display:flex;align-items:center;justify-content:center;width:60px;height:60px;flex-shrink:0;
-    margin:-26px 6px 0;border:4px solid var(--surface);border-radius:50%;background:var(--accent);color:#fff;
+    margin:-26px 4px 0;border:4px solid var(--surface);border-radius:50%;background:var(--accent);color:#fff;
     box-shadow:0 4px 0 var(--accent-deep);transition:transform .08s ease,box-shadow .08s ease;}
   .tab-fab svg{width:27px;height:27px;}
   .tab-fab:active{transform:translateY(4px);box-shadow:none;}
@@ -545,10 +549,21 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .num-input{min-width:0;max-width:none;padding:9px 4px;}
   .rest-pill{padding:4px 7px;font-size:12px;}
   .workout-head{flex-direction:column;align-items:stretch;gap:10px;}
-  /* three items plus gaps overran 360px-wide screens by a hair - enough for
-     Finish Workout to lose its right margin against the edge */
-  .workout-head-right{justify-content:space-between;gap:8px;}
-  .workout-head-right .btn{padding-left:14px;padding-right:14px;}
+  /* Stacked, these two are stretched to the column's width - but a stretched
+     flex item still reports the intrinsic width of the text input inside it,
+     which grows with the system font scale and drags the row past the screen.
+     A definite width gives the input something to shrink against. */
+  .workout-head-left,.workout-head-right{width:100%;}
+  /* Android applies the system font-size setting to the WebView: the text
+     grows but the viewport does not, so a row merely tuned to fit at 100%
+     overran the screen the moment anyone chose "Large". A grid instead of a
+     tuned flex row - the columns may shrink below their content and the
+     labels wrap to a second line, so the row gets taller under big text
+     rather than wider than the phone. */
+  .workout-head-right{display:grid;gap:8px;align-items:stretch;
+    grid-template-columns:minmax(0,auto) minmax(0,auto) minmax(0,1fr);}
+  .workout-head-right .btn{min-width:0;justify-content:center;text-align:center;
+    padding-left:12px;padding-right:12px;white-space:normal;line-height:1.2;}
   .workout-head-left .title-input{font-size:21px;min-width:0;}
   .section-title{font-size:17px;}
 }
@@ -702,11 +717,11 @@ body.photos-hidden .photo-veil{display:flex;}
   <div class="topbar-inner">
     <div class="brand"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="55 0 90 104"><ellipse cx="72" cy="25" rx="10.5" ry="23" transform="rotate(-15 72 25)" fill="#7C88C0"/><ellipse cx="73" cy="28" rx="5" ry="14" transform="rotate(-15 73 28)" fill="#FFC2AC"/><ellipse cx="128" cy="25" rx="10.5" ry="23" transform="rotate(15 128 25)" fill="#7C88C0"/><ellipse cx="127" cy="28" rx="5" ry="14" transform="rotate(15 127 28)" fill="#FFC2AC"/><ellipse cx="100" cy="64" rx="41" ry="36" fill="#7C88C0"/><path d="M66.5 42.5A41 36 0 0 1 77 32h46a41 36 0 0 1 10.5 10.5c-15.5 3-51.5 3-67 0z" fill="#FF6A3D"/><path d="M70.5 37.8A41 36 0 0 1 77 32h46a41 36 0 0 1 6.5 5.8c-12.5-2.2-46.5-2.2-59 0z" fill="#FFD3BC"/><ellipse cx="100" cy="80" rx="24.5" ry="17.5" fill="#FFF1DE"/><ellipse cx="100" cy="70" rx="7.5" ry="5.5" fill="#2A2233"/><path d="M100 75.5v4" stroke="#2A2233" stroke-width="3" stroke-linecap="round"/><path d="M100 79.5q-7 7-13 1" stroke="#2A2233" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M100 79.5q7 7 13 1" stroke="#2A2233" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="82" cy="57" r="7.5" fill="#2A2233"/><circle cx="84.8" cy="54" r="2.7" fill="#fff"/><circle cx="118" cy="57" r="7.5" fill="#2A2233"/><circle cx="120.8" cy="54" r="2.7" fill="#fff"/><ellipse cx="67" cy="72" rx="8" ry="5" fill="#FF6A3D" opacity=".28"/><ellipse cx="133" cy="72" rx="8" ry="5" fill="#FF6A3D" opacity=".28"/></svg>Athleticism</div>
     <nav class="tabs" id="tabs">
-      <button class="tab-btn" data-tab="home">Home</button>
-      <button class="tab-btn" data-tab="plans">Plans</button>
+      <button class="tab-btn" data-tab="home"><span>Home</span></button>
+      <button class="tab-btn" data-tab="plans"><span>Plans</span></button>
       <button class="tab-fab" id="tab-fab" data-action="start-blank" title="Start a workout" aria-label="Start a workout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M3.2 9.4v5.2M6.6 6.6v10.8M17.4 6.6v10.8M20.8 9.4v5.2M6.6 12h10.8"/></svg></button>
-      <button class="tab-btn" data-tab="exercises">Exercises</button>
-      <button class="tab-btn" data-tab="progress">Progress</button>
+      <button class="tab-btn" data-tab="exercises"><span>Exercises</span></button>
+      <button class="tab-btn" data-tab="progress"><span>Progress</span></button>
     </nav>
     <div class="topbar-right">
       <button id="inprogress-btn" class="inprogress-pill" data-action="resume-workout" hidden></button>
