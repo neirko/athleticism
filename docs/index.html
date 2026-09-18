@@ -660,6 +660,7 @@ body.photos-hidden .photo-veil{display:flex;}
 .photo-warn{background:var(--surface-2);border:2px solid var(--border);border-radius:var(--radius-md);
   padding:13px 15px;font-size:12.5px;font-weight:700;color:var(--text-dim);line-height:1.55;margin-bottom:16px;}
 .photo-warn b{color:var(--text);font-weight:800;}
+.photo-warn-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
 
 /* portrait crop stage, used by progress photos rather than the round avatar */
 .crop-stage.portrait{border-radius:var(--radius-md);}
@@ -763,6 +764,7 @@ var ICONS = {
   grip:'<svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></svg>',
   user:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
   camera:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+  download:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15.2V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3.8"/><polyline points="7.5 10.5 12 15 16.5 10.5"/><path d="M12 15V3.4"/></svg>',
   clock:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.2 2"/></svg>',
   eye:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3.2"/></svg>',
   compare:'<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.6" y="4.4" width="7.6" height="15.2" rx="1.8"/><rect x="13.8" y="4.4" width="7.6" height="15.2" rx="1.8"/><path d="M12 2.4v19.2"/></svg>',
@@ -1300,6 +1302,11 @@ function photosFor(poseId){
   return allPhotos().filter(function(p){ return !poseId || p.pose===poseId; })
     .sort(function(a,b){ return b.takenAt - a.takenAt; });
 }
+/* Comparing needs two shots of the SAME angle, so this is what decides
+   whether the button is worth offering at all. */
+function posesWithPairs(){
+  return photoPoses().filter(function(p){ return photosFor(p.id).length >= 2; });
+}
 function photoById(id){ return allPhotos().filter(function(p){ return p.id===id; })[0] || null; }
 
 /* ---- IndexedDB ---------------------------------------------------------- */
@@ -1615,6 +1622,34 @@ function photoFileName(p){
   return p.date + '-' + safe + '-' + p.id.slice(-4) + '.jpg';
 }
 function photosZipName(){ return 'athleticism-photos-'+backupStamp()+'.zip'; }
+/* Reachable from two places - the Photos pane and Settings - so the work
+   lives here and each caller says only where to put the message. */
+function runPhotoZipExport(report){
+  report({ kind:'ok', text:'Packing your photos\u2026' });
+  buildPhotosZip(function(bytes){
+    if (!bytes){ report({ kind:'error', text:'Could not build the photo archive.' }); return; }
+    var ok = downloadFile(photosZipName(), 'application/zip', bytes);
+    if (ok) markPhotosExported();
+    report(ok
+      ? { kind:'ok', text:'Photo archive saved \u2014 dated .jpg files in a .zip. It is for keeping, not for importing back.' }
+      : { kind:'error', text:'Could not create the file.' });
+  });
+}
+function runPhotoZipShare(report){
+  report({ kind:'ok', text:'Packing your photos\u2026' });
+  buildPhotosZip(function(bytes){
+    if (!bytes){ report({ kind:'error', text:'Could not build the photo archive.' }); return; }
+    report(null);
+    shareFile(photosZipName(), 'application/zip', bytes, function(sent){
+      if (sent){
+        markPhotosExported();
+        report({ kind:'ok', text:'Photo archive shared.' });
+      } else {
+        report(null);
+      }
+    });
+  });
+}
 /* cb(Uint8Array|null) */
 function buildPhotosZip(cb){
   var metas = allPhotos().slice().sort(function(a,b){ return a.takenAt - b.takenAt; });
@@ -1857,8 +1892,12 @@ function openCropper(img, opts){
       '<canvas id="crop-canvas" style="width:'+size.w+'px;height:'+size.h+'px"></canvas>'+
       '<div class="crop-mask'+(isPhoto?' rect':'')+'"></div></div>'+
     '<div class="crop-hint">'+
-      (cropper.ghost ? 'Your last '+esc(poseLabel(cropper.pose)).toLowerCase()+' shot is laid over the frame. Line yourself up with it.'
-                     : 'Drag to reposition. Pinch or use the slider to zoom.')+
+      (cropper.ghost
+        ? 'Your last '+esc(poseLabel(cropper.pose)).toLowerCase()+' shot is laid over the frame. Line yourself up with it.'
+        : isPhoto
+          /* with the filter on "All" the angle is chosen for you, so say so */
+          ? 'Saving to '+esc(poseLabel(cropper.pose))+'. Drag to reposition, pinch or use the slider to zoom.'
+          : 'Drag to reposition. Pinch or use the slider to zoom.')+
     '</div>'+
     '<div class="crop-zoom-row">'+
       '<button class="icon-btn" data-action="crop-zoom-out" title="Zoom out">&minus;</button>'+
@@ -3592,7 +3631,10 @@ function photosPaneHTML(){
 
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;">'+
     '<button class="btn btn-primary" data-action="photo-add">'+icon('camera')+' Add Photo</button>'+
-    (list.length>1 ? '<button class="btn btn-ghost" data-action="photo-compare-open">'+icon('compare')+' Compare</button>' : '')+
+    /* under "All" the filtered count says nothing about whether any single
+       angle has two shots, which is what comparing actually needs */
+    ((pose ? list.length>1 : posesWithPairs().length>0)
+      ? '<button class="btn btn-ghost" data-action="photo-compare-open">'+icon('compare')+' Compare</button>' : '')+
     (allPhotos().length ? '<span class="photo-storage">'+allPhotos().length+' photo'+(allPhotos().length!==1?'s':'')+' &middot; '+fmtBytes(photoLibraryBytes())+'</span>' : '')+
   '</div>';
 
@@ -3621,9 +3663,22 @@ function photosPaneHTML(){
     html += '</div>';
   }
 
-  html += '<div class="photo-warn"><b>Photos are not in your regular backups.</b> They are stored separately from the rest of your data, '+
-    'so a .json or portable backup skips them unless you tick &ldquo;Include progress photos&rdquo; in Settings. '+
-    'Settings &rarr; Export Progress Photos saves them as a .zip of dated images you can keep anywhere.</div>';
+  /* Both controls this points at are themselves hidden until a photo exists,
+     so showing it to an empty gallery would send you somewhere with nothing
+     in it. */
+  /* The explanation used to point at Settings for the archive, which meant
+     hunting for a row that is itself hidden until a photo exists. The button
+     belongs next to the sentence that mentions it. */
+  if (allPhotos().length){
+    html += '<div class="photo-warn"><b>Photos are not in your regular backups.</b> They are stored separately from the rest of your data, '+
+      'so a .json or portable backup skips them unless you switch on &ldquo;Include Progress Photos&rdquo; under Settings &rarr; Backup. '+
+      'Or keep them as dated images anywhere you like:'+
+      '<div class="photo-warn-actions">'+
+        '<button class="btn btn-ghost small" data-action="photo-zip-save">'+icon('download')+' Export Photos (.zip)</button>'+
+        (canShareFiles() ? '<button class="btn btn-ghost small" data-action="photo-zip-share">Share</button>' : '')+
+      '</div>'+
+    '</div>';
+  }
 
   return html;
 }
@@ -3662,12 +3717,16 @@ function compareSpanLabel(a, b){
   return txt === 'same day' ? 'Taken the same day' : txt + ' apart';
 }
 function photoCompareHTML(){
-  var pose = ui.photoPose || (photoById(ui.compareA) || {}).pose || photoPoses()[0].id;
-  var list = photosFor(pose);              /* newest first */
-  if (list.length < 2){
-    ui.compareOpen = false;
-    return photosPaneHTML();
+  var pairs = posesWithPairs();
+  if (!pairs.length){ ui.compareOpen = false; return photosPaneHTML(); }
+  /* the filter may be on "All", or on an angle holding a single shot, so
+     fall through to one that can actually be compared */
+  var pose = ui.photoPose;
+  if (!pose || photosFor(pose).length < 2){
+    var seeded = (photoById(ui.compareA) || {}).pose;
+    pose = (seeded && photosFor(seeded).length >= 2) ? seeded : pairs[0].id;
   }
+  var list = photosFor(pose);              /* newest first */
   /* default to the widest span available in this angle */
   var a = photoById(ui.compareA), b = photoById(ui.compareB);
   if (!a || a.pose!==pose) a = list[list.length-1];
@@ -4758,44 +4817,18 @@ function handleAction(action, el){
       if (!data.settings.blurPhotos) ui.photosRevealed = false;
       save(); renderSettingsModal(); renderMain();
       break;
-    case 'export-photos': {
-      ui.settingsMessage = { kind:'ok', text:'Packing your photos\u2026' };
-      renderSettingsModal();
-      buildPhotosZip(function(bytes){
-        if (!bytes){
-          ui.settingsMessage = { kind:'error', text:'Could not build the photo archive.' };
-        } else {
-          var zipOk = downloadFile(photosZipName(), 'application/zip', bytes);
-          if (zipOk) markPhotosExported();
-          ui.settingsMessage = zipOk
-            ? { kind:'ok', text:'Photo archive saved \u2014 dated .jpg files in a .zip. It is for keeping, not for importing back.' }
-            : { kind:'error', text:'Could not create the file.' };
-        }
-        renderSettingsModal();
-      });
+    case 'export-photos':
+      runPhotoZipExport(function(m){ ui.settingsMessage = m; renderSettingsModal(); });
       break;
-    }
-    case 'share-photos': {
-      ui.settingsMessage = { kind:'ok', text:'Packing your photos\u2026' };
-      renderSettingsModal();
-      buildPhotosZip(function(bytes){
-        if (!bytes){
-          ui.settingsMessage = { kind:'error', text:'Could not build the photo archive.' };
-          renderSettingsModal();
-          return;
-        }
-        ui.settingsMessage = null;
-        renderSettingsModal();
-        shareFile(photosZipName(), 'application/zip', bytes, function(sent){
-          if (sent){
-            markPhotosExported();
-            ui.settingsMessage = { kind:'ok', text:'Photo archive shared.' };
-          }
-          renderSettingsModal();
-        });
-      });
+    case 'share-photos':
+      runPhotoZipShare(function(m){ ui.settingsMessage = m; renderSettingsModal(); });
       break;
-    }
+    case 'photo-zip-save':
+      runPhotoZipExport(function(m){ ui.photoMessage = m; renderMain(); });
+      break;
+    case 'photo-zip-share':
+      runPhotoZipShare(function(m){ ui.photoMessage = m; renderMain(); });
+      break;
 
     case 'heatmap-day-click':
       ui.historyFilterDate = (ui.historyFilterDate === el.dataset.date) ? null : el.dataset.date;
