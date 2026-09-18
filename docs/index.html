@@ -3663,12 +3663,10 @@ function photosPaneHTML(){
     html += '</div>';
   }
 
-  /* Both controls this points at are themselves hidden until a photo exists,
-     so showing it to an empty gallery would send you somewhere with nothing
-     in it. */
-  /* The explanation used to point at Settings for the archive, which meant
-     hunting for a row that is itself hidden until a photo exists. The button
-     belongs next to the sentence that mentions it. */
+  /* The archive button sits here rather than only in Settings: that row is
+     itself hidden until a photo exists, so a notice pointing at it sent you
+     hunting for something that was not there. Still gated on having photos,
+     because there is nothing to warn about, or export, before then. */
   if (allPhotos().length){
     html += '<div class="photo-warn"><b>Photos are not in your regular backups.</b> They are stored separately from the rest of your data, '+
       'so a .json or portable backup skips them unless you switch on &ldquo;Include Progress Photos&rdquo; under Settings &rarr; Backup. '+
