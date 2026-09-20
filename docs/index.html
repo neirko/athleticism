@@ -1585,31 +1585,52 @@ function normaliseExerciseName(s){
   return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
 }
 
-/* Exact match first, then longest whole-word match inside the typed name, so
-   "Weighted Barbell Bench Press" still finds "bench press". The squashed
-   pass makes "pushup", "push-up" and "push up" the same thing. */
+/* Keys with their spaces closed up, so "push up" can be found by someone who
+   typed "pushup". Longest original key wins a collision. */
+var SQUASHED_MUSCLE_LOOKUP = (function(){
+  var map = {}, k, sq;
+  for (k in EXERCISE_MUSCLE_LOOKUP){
+    sq = k.replace(/ /g,'');
+    if (!map[sq] || map[sq].key.length < k.length) map[sq] = { key: k, hit: EXERCISE_MUSCLE_LOOKUP[k] };
+  }
+  return map;
+})();
+
+/* Exact match, then the longest whole phrase inside the typed name, so
+   "Weighted Barbell Bench Press" still finds "bench press".
+
+   The last pass closes up spaces to make "pushup", "push-up" and "push up"
+   one thing - but only across runs of WHOLE words. Searching the closed-up
+   name for a closed-up key as a plain substring finds "run" inside "trunk
+   rotation" and "rdl" inside "hurdle jump", and a confidently wrong
+   auto-fill is worse than none at all. */
 function lookupExerciseMuscles(name){
   var n = normaliseExerciseName(name);
   if (!n) return null;
   if (EXERCISE_MUSCLE_LOOKUP[n]) return EXERCISE_MUSCLE_LOOKUP[n];
 
-  var squashed = n.replace(/ /g,'');
   var best = null, bestLen = 0, k;
-  for (k in EXERCISE_MUSCLE_LOOKUP){
-    if (k.replace(/ /g,'') === squashed) return EXERCISE_MUSCLE_LOOKUP[k];
-  }
   for (k in EXERCISE_MUSCLE_LOOKUP){
     if (k.length > bestLen && (' '+n+' ').indexOf(' '+k+' ') >= 0){
       best = EXERCISE_MUSCLE_LOOKUP[k]; bestLen = k.length;
     }
   }
   if (best) return best;
-  for (k in EXERCISE_MUSCLE_LOOKUP){
-    if (k.length > bestLen && squashed.indexOf(k.replace(/ /g,'')) >= 0){
-      best = EXERCISE_MUSCLE_LOOKUP[k]; bestLen = k.length;
+
+  var words = n.split(' ');
+  for (var len = words.length; len >= 1; len--){
+    for (var i = 0; i + len <= words.length; i++){
+      var cand = words.slice(i, i + len).join('');
+      var tries = [cand];
+      /* "crunches" -> "crunch", "dips" -> "dip" */
+      if (cand.length > 3 && cand.slice(-2) === 'es') tries.push(cand.slice(0, -2));
+      if (cand.length > 2 && cand.slice(-1) === 's') tries.push(cand.slice(0, -1));
+      for (var t = 0; t < tries.length; t++){
+        if (SQUASHED_MUSCLE_LOOKUP[tries[t]]) return SQUASHED_MUSCLE_LOOKUP[tries[t]].hit;
+      }
     }
   }
-  return best;
+  return null;
 }
 
 /* ---- Migration ----------------------------------------------------------
@@ -3979,10 +4000,12 @@ function muscleMapSectionHTML(mode, raw, opts){
 }
 
 function planMuscleMapHTML(plan){
+  var exerciseItems = (plan.items||[]).filter(function(it){ return itemKind(it)==='exercise'; });
+  /* an empty plan already has its own empty state; a second card saying the
+     exercises are untagged, about no exercises, is just noise */
+  if (!exerciseItems.length) return '';
   var raw = planRawScores(plan);
-  var anyTagged = (plan.items||[]).some(function(it){
-    return itemKind(it)==='exercise' && hasMuscleData(exerciseById(it.exerciseId));
-  });
+  var anyTagged = exerciseItems.some(function(it){ return hasMuscleData(exerciseById(it.exerciseId)); });
   return muscleMapSectionHTML('workout', raw, {
     title: 'Muscle Coverage',
     sub: 'this plan',
