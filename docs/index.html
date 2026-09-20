@@ -5266,6 +5266,7 @@ function lastExportLine(){
 function closeSettings(){
   ui.importPreview = null;
   ui.settingsMessage = null;
+  ui.aboutOpen = null;   /* reopen compact, not on a wall of prose */
   document.getElementById('settings-modal').hidden = true;
   renderMain();
 }
@@ -5320,7 +5321,7 @@ var ABOUT_SECTIONS = [
     '<p><b>On your device. It never leaves.</b> No account, no server, no sync — nothing '+
     'here has anywhere to send your training to.</p>'+
 
-    '<p>Everything except photos is one block of text in the browser’s local storage. '+
+    '<p>Everything except photos is text in the browser’s local storage. '+
     'Progress photos are too big for that, so the images sit in a separate, much larger store '+
     'on the same device, with only their dates and notes in the main block.</p>'+
 
