@@ -5598,10 +5598,13 @@ function handleAction(action, el){
       var d = ui.exerciseDraft;
       var ex = { id: d.editingId || uid('ex'), name: d.name.trim(), tags: d.tags.slice(),
                  muscles: { primary: d.muscles.primary.slice(), secondary: d.muscles.secondary.slice() },
-                 /* records that the muscles have been through this editor, so
+                 /* records that the muscles were actually considered, so
                     clearing them all stays cleared instead of being re-filled
-                    from the name every time it is reopened */
-                 musclesSet: true,
+                    from the name. Set only when the picker was used or there
+                    is something in it - otherwise editing the rest time of an
+                    untagged exercise would silently retire its "add muscles"
+                    prompt. */
+                 musclesSet: !!(d.musclesTouched || d.muscles.primary.length || d.muscles.secondary.length),
                  fields: d.fields, defaultRestSec: d.defaultRestSec };
       /* kept in step so a build without this feature still finds its categories */
       ex.tag = tagsToLegacyTag(ex.tags);
