@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Muscle Map Kit — Demo</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 24px 16px;
+    background: #0a0a0a; color: #e5e5e5;
+    font: 15px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  }
+  h1 { font-size: 15px; letter-spacing: .18em; text-transform: uppercase; color: #f97316; margin: 0 0 4px; }
+  p.sub { margin: 0 0 24px; color: #737373; font-size: 13px; }
+  .wrap { max-width: 900px; margin: 0 auto; }
+  .stage { display: flex; gap: 24px; justify-content: center; flex-wrap: wrap; margin-bottom: 28px; }
+  .fig { text-align: center; }
+  .fig figcaption { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #737373; margin-bottom: 8px; }
+  .map { width: 200px; height: 400px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+  button {
+    background: #171717; color: #e5e5e5; border: 1px solid #262626;
+    border-radius: 999px; padding: 7px 15px; font-size: 13px; cursor: pointer;
+    font-family: inherit;
+  }
+  button:hover { background: #262626; }
+  button.on { background: #f97316; border-color: #f97316; color: #0a0a0a; font-weight: 600; }
+  .readout { text-align: center; font-size: 13px; color: #a3a3a3; min-height: 20px; }
+  code { background: #171717; padding: 1px 5px; border-radius: 4px; font-size: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Muscle Map Kit</h1>
+  <p class="sub">Click a muscle. Switch presets to see activation colouring. Nothing here is wired to any app — this is the raw component.</p>
+
+  <div class="controls" id="presets"></div>
+
+  <div class="stage">
+    <figure class="fig">
+      <figcaption>Front</figcaption>
+      <div class="map" id="front"></div>
+    </figure>
+    <figure class="fig">
+      <figcaption>Back</figcaption>
+      <div class="map" id="back"></div>
+    </figure>
+  </div>
+
+  <div class="controls">
+    <button id="gender">Switch to female</button>
+    <button id="clear">Clear</button>
+  </div>
+
+  <p class="readout" id="readout">Selected: <code>none</code></p>
+</div>
+
+<script src="../js/muscle-map-data.js"></script>
+<script src="../js/muscle-map.js"></script>
+<script>
+  var PRESETS = {
+    "Push day":  { chest: 100, triceps: 100, deltoids: 70, abs: 40 },
+    "Pull day":  { "upper-back": 100, "lower-back": 60, biceps: 100, trapezius: 70, forearm: 50 },
+    "Leg day":   { quadriceps: 100, hamstring: 100, gluteal: 90, calves: 70, adductors: 50 },
+    "Full body": { chest: 100, abs: 100, "upper-back": 100, deltoids: 50, hamstring: 50, gluteal: 50, triceps: 50 }
+  };
+
+  var OPTS = {
+    stops: ["#9ca3af", "#fbbf24", "#f59e0b", "#ef4444"],
+    outline: "#4b5563",
+    hidden: []            // e.g. ["hair", "head", "hands", "feet"] to omit parts
+  };
+
+  function make(id, side) {
+    var o = { side: side };
+    for (var k in OPTS) o[k] = OPTS[k];
+    return new MuscleMap(document.getElementById(id), o);
+  }
+
+  var front = make("front", "front");
+  var back  = make("back", "back");
+  var maps  = [front, back];
+
+  function onSelect(slug) {
+    document.getElementById("readout").innerHTML = "Selected: <code>" + slug + "</code>";
+  }
+  maps.forEach(function (m) { m.on("select", onSelect); });
+
+  var bar = document.getElementById("presets");
+  Object.keys(PRESETS).forEach(function (name) {
+    var b = document.createElement("button");
+    b.textContent = name;
+    b.onclick = function () {
+      [].forEach.call(bar.children, function (c) { c.classList.remove("on"); });
+      b.classList.add("on");
+      maps.forEach(function (m) { m.setActivation(PRESETS[name]); });
+    };
+    bar.appendChild(b);
+  });
+  bar.children[0].click();
+
+  document.getElementById("clear").onclick = function () {
+    [].forEach.call(bar.children, function (c) { c.classList.remove("on"); });
+    maps.forEach(function (m) { m.clear(); });
+    document.getElementById("readout").innerHTML = "Selected: <code>none</code>";
+  };
+
+  var gender = "male";
+  document.getElementById("gender").onclick = function () {
+    gender = gender === "male" ? "female" : "male";
+    this.textContent = "Switch to " + (gender === "male" ? "female" : "male");
+    maps.forEach(function (m) { m.setGender(gender); });
+    var active = bar.querySelector(".on");
+    if (active) active.click();
+  };
+</script>
+</body>
+</html>
