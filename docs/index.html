@@ -1644,11 +1644,51 @@ function lookupExerciseMuscles(name){
    them. New code never reads it. */
 function tagsToLegacyTag(tags){ return (tags||[]).join(', '); }
 
+/* ---- Muscle side-car ----------------------------------------------------
+   `tags` survives a build without this feature because `tag` carries it, and
+   that build writes `tag` back. `muscles` has no such carrier: that build's
+   exercise editor rebuilds the record from a fixed list of keys, so saving
+   any single exercise there drops its muscles entirely and silently.
+
+   So they are also kept under a second key, which a build that knows nothing
+   about them cannot rewrite. It is only ever read back when `muscles` is
+   missing from an exercise ALTOGETHER - which this build never does, since
+   both the editor and the migration always write one - so a missing key is
+   proof that something else rewrote that record. An empty-but-present
+   `muscles` means the user cleared them by hand, and is never restored over. */
+var MUSCLE_SIDECAR_KEY = 'athleticism_muscles_v1';
+
+function readMuscleSidecar(){
+  try{
+    var raw = localStorage.getItem(MUSCLE_SIDECAR_KEY);
+    var parsed = raw ? JSON.parse(raw) : null;
+    return (parsed && typeof parsed === 'object') ? parsed : {};
+  }catch(e){ return {}; }
+}
+function writeMuscleSidecar(){
+  var out = {};
+  data.exercises.forEach(function(ex){
+    if (!ex.muscles) return;
+    if (!hasMuscleData(ex) && !ex.musclesSet) return;
+    out[ex.id] = {
+      primary: (ex.muscles.primary||[]).slice(),
+      secondary: (ex.muscles.secondary||[]).slice(),
+      musclesSet: !!ex.musclesSet
+    };
+  });
+  try{ localStorage.setItem(MUSCLE_SIDECAR_KEY, JSON.stringify(out)); }
+  catch(e){ /* a full quota costs the safety net, not the app */ }
+}
+function clearMuscleSidecar(){
+  try{ localStorage.removeItem(MUSCLE_SIDECAR_KEY); }catch(e){}
+}
+
 function legacyTagString(ex){
   return (ex.tag === null || ex.tag === undefined) ? '' : String(ex.tag).trim();
 }
 function migrateMuscleData(){
   var changed = false;
+  var sidecar = readMuscleSidecar();
   data.exercises.forEach(function(ex){
     if (!Array.isArray(ex.tags)){
       ex.tags = parseTagInput(legacyTagString(ex));
@@ -1661,6 +1701,15 @@ function migrateMuscleData(){
       ex.tags = parseTagInput(legacyTagString(ex));
       changed = true;
     }
+    /* `muscles` gone entirely means another build rewrote this record, so
+       put back what was last seen here rather than installing an empty one */
+    var carried = ex.muscles ? null : sidecar[ex.id];
+    if (carried){
+      ex.muscles = { primary: (carried.primary||[]).slice(), secondary: (carried.secondary||[]).slice() };
+      if (carried.musclesSet) ex.musclesSet = true;
+      changed = true;
+    }
+
     /* repaired a tier at a time: one malformed list should not discard the
        other one */
     if (!ex.muscles || typeof ex.muscles !== 'object'){ ex.muscles = emptyMuscles(); changed = true; }
@@ -1671,6 +1720,7 @@ function migrateMuscleData(){
     if (ex.tag !== legacy){ ex.tag = legacy; changed = true; }
   });
   if (changed) save();
+  writeMuscleSidecar();
 }
 
 function exerciseTags(ex){ return (ex && Array.isArray(ex.tags)) ? ex.tags : []; }
@@ -5620,6 +5670,7 @@ function handleAction(action, el){
         save();
         ui.picker = null;
       }
+      writeMuscleSidecar();
       if (!d.editingId) ui.selectedExerciseId = ex.id;
       closeExerciseModal();
       renderMain();
@@ -5794,6 +5845,7 @@ function handleAction(action, el){
 
     case 'confirm-reset-data': armOrConfirm(el, function(){
       data = defaultData(); save();
+      clearMuscleSidecar();
       reconcilePhotoStore();   /* metadata is empty now, so this empties the store */
       ui.importPreview = null; ui.settingsMessage = null;
       document.getElementById('settings-modal').hidden = true;
