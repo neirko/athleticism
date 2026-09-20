@@ -709,6 +709,56 @@ body.photos-hidden .photo-veil{display:flex;}
   .cmp-grid{gap:8px;}
 }
 
+/* ---- muscle coverage map ---- */
+.mm-card{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;}
+.mm-figs{display:flex;gap:10px;flex:0 0 auto;}
+.mm-fig{margin:0;text-align:center;}
+.mm-canvas{width:104px;height:208px;}
+.mm-fig figcaption{font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text-faint);margin-top:6px;}
+.mm-side{flex:1 1 220px;min-width:0;}
+.mm-sub{font-family:var(--font-ui);font-size:13px;font-weight:700;color:var(--text-faint);}
+.mm-legend{display:flex;align-items:center;gap:8px;font-size:11px;font-weight:800;
+  text-transform:uppercase;letter-spacing:.06em;color:var(--text-faint);margin-bottom:12px;}
+.mm-legend-bar{flex:1;height:7px;border-radius:4px;
+  background:linear-gradient(90deg,#9ca3af,#fbbf24,#f59e0b,#ef4444);}
+.mm-row{display:flex;align-items:center;gap:10px;padding:4px 0;}
+.mm-name{flex:0 0 84px;font-size:13px;font-weight:700;color:var(--text);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.mm-bar{flex:1;min-width:40px;height:9px;border-radius:5px;background:var(--surface-2);
+  border:1px solid var(--border);overflow:hidden;}
+.mm-bar-fill{display:block;height:100%;border-radius:5px;}
+.mm-sets{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--text-faint);min-width:24px;text-align:right;}
+.mm-pct{flex:0 0 auto;font-size:12.5px;font-weight:800;color:var(--text-dim);min-width:38px;text-align:right;}
+.mm-untrained{margin-top:12px;padding-top:11px;border-top:2px solid var(--border);
+  font-size:12.5px;font-weight:600;color:var(--text-faint);line-height:1.5;}
+.mm-untrained-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text-dim);margin-bottom:3px;}
+.mm-empty{font-size:13px;color:var(--text-faint);line-height:1.5;}
+@media (max-width:560px){
+  .mm-card{gap:16px;}
+  .mm-canvas{width:88px;height:176px;}
+  .mm-name{flex-basis:70px;}
+}
+
+/* ---- muscle picker ---- */
+.mus-legend{font-size:12.5px;color:var(--text-faint);margin-bottom:10px;line-height:1.5;}
+.mus-key-p{color:var(--accent-deep);}
+.mus-key-s{color:var(--text-dim);}
+.mus-auto{color:var(--good-deep);font-weight:700;}
+.mus-group{margin-bottom:10px;}
+.mus-group-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--text-faint);margin-bottom:5px;}
+.mus-grid{display:flex;flex-wrap:wrap;gap:6px;}
+.mus-chip{background:var(--surface-2);border:2px solid var(--border);color:var(--text-dim);
+  border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:700;}
+.mus-chip:hover{border-color:var(--accent-soft-border);}
+.mus-chip.s{background:var(--accent-soft);border-color:var(--accent-soft-border);color:var(--accent-deep);}
+.mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
+.chip.chip-soft{background:var(--surface-2);border-color:var(--border);color:var(--text-dim);}
+.split-item-nudge{margin-left:auto;font-size:11px;font-weight:800;color:var(--accent-deep);
+  background:var(--accent-soft);border:2px solid var(--accent-soft-border);border-radius:10px;
+  padding:1px 7px;white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -752,7 +802,7 @@ body.photos-hidden .photo-veil{display:flex;}
      data snapshot before the LAST untyped <script>, and the app reads that
      snapshot while it evaluates.
      ------------------------------------------------------------------ -->
-<script>
+<script type="text/javascript">
 /* Muscle map geometry — generated from react-muscle-highlighter v1.2.0 (MIT).
    Plain data. No dependencies. Works from file:// with a <script> tag. */
 (function (root) {
@@ -761,7 +811,7 @@ body.photos-hidden .photo-veil{display:flex;}
   else root.MuscleMapData = DATA;
 })(typeof globalThis !== "undefined" ? globalThis : this);
 </script>
-<script>
+<script type="text/javascript">
 /*
  * muscle-map.js — zero-dependency SVG muscle map renderer.
  *
@@ -1017,7 +1067,9 @@ body.photos-hidden .photo-veil{display:flex;}
 
 /* =========================================================================
    DATA MODEL
-   exercises: [{ id, name, tag, fields:[{id,type,label,unit}], defaultRestSec }]
+   exercises: [{ id, name, tags:[str], muscles:{primary:[slug],secondary:[slug]},
+                 fields:[{id,type,label,unit}], defaultRestSec,
+                 tag: legacy mirror of tags.join(', ') - written, never read }]
    plans:     [{ id, name, items:[{ exerciseId, targetSets }] }]
    workouts:  [{ id, planId, name, date, startedAt, completedAt,
                  exercises:[{ exerciseId, name, fields:[snapshot], defaultRestSec,
@@ -1149,6 +1201,10 @@ var FIELD_INFO = {
     scale: [['10','No reps left at all'],['9','One rep left'],['8','Two reps left'],
             ['7','Three reps left'],['\u2264 6','Easy - warm-up territory']],
     foot: 'Higher means harder. Half points are fine (8.5).'
+  },
+  'muscle-volume': {
+    title: 'Muscle Coverage',
+    body: 'Shows training volume \u2014 how much you worked each muscle, not how strong it is.'
   }
 };
 function isEffortType(t){ return t==='rir' || t==='rpe'; }
@@ -1181,6 +1237,421 @@ function esc(s){
   });
 }
 
+/* ---- Muscle coverage ----------------------------------------------------
+   Two separate fields hang off an exercise, and they must stay separate:
+
+     muscles: { primary:[slug], secondary:[slug] }   drives the diagram
+     tags:    ["grip work", "explosive"]             free text, drives search
+
+   `muscles` is constrained to the slugs the artwork knows about. `tags` is
+   whatever you type. Merging them would mean typing "lats", seeing nothing
+   light up, and concluding the map is broken.
+
+   Volume is scored in SETS, not exercises. Five sets of pull-ups should
+   outweigh one set of curls, and an exercise count cannot tell a warm-up
+   from the main event. */
+
+var MUSCLE_SLUGS = ['abs','adductors','ankles','biceps','calves','chest','deltoids','feet',
+  'forearm','gluteal','hair','hamstring','hands','head','knees','lower-back','neck','obliques',
+  'quadriceps','tibialis','trapezius','triceps','upper-back'];
+
+/* Hair and head are drawn, but they are not muscles. The renderer paints them
+   a fixed colour; everything on this side of the line ignores them. */
+var NON_TRAINABLE = ['hair','head'];
+var TRAINABLE_MUSCLES = MUSCLE_SLUGS.filter(function(s){ return NON_TRAINABLE.indexOf(s)<0; });
+
+var MUSCLE_LABELS = {
+  'abs':'Abs','adductors':'Adductors','ankles':'Ankles','biceps':'Biceps','calves':'Calves',
+  'chest':'Chest','deltoids':'Shoulders','feet':'Feet','forearm':'Forearms','gluteal':'Glutes',
+  'hamstring':'Hamstrings','hands':'Hands','knees':'Knees','lower-back':'Lower Back','neck':'Neck',
+  'obliques':'Obliques','quadriceps':'Quads','tibialis':'Shins','trapezius':'Traps',
+  'triceps':'Triceps','upper-back':'Upper Back'
+};
+function muscleLabel(slug){ return MUSCLE_LABELS[slug] || slug; }
+function isTrainableMuscle(slug){ return TRAINABLE_MUSCLES.indexOf(slug) >= 0; }
+
+/* One ramp, magnitude only - grey through amber to red. Deliberately NOT a
+   colour per muscle group: colour can carry identity or magnitude, not both,
+   and trying for both destroys the at-a-glance read the map exists for. */
+var MUSCLE_RAMP = ['#9ca3af','#fbbf24','#f59e0b','#ef4444'];
+
+var PRIMARY_WEIGHT = 1.0;
+var SECONDARY_WEIGHT = 0.5;
+
+/* Midpoint of the 10-20 weekly sets per muscle that the hypertrophy
+   literature generally lands on. One constant, one place - a settings
+   toggle can point at it later. */
+var WEEKLY_TARGET_SETS = 14;
+var WEEKLY_WINDOW_DAYS = 7;
+
+function emptyMuscles(){ return { primary: [], secondary: [] }; }
+
+function exerciseMuscles(ex){
+  if (!ex || !ex.muscles) return emptyMuscles();
+  return {
+    primary: (ex.muscles.primary || []).filter(isTrainableMuscle),
+    secondary: (ex.muscles.secondary || []).filter(isTrainableMuscle)
+  };
+}
+function hasMuscleData(ex){
+  var m = exerciseMuscles(ex);
+  return m.primary.length > 0 || m.secondary.length > 0;
+}
+
+/* raw[slug] += weight * sets. An exercise with no muscle data contributes
+   nothing rather than being guessed at. A slug listed as both primary and
+   secondary counts once, as primary. */
+function addMuscleVolume(raw, ex, sets){
+  if (!ex || !(sets > 0)) return;
+  var m = exerciseMuscles(ex);
+  m.primary.forEach(function(s){ raw[s] = (raw[s]||0) + PRIMARY_WEIGHT * sets; });
+  m.secondary.forEach(function(s){
+    if (m.primary.indexOf(s) >= 0) return;
+    raw[s] = (raw[s]||0) + SECONDARY_WEIGHT * sets;
+  });
+}
+
+function exerciseById(id){ return data.exercises.find(function(e){ return e.id===id; }); }
+
+/* A plan is a preset: every set written into it is a set you intend to do. */
+function planSetCount(item){
+  return (item.sets || []).filter(function(s){ return (s.kind||'set')==='set'; }).length;
+}
+function planRawScores(plan){
+  var raw = {};
+  if (!plan) return raw;
+  (plan.items || []).forEach(function(item){
+    if (itemKind(item) !== 'exercise') return;
+    addMuscleVolume(raw, exerciseById(item.exerciseId), planSetCount(item));
+  });
+  return raw;
+}
+
+/* A logged workout only counts the sets actually ticked off. */
+function workoutSetCount(wex){
+  return (wex.sets || []).filter(function(s){ return (s.kind||'set')==='set' && s.done; }).length;
+}
+function workoutRawScores(w){
+  var raw = {};
+  if (!w) return raw;
+  (w.exercises || []).forEach(function(wex){
+    if ((wex.kind||'exercise') !== 'exercise') return;
+    addMuscleVolume(raw, exerciseById(wex.exerciseId), workoutSetCount(wex));
+  });
+  return raw;
+}
+
+function daysAgoISO(n){
+  var d = new Date();
+  d.setDate(d.getDate() - n);
+  return toLocalISO(d);
+}
+function recentWorkouts(days){
+  var from = daysAgoISO(days - 1);
+  return data.workouts.filter(function(w){ return w.completedAt && w.date && w.date >= from; });
+}
+function weeklyRawScores(){
+  var raw = {};
+  recentWorkouts(WEEKLY_WINDOW_DAYS).forEach(function(w){
+    (w.exercises || []).forEach(function(wex){
+      if ((wex.kind||'exercise') !== 'exercise') return;
+      addMuscleVolume(raw, exerciseById(wex.exerciseId), workoutSetCount(wex));
+    });
+  });
+  return raw;
+}
+
+/* Workout mode: normalised against the session's own hardest-hit muscle.
+   Answers "what does this session emphasise". */
+function relativeActivation(raw){
+  var out = {}, max = 0;
+  TRAINABLE_MUSCLES.forEach(function(s){ if ((raw[s]||0) > max) max = raw[s]; });
+  if (!(max > 0)) return out;
+  TRAINABLE_MUSCLES.forEach(function(s){
+    if (raw[s] > 0) out[s] = Math.round(100 * raw[s] / max);
+  });
+  return out;
+}
+
+/* Weekly mode: scored against a target band instead of against itself, so a
+   muscle you skipped stays grey rather than being normalised up into colour.
+   This is the mode that actually reveals the gaps. */
+function absoluteActivation(raw){
+  var out = {};
+  TRAINABLE_MUSCLES.forEach(function(s){
+    if (raw[s] > 0) out[s] = Math.min(100, Math.round(100 * raw[s] / WEEKLY_TARGET_SETS));
+  });
+  return out;
+}
+
+/* Sorted high to low, muscles at zero left out - 21 rows of nothing is not a
+   breakdown. */
+function muscleBreakdown(raw, activation){
+  return TRAINABLE_MUSCLES
+    .filter(function(s){ return (raw[s]||0) > 0; })
+    .map(function(s){ return { slug:s, label:muscleLabel(s), sets:raw[s], pct:activation[s]||0 }; })
+    .sort(function(a,b){ return b.sets - a.sets || a.label.localeCompare(b.label); });
+}
+function untrainedMuscles(raw){
+  return TRAINABLE_MUSCLES.filter(function(s){ return !(raw[s] > 0); });
+}
+
+/* ---- Name lookup --------------------------------------------------------
+   A convenience layer, never a constraint. Type a name it recognises and the
+   muscles arrive pre-filled and fully editable; type anything else and the
+   field is simply empty. The free-text exercise input is untouched - there is
+   no dropdown of approved exercises, because customisability is the point of
+   this app.
+
+   [ names (| separated), primary, secondary ] */
+var EXERCISE_MUSCLE_SEED = [
+  /* chest / push */
+  ['bench press|barbell bench press|flat bench press|flat bench', ['chest','triceps'], ['deltoids']],
+  ['incline bench press|incline barbell press', ['chest','deltoids'], ['triceps']],
+  ['decline bench press', ['chest'], ['triceps']],
+  ['dumbbell bench press|dumbbell press|db bench press', ['chest','triceps'], ['deltoids']],
+  ['incline dumbbell press|incline dumbbell bench press', ['chest','deltoids'], ['triceps']],
+  ['chest fly|dumbbell fly|cable fly|pec deck|chest flye', ['chest'], ['deltoids']],
+  ['cable crossover', ['chest'], ['deltoids']],
+  ['machine chest press|chest press', ['chest','triceps'], ['deltoids']],
+  ['push up|press up', ['chest','triceps'], ['deltoids','abs']],
+  ['incline push up', ['chest'], ['triceps','deltoids']],
+  ['decline push up', ['chest','deltoids'], ['triceps']],
+  ['diamond push up|close grip push up', ['triceps','chest'], ['deltoids']],
+  ['wide push up', ['chest'], ['triceps','deltoids']],
+  ['archer push up', ['chest','triceps'], ['abs','deltoids']],
+  ['pseudo planche push up', ['chest','deltoids'], ['triceps','abs']],
+  ['dip|chest dip|parallel bar dip', ['chest','triceps'], ['deltoids']],
+  ['bench dip|tricep dip|triceps dip', ['triceps'], ['chest','deltoids']],
+  /* shoulders */
+  ['overhead press|military press|shoulder press|strict press', ['deltoids','triceps'], ['trapezius','abs']],
+  ['dumbbell shoulder press|dumbbell overhead press', ['deltoids','triceps'], ['trapezius']],
+  ['arnold press', ['deltoids'], ['triceps','trapezius']],
+  ['lateral raise|side raise|side lateral raise', ['deltoids'], ['trapezius']],
+  ['front raise', ['deltoids'], ['chest']],
+  ['rear delt fly|reverse fly|rear delt raise', ['deltoids','upper-back'], ['trapezius']],
+  ['upright row', ['deltoids','trapezius'], ['biceps','forearm']],
+  ['face pull', ['upper-back','deltoids'], ['trapezius']],
+  ['shrug|barbell shrug|dumbbell shrug', ['trapezius'], ['forearm']],
+  ['handstand push up|hspu', ['deltoids','triceps'], ['trapezius','abs']],
+  ['pike push up', ['deltoids','triceps'], ['chest']],
+  ['handstand|handstand hold|wall handstand', ['deltoids'], ['abs','trapezius','forearm']],
+  ['forearm stand|forearm handstand', ['deltoids','abs'], ['trapezius','forearm']],
+  /* back / pull */
+  ['pull up|pullup', ['upper-back','biceps'], ['forearm','abs']],
+  ['chin up|chinup', ['biceps','upper-back'], ['forearm','abs']],
+  ['wide grip pull up', ['upper-back'], ['biceps','forearm']],
+  ['weighted pull up', ['upper-back','biceps'], ['forearm','abs']],
+  ['muscle up', ['upper-back','triceps','chest'], ['biceps','abs','forearm']],
+  ['lat pulldown|pulldown', ['upper-back'], ['biceps','forearm']],
+  ['barbell row|bent over row|bent over barbell row', ['upper-back'], ['biceps','lower-back','forearm']],
+  ['dumbbell row|one arm row|single arm row', ['upper-back'], ['biceps','forearm']],
+  ['pendlay row', ['upper-back'], ['biceps','lower-back']],
+  ['t bar row', ['upper-back'], ['biceps','trapezius']],
+  ['seated cable row|cable row', ['upper-back'], ['biceps','forearm']],
+  ['inverted row|australian pull up', ['upper-back','biceps'], ['abs','forearm']],
+  ['deadlift|conventional deadlift', ['lower-back','gluteal','hamstring'], ['trapezius','quadriceps','forearm','upper-back']],
+  ['romanian deadlift|rdl|stiff leg deadlift', ['hamstring','gluteal'], ['lower-back','forearm']],
+  ['sumo deadlift', ['gluteal','quadriceps','adductors'], ['lower-back','hamstring','trapezius']],
+  ['rack pull', ['trapezius','lower-back'], ['upper-back','forearm']],
+  ['back extension|hyperextension', ['lower-back'], ['gluteal','hamstring']],
+  ['good morning', ['hamstring','lower-back'], ['gluteal']],
+  ['pullover|dumbbell pullover', ['upper-back','chest'], ['triceps']],
+  ['dead hang|bar hang', ['forearm'], ['upper-back','deltoids']],
+  /* arms */
+  ['bicep curl|biceps curl|barbell curl|dumbbell curl|curl', ['biceps'], ['forearm']],
+  ['hammer curl', ['biceps','forearm'], []],
+  ['preacher curl', ['biceps'], ['forearm']],
+  ['concentration curl', ['biceps'], []],
+  ['cable curl', ['biceps'], ['forearm']],
+  ['incline curl', ['biceps'], ['forearm']],
+  ['reverse curl', ['forearm','biceps'], []],
+  ['wrist curl', ['forearm'], []],
+  ['tricep pushdown|triceps pushdown|pushdown|cable pushdown', ['triceps'], []],
+  ['tricep extension|triceps extension', ['triceps'], []],
+  ['overhead tricep extension|overhead triceps extension', ['triceps'], ['deltoids']],
+  ['skull crusher|lying tricep extension', ['triceps'], []],
+  ['close grip bench press', ['triceps','chest'], ['deltoids']],
+  ['tricep kickback|kickback', ['triceps'], []],
+  ['farmer carry|farmers walk|farmer walk|suitcase carry', ['forearm','trapezius'], ['abs','gluteal','quadriceps']],
+  /* legs */
+  ['squat|back squat|barbell squat', ['quadriceps','gluteal'], ['hamstring','lower-back','adductors','abs']],
+  ['front squat', ['quadriceps'], ['gluteal','abs','upper-back']],
+  ['goblet squat', ['quadriceps','gluteal'], ['abs','adductors']],
+  ['bodyweight squat|air squat', ['quadriceps','gluteal'], ['hamstring']],
+  ['pistol squat|single leg squat', ['quadriceps','gluteal'], ['abs','adductors','tibialis']],
+  ['bulgarian split squat|split squat', ['quadriceps','gluteal'], ['hamstring','adductors']],
+  ['lunge|walking lunge|reverse lunge|forward lunge', ['quadriceps','gluteal'], ['hamstring','adductors']],
+  ['step up', ['quadriceps','gluteal'], ['hamstring','calves']],
+  ['leg press', ['quadriceps','gluteal'], ['hamstring','adductors']],
+  ['hack squat', ['quadriceps'], ['gluteal']],
+  ['leg extension', ['quadriceps'], []],
+  ['leg curl|hamstring curl|lying leg curl|seated leg curl', ['hamstring'], ['calves']],
+  ['nordic curl|nordic hamstring curl', ['hamstring'], ['gluteal']],
+  ['hip thrust|barbell hip thrust', ['gluteal'], ['hamstring','abs']],
+  ['glute bridge', ['gluteal'], ['hamstring','abs']],
+  ['calf raise|standing calf raise', ['calves'], ['ankles']],
+  ['seated calf raise', ['calves'], ['ankles']],
+  ['tibialis raise|toe raise', ['tibialis'], ['ankles']],
+  ['hip adduction|adductor machine', ['adductors'], []],
+  ['hip abduction|abductor machine', ['gluteal'], ['adductors']],
+  ['box jump', ['quadriceps','gluteal'], ['calves','hamstring']],
+  ['jump squat', ['quadriceps','gluteal'], ['calves']],
+  ['sled push|prowler push', ['quadriceps','gluteal'], ['calves','hamstring']],
+  ['wall sit', ['quadriceps'], ['gluteal']],
+  /* core */
+  ['plank|front plank', ['abs'], ['obliques','deltoids','lower-back']],
+  ['side plank', ['obliques'], ['abs','deltoids']],
+  ['crunch|sit up|situp', ['abs'], ['obliques']],
+  ['hanging leg raise', ['abs'], ['forearm','obliques']],
+  ['leg raise|lying leg raise', ['abs'], ['quadriceps']],
+  ['knee raise|hanging knee raise', ['abs'], ['obliques']],
+  ['toes to bar', ['abs'], ['upper-back','forearm','obliques']],
+  ['russian twist', ['obliques'], ['abs']],
+  ['ab wheel|ab rollout|wheel rollout', ['abs'], ['obliques','lower-back','deltoids']],
+  ['mountain climber', ['abs'], ['obliques','quadriceps','deltoids']],
+  ['bicycle crunch', ['abs','obliques'], []],
+  ['dead bug', ['abs'], ['obliques']],
+  ['hollow hold|hollow body hold', ['abs'], ['obliques','quadriceps']],
+  ['l sit|l hold', ['abs'], ['triceps','quadriceps','deltoids']],
+  ['v sit', ['abs'], ['quadriceps']],
+  ['dragon flag', ['abs'], ['obliques','lower-back']],
+  ['windshield wiper', ['obliques','abs'], []],
+  ['woodchop|cable woodchop', ['obliques'], ['abs']],
+  ['pallof press', ['obliques'], ['abs']],
+  ['superman', ['lower-back'], ['gluteal']],
+  /* calisthenics skill work */
+  ['front lever', ['upper-back','abs'], ['biceps','forearm','lower-back']],
+  ['back lever', ['chest','upper-back','abs'], ['biceps','deltoids']],
+  ['planche', ['deltoids','chest','abs'], ['triceps','forearm','lower-back']],
+  ['human flag', ['obliques','deltoids','upper-back'], ['abs','forearm']],
+  ['headstand', ['neck','deltoids'], ['abs','trapezius']],
+  ['crow pose|crow', ['deltoids','abs'], ['triceps','forearm']],
+  ['bridge|wheel pose', ['lower-back','gluteal'], ['deltoids','quadriceps','abs']],
+  ['neck bridge', ['neck'], ['lower-back','gluteal']],
+  ['neck curl|neck extension', ['neck'], []],
+  /* breakdance */
+  ['freeze|baby freeze', ['deltoids','triceps','abs'], ['obliques','forearm']],
+  ['chair freeze|air chair', ['triceps','deltoids','obliques'], ['abs','forearm']],
+  ['elbow freeze', ['deltoids','abs'], ['obliques','triceps']],
+  ['six step|6 step', ['deltoids','abs','quadriceps'], ['obliques','triceps','forearm']],
+  ['windmill', ['obliques','abs','deltoids'], ['upper-back','lower-back']],
+  ['flare', ['abs','obliques','deltoids'], ['triceps','forearm','adductors']],
+  ['swipe', ['obliques','abs','deltoids'], ['upper-back','quadriceps']],
+  ['toprock', ['calves','quadriceps'], ['abs','tibialis']],
+  ['turtle', ['triceps','abs','deltoids'], ['obliques','forearm']],
+  ['headspin', ['neck'], ['deltoids','abs','trapezius']],
+  ['kip up', ['abs','lower-back'], ['quadriceps','deltoids']],
+  /* conditioning */
+  ['burpee', ['quadriceps','chest','abs'], ['deltoids','triceps','gluteal','calves']],
+  ['jump rope|skipping', ['calves'], ['quadriceps','tibialis','forearm']],
+  ['running|run|jogging', ['quadriceps','hamstring','calves'], ['gluteal','tibialis','abs']],
+  ['sprint|sprints', ['hamstring','quadriceps','gluteal'], ['calves','abs']],
+  ['rowing|row machine|erg', ['upper-back','quadriceps'], ['biceps','hamstring','lower-back','gluteal']],
+  ['cycling|bike|stationary bike', ['quadriceps'], ['hamstring','calves','gluteal']],
+  ['swimming|swim', ['upper-back','deltoids'], ['chest','triceps','abs','quadriceps']],
+  ['battle ropes|battle rope', ['deltoids','forearm'], ['abs','upper-back']],
+  ['kettlebell swing', ['gluteal','hamstring'], ['lower-back','deltoids','abs','forearm']],
+  ['power clean|clean', ['quadriceps','trapezius','gluteal'], ['hamstring','deltoids','lower-back','forearm']],
+  ['snatch', ['deltoids','trapezius','quadriceps'], ['gluteal','hamstring','lower-back','forearm']],
+  ['clean and jerk', ['quadriceps','deltoids','trapezius'], ['gluteal','triceps','lower-back']],
+  ['thruster', ['quadriceps','deltoids'], ['gluteal','triceps','abs']],
+  ['turkish get up', ['deltoids','abs'], ['obliques','quadriceps','gluteal']],
+  ['wall ball', ['quadriceps','deltoids'], ['gluteal','abs','triceps']]
+];
+
+var EXERCISE_MUSCLE_LOOKUP = (function(){
+  var map = {};
+  EXERCISE_MUSCLE_SEED.forEach(function(row){
+    row[0].split('|').forEach(function(name){
+      map[name] = { primary: row[1], secondary: row[2] };
+    });
+  });
+  return map;
+})();
+
+function normaliseExerciseName(s){
+  return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
+}
+
+/* Exact match first, then longest whole-word match inside the typed name, so
+   "Weighted Barbell Bench Press" still finds "bench press". The squashed
+   pass makes "pushup", "push-up" and "push up" the same thing. */
+function lookupExerciseMuscles(name){
+  var n = normaliseExerciseName(name);
+  if (!n) return null;
+  if (EXERCISE_MUSCLE_LOOKUP[n]) return EXERCISE_MUSCLE_LOOKUP[n];
+
+  var squashed = n.replace(/ /g,'');
+  var best = null, bestLen = 0, k;
+  for (k in EXERCISE_MUSCLE_LOOKUP){
+    if (k.replace(/ /g,'') === squashed) return EXERCISE_MUSCLE_LOOKUP[k];
+  }
+  for (k in EXERCISE_MUSCLE_LOOKUP){
+    if (k.length > bestLen && (' '+n+' ').indexOf(' '+k+' ') >= 0){
+      best = EXERCISE_MUSCLE_LOOKUP[k]; bestLen = k.length;
+    }
+  }
+  if (best) return best;
+  for (k in EXERCISE_MUSCLE_LOOKUP){
+    if (k.length > bestLen && squashed.indexOf(k.replace(/ /g,'')) >= 0){
+      best = EXERCISE_MUSCLE_LOOKUP[k]; bestLen = k.length;
+    }
+  }
+  return best;
+}
+
+/* ---- Migration ----------------------------------------------------------
+   The old free-text Category was a single string on the exercise. It becomes
+   the first entry of `tags`. Nothing is guessed into muscle slugs from it -
+   "Chest" as a category does not prove the exercise trains the chest.
+
+   `tag` is left behind, rewritten from `tags`, on purpose. An install shares
+   one localStorage blob with whatever build last opened it, so a copy of the
+   app without this feature must still find its categories where it left
+   them. New code never reads it. */
+function tagsToLegacyTag(tags){ return (tags||[]).join(', '); }
+
+function migrateMuscleData(){
+  var changed = false;
+  data.exercises.forEach(function(ex){
+    if (!Array.isArray(ex.tags)){
+      var old = typeof ex.tag === 'string' ? ex.tag.trim() : '';
+      ex.tags = old ? old.split(',').map(function(t){ return t.trim(); }).filter(Boolean) : [];
+      changed = true;
+    }
+    if (!ex.muscles || !Array.isArray(ex.muscles.primary) || !Array.isArray(ex.muscles.secondary)){
+      ex.muscles = emptyMuscles();
+      changed = true;
+    }
+    var legacy = tagsToLegacyTag(ex.tags);
+    if (ex.tag !== legacy){ ex.tag = legacy; changed = true; }
+  });
+  if (changed) save();
+}
+
+function exerciseTags(ex){ return (ex && Array.isArray(ex.tags)) ? ex.tags : []; }
+function allTagOptions(){
+  var seen = {}, out = [];
+  data.exercises.forEach(function(e){
+    exerciseTags(e).forEach(function(t){ if (t && !seen[t]){ seen[t]=1; out.push(t); } });
+  });
+  return out.sort(function(a,b){ return a.localeCompare(b); });
+}
+function parseTagInput(s){
+  var seen = {};
+  return String(s||'').split(',').map(function(t){ return t.trim(); })
+    .filter(function(t){ if (!t || seen[t.toLowerCase()]) return false; seen[t.toLowerCase()]=1; return true; });
+}
+function exerciseMatchesQuery(e, q){
+  if (!q) return true;
+  if (e.name.toLowerCase().indexOf(q) >= 0) return true;
+  return exerciseTags(e).some(function(t){ return t.toLowerCase().indexOf(q) >= 0; });
+}
+function tagBadgesHTML(ex){
+  return exerciseTags(ex).map(function(t){ return '<span class="badge">'+esc(t)+'</span>'; }).join('');
+}
+
 /* --------------------------------------------------------- persistence */
 
 /* Declared here rather than beside the rest of the photo code because
@@ -1190,7 +1661,7 @@ var DEFAULT_POSES = [{id:'front',label:'Front'},{id:'side',label:'Side'},{id:'ba
 function defaultData(){
   return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, lastPhotoExportAt:null, backupNudgeDismissedAt:null, persistRequested:false,
     progressPhotos:[], photoPoses: DEFAULT_POSES.map(function(p){ return {id:p.id, label:p.label}; }),
-    settings:{weightUnit:'lb', progressTab:'sessions', blurPhotos:false} };
+    settings:{weightUnit:'lb', progressTab:'sessions', blurPhotos:false, bodyType:'male'} };
 }
 function loadData(){
   try{
@@ -1539,6 +2010,7 @@ function mergeImportedData(payload){
   data.workouts.sort(function(a,b){ return (a.completedAt||0) - (b.completedAt||0); });
   save();
   migratePlanItems();
+  migrateMuscleData();
   return added;
 }
 
@@ -1556,6 +2028,7 @@ function applyImportedData(payload){
   });
   save();
   migratePlanItems();
+  migrateMuscleData();
   renderAvatarButton();
   /* whatever the old install had in IndexedDB is now unreferenced */
   if (incoming) absorbPhotoBlobs(incoming, function(){ reconcilePhotoStore(); renderMain(); });
@@ -2361,6 +2834,7 @@ function migratePlanItems(){
   if (changed) save();
 }
 migratePlanItems();
+migrateMuscleData();
 function newPlanItem(exerciseId){
   var ex = data.exercises.find(function(e){return e.id===exerciseId;});
   var fields = ex ? ex.fields : [];
@@ -2551,6 +3025,7 @@ function renderMain(){
     case 'profile': renderProfile(); break;
   }
   paintCharts();
+  paintMuscleMaps();
   syncPhotoBlur();
   paintPhotos();
 }
@@ -2775,6 +3250,7 @@ function renderPlans(){
             '<input class="title-input" style="font-size:19px;font-weight:600;flex:1" data-commit="plan-name" data-id="'+plan.id+'" value="'+esc(plan.name)+'">'+
             '<button class="btn btn-ghost" data-action="confirm-delete-plan" data-id="'+plan.id+'">'+icon('trash')+' Delete</button>'+
           '</div>'+
+          planMuscleMapHTML(plan)+
           '<div id="plan-items">'+rowsHtml+'</div>'+
           '<div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">'+
             '<button class="btn btn-ghost" data-action="open-plan-picker">'+icon('plus')+' Add Exercise</button>'+
@@ -3307,12 +3783,14 @@ function renderExerciseListResults(){
   if (!el) return;
   var q = (ui.exerciseSearch||'').trim().toLowerCase();
   var list = data.exercises.filter(function(e){
-    return !q || e.name.toLowerCase().indexOf(q)>=0 || (e.tag||'').toLowerCase().indexOf(q)>=0;
+    return exerciseMatchesQuery(e, q);
   }).sort(function(a,b){ return a.name.localeCompare(b.name); });
   if (data.exercises.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 16px;">No exercises yet.</div>'; return; }
   if (list.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 16px;">No matches.</div>'; return; }
   el.innerHTML = list.map(function(e){
-    return '<button class="split-item '+(e.id===ui.selectedExerciseId?'active':'')+'" data-action="select-exercise" data-id="'+e.id+'"><span>'+esc(e.name)+'</span>'+icon('chevronRight')+'</button>';
+    return '<button class="split-item '+(e.id===ui.selectedExerciseId?'active':'')+'" data-action="select-exercise" data-id="'+e.id+'"><span>'+esc(e.name)+'</span>'+
+      (hasMuscleData(e)?'':'<span class="split-item-nudge" title="No muscles set">add muscles</span>')+
+      icon('chevronRight')+'</button>';
   }).join('');
 }
 function renderExerciseDetailHTML(){
@@ -3326,13 +3804,20 @@ function renderExerciseDetailHTML(){
   if (!ex){ ui.selectedExerciseId = null; return renderExerciseDetailHTML(); }
   return '<a href="#" class="back-link mobile-only" data-action="deselect-exercise">'+icon('chevronLeft')+' Back to exercises</a>'+
     '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px;gap:12px;flex-wrap:wrap;">'+
-      '<div><div style="font-size:20px;font-weight:600;margin-bottom:6px;">'+esc(ex.name)+'</div>'+(ex.tag?('<span class="badge">'+esc(ex.tag)+'</span>'):'')+'</div>'+
+      '<div><div style="font-size:20px;font-weight:600;margin-bottom:6px;">'+esc(ex.name)+'</div>'+tagBadgesHTML(ex)+'</div>'+
       '<div style="display:flex;gap:8px;">'+
         '<button class="btn btn-ghost" data-action="edit-exercise" data-id="'+ex.id+'">'+icon('edit')+' Edit</button>'+
         '<button class="btn btn-ghost" data-action="confirm-delete-exercise" data-id="'+ex.id+'">'+icon('trash')+' Delete</button>'+
       '</div>'+
     '</div>'+
-    '<div class="field-label">Tracking fields</div>'+
+    '<div class="field-label">Muscles</div>'+
+    (hasMuscleData(ex)
+      ? '<div class="chip-row">'+
+          exerciseMuscles(ex).primary.map(function(s){ return '<div class="chip" style="padding:6px 12px;"><span>'+esc(muscleLabel(s))+'</span></div>'; }).join('')+
+          exerciseMuscles(ex).secondary.map(function(s){ return '<div class="chip chip-soft" style="padding:6px 12px;"><span>'+esc(muscleLabel(s))+' &middot; supporting</span></div>'; }).join('')+
+        '</div>'
+      : '<button class="btn btn-tag" data-action="edit-exercise" data-id="'+ex.id+'">'+icon('plus')+' Add muscles</button>')+
+    '<div class="field-label" style="margin-top:16px;">Tracking fields</div>'+
     '<div class="chip-row">'+ex.fields.map(function(f){
       return '<div class="chip" style="padding:6px 12px;"><span>'+esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'')+' &middot; '+FIELD_TYPE_NAMES[f.type]+'</span></div>';
     }).join('')+'</div>'+
@@ -3347,12 +3832,224 @@ function renderExerciseDetailHTML(){
     : '');
 }
 
+/* ---- Muscle map rendering ----------------------------------------------
+   Views emit an empty <div data-musclemap="front"> carrying its activation
+   as a data attribute, and paintMuscleMaps() fills it in afterwards - the
+   same shape as paintCharts() and paintPhotos().
+
+   Every map container must live inside #main. buildPortableHTML() clones the
+   live DOM and blanks #main; a map mounted anywhere else would bake its
+   rendered <path> markup into every exported backup. */
+
+function bodyType(){ return (data.settings && data.settings.bodyType === 'female') ? 'female' : 'male'; }
+
+function muscleMapOptions(side){
+  return {
+    gender: bodyType(),
+    side: side,
+    stops: MUSCLE_RAMP,
+    inactive: MUSCLE_RAMP[0],
+    outline: '#D9C9B6',
+    /* nothing happens on click, so don't offer a pointer that says otherwise */
+    interactive: false
+  };
+}
+
+/* Built once and moved between containers rather than rebuilt. setActivation
+   recolours existing nodes, so a keystroke costs a repaint, not ~100 new
+   SVG paths. */
+var mmInstances = {};
+
+function paintMuscleMaps(){
+  if (typeof MuscleMap === 'undefined') return;
+  var nodes = document.querySelectorAll('[data-musclemap]');
+  var used = {};
+  for (var i=0; i<nodes.length; i++){
+    var el = nodes[i];
+    var side = el.getAttribute('data-musclemap');
+    if (side !== 'front' && side !== 'back') continue;
+    var act = {};
+    try { act = JSON.parse(el.getAttribute('data-activation') || '{}'); } catch(e){}
+
+    var key = bodyType()+'-'+side;
+    var map = used[key] ? null : mmInstances[key];
+    try {
+      if (map && map.svg){
+        if (map.svg.parentNode !== el) el.appendChild(map.svg);
+        map.container = el;
+      } else {
+        map = new MuscleMap(el, muscleMapOptions(side));
+        if (!used[key]) mmInstances[key] = map;
+      }
+      used[key] = true;
+      map.setActivation(act);
+    } catch(e){
+      /* geometry missing or a container that vanished mid-paint: leave the
+         slot empty rather than taking the whole render down with it */
+      el.innerHTML = '';
+    }
+  }
+}
+/* A body swap invalidates nothing except which instances get reused. */
+function resetMuscleMaps(){ mmInstances = {}; }
+
+function fmtSets(n){
+  var r = Math.round(n * 10) / 10;
+  return (r === Math.round(r)) ? String(Math.round(r)) : r.toFixed(1);
+}
+
+function muscleBreakdownHTML(rows, showSets){
+  return rows.map(function(r){
+    return '<div class="mm-row">'+
+      '<span class="mm-name">'+esc(r.label)+'</span>'+
+      '<span class="mm-bar"><span class="mm-bar-fill" style="width:'+Math.max(2, r.pct)+'%;background:'+
+        MuscleMap.ramp(MUSCLE_RAMP, r.pct)+'"></span></span>'+
+      (showSets ? '<span class="mm-sets">'+fmtSets(r.sets)+'</span>' : '')+
+      '<span class="mm-pct">'+r.pct+'%</span>'+
+    '</div>';
+  }).join('');
+}
+
+/* mode: 'workout' normalises against this session's hardest-hit muscle.
+         'weekly'  scores against WEEKLY_TARGET_SETS so gaps stay grey. */
+function muscleMapSectionHTML(mode, raw, opts){
+  opts = opts || {};
+  var weekly = mode === 'weekly';
+  var activation = weekly ? absoluteActivation(raw) : relativeActivation(raw);
+  var rows = muscleBreakdown(raw, activation);
+  var actAttr = esc(JSON.stringify(activation));
+
+  var body;
+  if (rows.length === 0){
+    body = '<div class="mm-empty">'+esc(opts.emptyText || 'Nothing scored yet.')+'</div>';
+  } else {
+    body = '<div class="mm-break">'+ muscleBreakdownHTML(rows, weekly) +'</div>';
+    if (weekly){
+      var cold = untrainedMuscles(raw);
+      if (cold.length){
+        body += '<div class="mm-untrained"><span class="mm-untrained-lbl">Untouched this week</span>'+
+          esc(cold.map(muscleLabel).join(' · '))+'</div>';
+      }
+    }
+  }
+
+  return '<div class="section-title"><span class="field-info" data-info="muscle-volume" role="button" tabindex="0" '+
+      'aria-label="Muscle coverage - what is this?">'+esc(opts.title || 'Muscle Coverage')+
+      '<span class="fi-dot" aria-hidden="true">i</span></span>'+
+      (opts.sub ? '<span class="mm-sub">'+esc(opts.sub)+'</span>' : '')+
+    '</div>'+
+    '<div class="card mm-card">'+
+      '<div class="mm-figs">'+
+        '<figure class="mm-fig"><div class="mm-canvas" data-musclemap="front" data-activation="'+actAttr+'"></div>'+
+          '<figcaption>Front</figcaption></figure>'+
+        '<figure class="mm-fig"><div class="mm-canvas" data-musclemap="back" data-activation="'+actAttr+'"></div>'+
+          '<figcaption>Back</figcaption></figure>'+
+      '</div>'+
+      '<div class="mm-side">'+
+        '<div class="mm-legend"><span>Less</span><span class="mm-legend-bar"></span><span>More</span></div>'+
+        body +
+      '</div>'+
+    '</div>';
+}
+
+function planMuscleMapHTML(plan){
+  var raw = planRawScores(plan);
+  var anyTagged = (plan.items||[]).some(function(it){
+    return itemKind(it)==='exercise' && hasMuscleData(exerciseById(it.exerciseId));
+  });
+  return muscleMapSectionHTML('workout', raw, {
+    title: 'Muscle Coverage',
+    sub: 'this plan',
+    emptyText: anyTagged
+      ? 'Add sets to an exercise and it will show up here.'
+      : 'None of these exercises have muscles set yet. Open one from the Exercises tab to add them.'
+  });
+}
+
+function weeklyMuscleMapHTML(){
+  var raw = weeklyRawScores();
+  return muscleMapSectionHTML('weekly', raw, {
+    title: 'Muscle Coverage',
+    sub: 'last 7 days',
+    emptyText: 'No sets logged in the last 7 days, or the exercises you did have no muscles set yet.'
+  });
+}
+
+/* ---- Muscle picker (exercise editor) ------------------------------------
+   Two tiers, not three. Primary carries full weight, supporting carries half.
+   A third tier is false precision and makes data entry tedious enough that
+   people stop doing it at all. */
+
+var MUSCLE_PICKER_GROUPS = [
+  ['Torso',  ['chest','upper-back','deltoids','trapezius','lower-back','neck']],
+  ['Arms',   ['biceps','triceps','forearm','hands']],
+  ['Core',   ['abs','obliques']],
+  ['Legs',   ['quadriceps','hamstring','gluteal','adductors','calves','tibialis']],
+  ['Joints', ['knees','ankles','feet']]
+];
+
+function muscleTier(d, slug){
+  if ((d.muscles.primary||[]).indexOf(slug) >= 0) return 'p';
+  if ((d.muscles.secondary||[]).indexOf(slug) >= 0) return 's';
+  return '';
+}
+
+/* off -> primary -> supporting -> off */
+function cycleMuscleTier(d, slug){
+  var tier = muscleTier(d, slug);
+  var p = d.muscles.primary.filter(function(s){ return s!==slug; });
+  var s = d.muscles.secondary.filter(function(x){ return x!==slug; });
+  if (tier === '') p.push(slug);
+  else if (tier === 'p') s.push(slug);
+  d.muscles = { primary: p, secondary: s };
+  d.musclesTouched = true;
+}
+
+/* The picker repaints on its own so typing a name never steals the caret
+   out of the name field. */
+function refreshMusclePicker(){
+  var el = document.getElementById('ex-muscle-picker');
+  if (el && ui.exerciseDraft) el.innerHTML = musclePickerHTML(ui.exerciseDraft);
+}
+/* Pre-fills from the typed name until the moment the user edits the
+   muscles themselves, after which their choice is left alone. */
+function autofillMuscles(d){
+  if (d.musclesTouched) return false;
+  var hit = lookupExerciseMuscles(d.name);
+  var next = hit ? { primary: hit.primary.slice(), secondary: hit.secondary.slice() } : emptyMuscles();
+  var changed = JSON.stringify(next) !== JSON.stringify(d.muscles);
+  d.muscles = next;
+  d.musclesAutofilled = !!hit;
+  return changed;
+}
+
+function musclePickerHTML(d){
+  var count = d.muscles.primary.length + d.muscles.secondary.length;
+  return '<label class="field-label">Muscles <span class="field-optional">Optional</span></label>'+
+    '<div class="mus-legend">Tap once for <b class="mus-key-p">primary</b>, again for <b class="mus-key-s">supporting</b>, again to clear.'+
+      (d.musclesAutofilled && !d.musclesTouched
+        ? ' <span class="mus-auto">Filled in from the name — change anything you like.</span>' : '')+
+    '</div>'+
+    MUSCLE_PICKER_GROUPS.map(function(g){
+      return '<div class="mus-group"><span class="mus-group-lbl">'+esc(g[0])+'</span><div class="mus-grid">'+
+        g[1].map(function(slug){
+          var t = muscleTier(d, slug);
+          return '<button type="button" class="mus-chip '+t+'" data-action="ex-toggle-muscle" data-slug="'+slug+'" '+
+            'aria-pressed="'+(t?'true':'false')+'">'+esc(muscleLabel(slug))+'</button>';
+        }).join('')+
+      '</div></div>';
+    }).join('')+
+    (count===0 ? '<div class="empty-hint">No muscles set — this exercise will not colour the map.</div>' : '');
+}
+
 /* ----------------------------------------------------- exercise modal */
 
 function openExerciseModal(editingExercise, pickerContext){
   ui.exerciseDraft = editingExercise
-    ? { editingId: editingExercise.id, name: editingExercise.name, tag: editingExercise.tag||'', fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
-    : { editingId: null, name:'', tag:'', fields:[], defaultRestSec:null };
+    ? { editingId: editingExercise.id, name: editingExercise.name, tags: exerciseTags(editingExercise).slice(),
+        muscles: exerciseMuscles(editingExercise), musclesTouched: hasMuscleData(editingExercise), musclesAutofilled: false,
+        fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
+    : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], defaultRestSec:null };
   ui.pickerContextForModal = pickerContext || null;
   ui.showCustomFieldForm = false;
   document.getElementById('exercise-modal').hidden = false;
@@ -3368,14 +4065,16 @@ function renderExerciseModal(){
   var d = ui.exerciseDraft;
   if (!d) { wrap.innerHTML=''; return; }
   function hasType(t){ return d.fields.some(function(f){return f.type===t;}); }
-  var tagOptions = Array.from(new Set(data.exercises.map(function(e){return e.tag;}).filter(Boolean)));
+  var tagOptions = allTagOptions();
 
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>'+(d.editingId?'Edit Exercise':'New Exercise')+'</h2><button class="icon-btn" data-action="ex-modal-close">'+icon('x')+'</button></div>'+
     '<label class="field-label">Name</label>'+
     '<input id="ex-name-input" class="input" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
-    '<label class="field-label">Category <span class="field-optional">Optional</span></label>'+
-    '<input class="input" list="ex-tag-options" data-commit="ex-tag" placeholder="e.g. Chest, Cardio, Mobility" value="'+esc(d.tag)+'">'+
+    '<div id="ex-muscle-picker">'+musclePickerHTML(d)+'</div>'+
+    '<label class="field-label" style="margin-top:14px;">Tags <span class="field-optional">Optional</span></label>'+
+    '<div class="mus-legend">Free text, comma separated. Used for search and labels \u2014 never for the map.</div>'+
+    '<input class="input" list="ex-tag-options" data-commit="ex-tags" placeholder="e.g. Chest, Cardio, Mobility" value="'+esc(d.tags.join(', '))+'">'+
     '<datalist id="ex-tag-options">'+tagOptions.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
     '<label class="field-label">Tracking Fields</label>'+
     '<div class="chip-row">'+
@@ -3463,14 +4162,14 @@ function renderPickerResults(){
   if (!el) return;
   var q = ui.picker.query.trim().toLowerCase();
   var list = data.exercises.filter(function(e){
-    return !q || e.name.toLowerCase().indexOf(q)>=0 || (e.tag||'').toLowerCase().indexOf(q)>=0;
+    return exerciseMatchesQuery(e, q);
   });
   if (data.exercises.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 4px;">Your library is empty &mdash; click "New" to create your first exercise.</div>'; return; }
   if (list.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 4px;">No matches.</div>'; return; }
   el.innerHTML = list.map(function(ex){
     return '<button class="result-row" data-action="picker-pick" data-id="'+ex.id+'">'+
       '<div><div class="result-row-name">'+esc(ex.name)+'</div><div class="result-row-sub">'+ex.fields.map(function(f){return f.label;}).join(' &middot; ')+'</div></div>'+
-      (ex.tag?('<span class="badge">'+esc(ex.tag)+'</span>'):'')+
+      tagBadgesHTML(ex)+
     '</button>';
   }).join('');
 }
@@ -4097,7 +4796,8 @@ function sessionsPaneHTML(){
   var sorted = data.workouts.filter(function(w){return w.completedAt;}).sort(function(a,b){return b.completedAt-a.completedAt;});
   var shown = ui.historyFilterDate ? sorted.filter(function(w){return w.date===ui.historyFilterDate;}) : sorted;
 
-  var html = '<div class="stat-grid">'+
+  var html = weeklyMuscleMapHTML() +
+  '<div class="stat-grid">'+
     '<div class="stat-card"><div class="stat-num">'+computeStreak(trained)+'</div><div class="stat-lbl">Day Streak</div></div>'+
     '<div class="stat-card"><div class="stat-num">'+computeThisMonthCount()+'</div><div class="stat-lbl">This Month</div></div>'+
     '<div class="stat-card"><div class="stat-num">'+sorted.length+'</div><div class="stat-lbl">All Time</div></div>'+
@@ -4380,6 +5080,13 @@ function renderSettingsModal(){
       '<button class="'+(data.settings.weightUnit==='lb'?'active':'')+'" data-action="unit-lb">lb</button>'+
       '<button class="'+(data.settings.weightUnit==='kg'?'active':'')+'" data-action="unit-kg">kg</button>'+
     '</div></div>'+
+
+    '<div class="settings-row"><div class="settings-row-text"><span>Body Diagram</span>'+
+      '<span class="settings-row-sub">Which figure the muscle coverage map draws</span></div>'+
+      '<div class="segmented">'+
+        '<button class="'+(bodyType()==='male'?'active':'')+'" data-action="body-type" data-body="male">Male</button>'+
+        '<button class="'+(bodyType()==='female'?'active':'')+'" data-action="body-type" data-body="female">Female</button>'+
+      '</div></div>'+
 
     '<div class="settings-row"><div class="settings-row-text"><span>Hide Progress Photos</span>'+
       '<span class="settings-row-sub">Blurs them until you tap to reveal, for handing your phone to someone</span></div>'+
@@ -4816,6 +5523,11 @@ function handleAction(action, el){
       renderExerciseModal();
       break;
     }
+    case 'ex-toggle-muscle': {
+      cycleMuscleTier(ui.exerciseDraft, el.dataset.slug);
+      refreshMusclePicker();
+      break;
+    }
     case 'ex-toggle-custom': ui.showCustomFieldForm = !ui.showCustomFieldForm; renderExerciseModal(); break;
     case 'ex-add-custom-field': {
       var cname = document.getElementById('ex-custom-name').value.trim();
@@ -4829,7 +5541,11 @@ function handleAction(action, el){
     }
     case 'ex-modal-save': {
       var d = ui.exerciseDraft;
-      var ex = { id: d.editingId || uid('ex'), name: d.name.trim(), tag: d.tag.trim(), fields: d.fields, defaultRestSec: d.defaultRestSec };
+      var ex = { id: d.editingId || uid('ex'), name: d.name.trim(), tags: d.tags.slice(),
+                 muscles: { primary: d.muscles.primary.slice(), secondary: d.muscles.secondary.slice() },
+                 fields: d.fields, defaultRestSec: d.defaultRestSec };
+      /* kept in step so a build without this feature still finds its categories */
+      ex.tag = tagsToLegacyTag(ex.tags);
       if (d.editingId){
         data.exercises = data.exercises.map(function(e){ return e.id===ex.id ? ex : e; });
       } else {
@@ -4902,6 +5618,11 @@ function handleAction(action, el){
           : { kind:'error', text:'This browser turned the request down. It usually grants it once the app is installed to your home screen.' };
         renderSettingsModal();
       });
+      break;
+    }
+    case 'body-type': {
+      data.settings.bodyType = el.dataset.body==='female' ? 'female' : 'male';
+      save(); resetMuscleMaps(); renderSettingsModal(); renderMain();
       break;
     }
     case 'unit-lb': data.settings.weightUnit='lb'; save(); renderSettingsModal(); renderMain(); break;
@@ -5218,7 +5939,7 @@ function onFocusOut(e){
       if (plan){ plan.name = t.value.trim() || 'Untitled Plan'; t.value = plan.name; save(); }
       break;
     }
-    case 'ex-tag': ui.exerciseDraft.tag = t.value; break;
+    case 'ex-tags': ui.exerciseDraft.tags = parseTagInput(t.value); break;
     case 'ex-default-rest': {
       var val = t.value.trim();
       ui.exerciseDraft.defaultRestSec = val==='' ? null : Math.max(0, parseInt(val,10)||0);
@@ -5277,6 +5998,7 @@ function onInput(e){
     ui.exerciseDraft.name = t.value;
     var btn = document.getElementById('ex-save-btn');
     if (btn) btn.disabled = !(t.value.trim() && ui.exerciseDraft.fields.length);
+    if (autofillMuscles(ui.exerciseDraft)) refreshMusclePicker();
     return;
   }
   if (t.id==='picker-search'){ ui.picker.query = t.value; renderPickerResults(); return; }
@@ -5528,9 +6250,9 @@ function fieldInfoHTML(key){
   var d = FIELD_INFO[key];
   return '<div class="fi-title">'+esc(d.title)+'</div>'+
     '<div class="fi-body">'+esc(d.body)+'</div>'+
-    '<div class="fi-scale">'+d.scale.map(function(s){
+    (d.scale ? ('<div class="fi-scale">'+d.scale.map(function(s){
       return '<div class="fi-scale-row"><span class="fi-key">'+esc(s[0])+'</span><span>'+esc(s[1])+'</span></div>';
-    }).join('')+'</div>'+
+    }).join('')+'</div>') : '')+
     (d.foot?('<div class="fi-foot">'+esc(d.foot)+'</div>'):'');
 }
 function positionFieldInfo(){
