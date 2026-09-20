@@ -1285,6 +1285,15 @@ function isTrainableMuscle(slug){ return TRAINABLE_MUSCLES.indexOf(slug) >= 0; }
    and trying for both destroys the at-a-glance read the map exists for. */
 var MUSCLE_RAMP = ['#9ca3af','#fbbf24','#f59e0b','#ef4444'];
 
+/* paintMuscleMaps() degrades to an empty slot if the kit is somehow absent.
+   The breakdown has to survive the same way, or a missing kit blanks the
+   whole tab rather than just the diagram. */
+function muscleColour(pct){
+  if (typeof MuscleMap !== 'undefined' && MuscleMap.ramp) return MuscleMap.ramp(MUSCLE_RAMP, pct);
+  var i = Math.max(0, Math.min(MUSCLE_RAMP.length - 1, Math.round((MUSCLE_RAMP.length - 1) * (pct || 0) / 100)));
+  return MUSCLE_RAMP[i];
+}
+
 var PRIMARY_WEIGHT = 1.0;
 var SECONDARY_WEIGHT = 0.5;
 
@@ -1614,18 +1623,29 @@ function lookupExerciseMuscles(name){
    them. New code never reads it. */
 function tagsToLegacyTag(tags){ return (tags||[]).join(', '); }
 
+function legacyTagString(ex){
+  return (ex.tag === null || ex.tag === undefined) ? '' : String(ex.tag).trim();
+}
 function migrateMuscleData(){
   var changed = false;
   data.exercises.forEach(function(ex){
     if (!Array.isArray(ex.tags)){
-      var old = typeof ex.tag === 'string' ? ex.tag.trim() : '';
-      ex.tags = old ? old.split(',').map(function(t){ return t.trim(); }).filter(Boolean) : [];
+      ex.tags = parseTagInput(legacyTagString(ex));
+      changed = true;
+    } else if (typeof ex.tag === 'string' && ex.tag.trim() !== tagsToLegacyTag(ex.tags)){
+      /* `tag` and `tags` only drift apart when something other than this
+         build wrote one of them - i.e. the app was opened in a copy without
+         this feature and a category was edited there. That edit is the newer
+         intent, so it wins. */
+      ex.tags = parseTagInput(legacyTagString(ex));
       changed = true;
     }
-    if (!ex.muscles || !Array.isArray(ex.muscles.primary) || !Array.isArray(ex.muscles.secondary)){
-      ex.muscles = emptyMuscles();
-      changed = true;
-    }
+    /* repaired a tier at a time: one malformed list should not discard the
+       other one */
+    if (!ex.muscles || typeof ex.muscles !== 'object'){ ex.muscles = emptyMuscles(); changed = true; }
+    if (!Array.isArray(ex.muscles.primary)){ ex.muscles.primary = []; changed = true; }
+    if (!Array.isArray(ex.muscles.secondary)){ ex.muscles.secondary = []; changed = true; }
+
     var legacy = tagsToLegacyTag(ex.tags);
     if (ex.tag !== legacy){ ex.tag = legacy; changed = true; }
   });
@@ -3791,7 +3811,9 @@ function renderExerciseListResults(){
   if (list.length===0){ el.innerHTML = '<div class="empty-hint" style="padding:14px 16px;">No matches.</div>'; return; }
   el.innerHTML = list.map(function(e){
     return '<button class="split-item '+(e.id===ui.selectedExerciseId?'active':'')+'" data-action="select-exercise" data-id="'+e.id+'"><span>'+esc(e.name)+'</span>'+
-      (hasMuscleData(e)?'':'<span class="split-item-nudge" title="No muscles set">add muscles</span>')+
+      /* once they have been through the editor the answer is theirs, even
+         if the answer was none */
+      (hasMuscleData(e)||e.musclesSet?'':'<span class="split-item-nudge" title="No muscles set">add muscles</span>')+
       icon('chevronRight')+'</button>';
   }).join('');
 }
@@ -3818,7 +3840,9 @@ function renderExerciseDetailHTML(){
           exerciseMuscles(ex).primary.map(function(s){ return '<div class="chip" style="padding:6px 12px;"><span>'+esc(muscleLabel(s))+'</span></div>'; }).join('')+
           exerciseMuscles(ex).secondary.map(function(s){ return '<div class="chip chip-soft" style="padding:6px 12px;"><span>'+esc(muscleLabel(s))+' &middot; supporting</span></div>'; }).join('')+
         '</div>'
-      : '<button class="btn btn-tag" data-action="edit-exercise" data-id="'+ex.id+'">'+icon('plus')+' Add muscles</button>')+
+      : (ex.musclesSet
+          ? '<div style="color:var(--text-dim);font-size:14px;">None \u2014 this exercise does not colour the map.</div>'
+          : '<button class="btn btn-tag" data-action="edit-exercise" data-id="'+ex.id+'">'+icon('plus')+' Add muscles</button>'))+
     '<div class="field-label" style="margin-top:16px;">Tracking fields</div>'+
     '<div class="chip-row">'+ex.fields.map(function(f){
       return '<div class="chip" style="padding:6px 12px;"><span>'+esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'')+' &middot; '+FIELD_TYPE_NAMES[f.type]+'</span></div>';
@@ -3905,7 +3929,7 @@ function muscleBreakdownHTML(rows, showSets){
     return '<div class="mm-row">'+
       '<span class="mm-name">'+esc(r.label)+'</span>'+
       '<span class="mm-bar"><span class="mm-bar-fill" style="width:'+Math.max(2, r.pct)+'%;background:'+
-        MuscleMap.ramp(MUSCLE_RAMP, r.pct)+'"></span></span>'+
+        muscleColour(r.pct)+'"></span></span>'+
       (showSets ? '<span class="mm-sets">'+fmtSets(r.sets)+'</span>' : '')+
       '<span class="mm-pct">'+r.pct+'%</span>'+
     '</div>';
@@ -4049,7 +4073,8 @@ function musclePickerHTML(d){
 function openExerciseModal(editingExercise, pickerContext){
   ui.exerciseDraft = editingExercise
     ? { editingId: editingExercise.id, name: editingExercise.name, tags: exerciseTags(editingExercise).slice(),
-        muscles: exerciseMuscles(editingExercise), musclesTouched: hasMuscleData(editingExercise), musclesAutofilled: false,
+        muscles: exerciseMuscles(editingExercise),
+        musclesTouched: !!editingExercise.musclesSet || hasMuscleData(editingExercise), musclesAutofilled: false,
         fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
     : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], defaultRestSec:null };
   /* An exercise that predates this feature, or one being created, gets its
@@ -5550,6 +5575,10 @@ function handleAction(action, el){
       var d = ui.exerciseDraft;
       var ex = { id: d.editingId || uid('ex'), name: d.name.trim(), tags: d.tags.slice(),
                  muscles: { primary: d.muscles.primary.slice(), secondary: d.muscles.secondary.slice() },
+                 /* records that the muscles have been through this editor, so
+                    clearing them all stays cleared instead of being re-filled
+                    from the name every time it is reopened */
+                 musclesSet: true,
                  fields: d.fields, defaultRestSec: d.defaultRestSec };
       /* kept in step so a build without this feature still finds its categories */
       ex.tag = tagsToLegacyTag(ex.tags);
