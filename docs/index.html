@@ -765,6 +765,26 @@ body.photos-hidden .photo-veil{display:flex;}
 .mus-chip:hover{border-color:var(--accent-soft-border);}
 .mus-chip.s{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);}
 .mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
+
+/* ---- about ---- */
+.about-block{border-bottom:2px solid var(--border);}
+.about-toggle{padding:13px 0;}
+.about-toggle .field-label{font-size:14.5px;font-weight:700;color:var(--text);}
+.about-body{padding:0 2px 16px;font-size:13.5px;font-weight:600;color:var(--text-dim);line-height:1.62;}
+.about-body p{margin:0 0 11px;}
+.about-body p:last-child{margin-bottom:0;}
+.about-body b{color:var(--text);font-weight:800;}
+.about-body i{font-style:normal;color:var(--text);}
+.about-body code{font-family:var(--font-ui);font-weight:800;font-size:12.5px;
+  background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:0 4px;}
+.about-where{margin:0 0 11px;border:2px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
+.about-where-row{display:flex;gap:10px;padding:9px 11px;background:var(--surface);}
+.about-where-row + .about-where-row{border-top:2px solid var(--border);}
+.about-where-k{flex:0 0 96px;font-size:12px;font-weight:800;color:var(--text);}
+@media (max-width:480px){
+  .about-where-row{flex-direction:column;gap:2px;}
+  .about-where-k{flex:none;}
+}
 .chip.chip-soft{background:var(--surface-2);border-color:var(--border);color:var(--text-dim);}
 .split-item-nudge{margin-left:auto;font-size:11px;font-weight:800;color:var(--accent-deep);
   background:var(--accent-soft);border:2px solid var(--accent-soft-border);border-radius:10px;
@@ -1631,6 +1651,81 @@ function lookupExerciseMuscles(name){
     }
   }
   return null;
+}
+
+/* ---- Name suggestions ---------------------------------------------------
+   The same table that fills in muscles also knows ~144 exercise names, so it
+   may as well offer them while you type. A hint, not a menu: nothing appears
+   until two characters are in, at most eight ever show, your own exercises
+   come first, and typing straight past them costs nothing.
+
+   Only the first name in each row is ever suggested - the rest are spellings
+   kept for matching ("rdl", "hspu", "db bench press"), not names worth
+   putting in front of anyone. */
+
+function titleCaseExerciseName(s){
+  return String(s).split(' ').map(function(w){
+    return w ? w.charAt(0).toUpperCase() + w.slice(1) : w;
+  }).join(' ');
+}
+
+var EXERCISE_NAME_SUGGESTIONS = EXERCISE_MUSCLE_SEED.map(function(row){
+  return titleCaseExerciseName(row[0].split('|')[0]);
+});
+
+var MAX_NAME_SUGGESTIONS = 8;
+var MIN_SUGGEST_CHARS = 2;
+
+/* Start of the name, or start of any word in it. "pr" finds Preacher Curl and
+   Overhead Press; it does not find Scapular Retraction.
+
+   Matching is against the name you can SEE, never against the hidden
+   spellings the muscle lookup keeps. Typing "ba" and being offered "Bench
+   Press" - because "barbell bench press" is one of its aliases - reads as a
+   bug, however correct it is. Every suggestion visibly starts with what was
+   typed. The squashed pass is prefix-only, so "pushup" still finds "Push Up"
+   without "run" finding "Trunk Rotation". */
+function nameStartsWith(candidate, q){
+  if (candidate.indexOf(q) === 0) return true;
+  if ((' '+candidate).indexOf(' '+q) >= 0) return true;
+  return candidate.replace(/ /g,'').indexOf(q.replace(/ /g,'')) === 0;
+}
+
+function exerciseNameSuggestions(query, excludeId){
+  var q = normaliseExerciseName(query);
+  if (q.length < MIN_SUGGEST_CHARS) return [];
+  var out = [], seen = {};
+
+  /* what you actually train beats what was guessed for you */
+  data.exercises.forEach(function(ex){
+    if (out.length >= MAX_NAME_SUGGESTIONS) return;
+    if (!ex.name || ex.id === excludeId) return;
+    var n = normaliseExerciseName(ex.name);
+    if (seen[n] || n === q || !nameStartsWith(n, q)) return;
+    seen[n] = 1;
+    out.push(ex.name);
+  });
+
+  EXERCISE_NAME_SUGGESTIONS.forEach(function(label){
+    if (out.length >= MAX_NAME_SUGGESTIONS) return;
+    var n = normaliseExerciseName(label);
+    if (seen[n] || n === q || !nameStartsWith(n, q)) return;
+    seen[n] = 1;
+    out.push(label);
+  });
+
+  return out;
+}
+
+/* The <datalist> is refilled as you type rather than carrying all 144 names,
+   so tapping an empty field never drops a wall of options over the keyboard. */
+function refreshNameSuggestions(query){
+  var el = document.getElementById('ex-name-options');
+  if (!el) return;
+  var d = ui.exerciseDraft;
+  el.innerHTML = exerciseNameSuggestions(query, d && d.editingId).map(function(s){
+    return '<option value="'+esc(s)+'">';
+  }).join('');
 }
 
 /* ---- Migration ----------------------------------------------------------
@@ -3030,6 +3125,7 @@ var ui = {
   pickerContextForModal: null,
   exerciseDraft: null,
   showCustomFieldForm: false,
+  aboutOpen: null,
   editingRest: null,
   editingDefaultRest: null,
   editingPlanRest: null,
@@ -4175,7 +4271,9 @@ function renderExerciseModal(){
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>'+(d.editingId?'Edit Exercise':'New Exercise')+'</h2><button class="icon-btn" data-action="ex-modal-close">'+icon('x')+'</button></div>'+
     '<label class="field-label">Name</label>'+
-    '<input id="ex-name-input" class="input" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
+    '<input id="ex-name-input" class="input" list="ex-name-options" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
+    /* filled in by refreshNameSuggestions() once two characters are typed */
+    '<datalist id="ex-name-options"></datalist>'+
     '<div id="ex-muscle-picker">'+musclePickerHTML(d)+'</div>'+
     '<label class="field-label" style="margin-top:14px;">Tags <span class="field-optional">Optional</span></label>'+
     '<div class="mus-legend">Free text, comma separated. Used for search and labels \u2014 never for the map.</div>'+
@@ -5172,6 +5270,110 @@ function closeSettings(){
   renderMain();
 }
 
+
+/* ---- About --------------------------------------------------------------
+   Three collapsed rows at the foot of Settings. Built here rather than
+   written into the page body so it costs an exported backup nothing:
+   buildPortableHTML() blanks #settings-modal, and this is rebuilt from the
+   app script on the other side. */
+
+var ABOUT_SECTIONS = [
+  { key:'what', title:'What this is', body:
+    '<p><b>Most fitness apps ship you a library and ask you to find yourself in it.</b> '+
+    'You search for what you did, pick the closest thing, and log that instead. '+
+    'This one starts empty on purpose.</p>'+
+
+    '<p>Every exercise here defines its own fields. A bench press tracks weight and reps. '+
+    'A handstand hold tracks time. A max hang tracks time and added load. A freeze tracks '+
+    'nothing but whether you held it. None of these is a special case — they are all the '+
+    'same kind of object, and you decide what that object measures.</p>'+
+
+    '<p>That is the whole design. <b>Nothing is preset because nothing should be.</b> If an '+
+    'app decides in advance that exercises have weight and reps, then breakdance, skill '+
+    'holds and half of calisthenics become things you cannot log properly — and you '+
+    'quietly stop logging them.</p>'+
+
+    '<p>You name your own exercises. You choose their fields. You group them however you '+
+    'think. You build your own plans out of them. If the app ever tells you an exercise '+
+    'does not exist, something has gone wrong with the app.</p>' },
+
+  { key:'hints', title:'Suggestions, never rules', body:
+    '<p>Type an exercise name and two things may fill themselves in. '+
+    '<b>Both are hints, and both are yours to overwrite.</b></p>'+
+
+    '<p><b>Name suggestions.</b> About 150 common names live in the app — barbell lifts, '+
+    'calisthenics, skill work, breakdance, conditioning. Once you have typed a couple of '+
+    'letters, matching ones appear underneath. Your own exercises come first, because what '+
+    'you actually train beats what was guessed for you. Keep typing and they go away. There '+
+    'is no approved list; anything you type is a real exercise the moment you save it.</p>'+
+
+    '<p><b>Muscle suggestions.</b> If the name matches something known, the muscle chips fill '+
+    'in — solid for the ones doing the work, soft for the ones helping. Tap any of them to '+
+    'change it. Clear them all and it stays cleared. An unrecognised name fills in nothing at '+
+    'all rather than guessing, because a confidently wrong answer is worse than an empty '+
+    'one.</p>'+
+
+    '<p>The suggestions exist to save you typing on your fiftieth set of pull-ups. They were '+
+    'never meant to tell you what you are allowed to do.</p>' },
+
+  { key:'data', title:'Where your data lives', body:
+    '<p><b>On your device. It never leaves.</b> No account, no server, no sync — nothing '+
+    'here has anywhere to send your training to.</p>'+
+
+    '<p>Everything except photos is one block of text in the browser’s local storage. '+
+    'Progress photos are too big for that, so the images sit in a separate, much larger store '+
+    'on the same device, with only their dates and notes in the main block.</p>'+
+
+    '<p><b>Each install is its own island.</b> Storage is tied to where the app was opened '+
+    'from, so the same app in two places keeps two separate histories:</p>'+
+
+    '<div class="about-where">'+
+      '<div class="about-where-row"><span class="about-where-k">Browser</span>'+
+        '<span>Laptop, desktop or phone. Storage for that web address, in that browser.</span></div>'+
+      '<div class="about-where-row"><span class="about-where-k">Home Screen</span>'+
+        '<span>iPhone or Android. The same storage as the browser you installed it from, '+
+        'and harder for the phone to clear.</span></div>'+
+      '<div class="about-where-row"><span class="about-where-k">Android APK</span>'+
+        '<span>The app’s own private storage. Separate from Chrome on the same phone, '+
+        'even though it is the same app.</span></div>'+
+      '<div class="about-where-row"><span class="about-where-k">Portable copy</span>'+
+        '<span>An exported <code>.html</code> gets its own storage again, separate from all '+
+        'of the above.</span></div>'+
+    '</div>'+
+
+    '<p>There is no iOS app to install — on iPhone and iPad, Add to Home Screen <i>is</i> '+
+    'the install. It runs offline, full screen, no App Store involved.</p>'+
+
+    '<p>So your phone and your laptop do not share anything automatically, and moving between '+
+    'them means exporting a file. That is deliberate: sync would mean a server, and a server '+
+    'would mean an account.</p>'+
+
+    '<p><b>Browsers can delete this.</b> If space runs low, or you do not open the app for a '+
+    'long stretch, the browser may reclaim it. Installing to a Home Screen makes that much '+
+    'less likely, and <i>Protect From Automatic Clearing</i> above asks the browser not to. '+
+    'Neither is a promise.</p>'+
+
+    '<p><b>Exporting a real file is the only actual guarantee.</b> <code>.json</code> is small '+
+    'and easy to keep anywhere. The portable <code>.html</code> is a complete working copy of '+
+    'the app with your data inside it — open it on any machine, in any browser, with no '+
+    'internet, and it just runs.</p>' }
+];
+
+function aboutSectionsHTML(){
+  return '<div class="settings-section-label">About</div>' +
+    ABOUT_SECTIONS.map(function(s){
+      var open = ui.aboutOpen === s.key;
+      return '<div class="about-block">'+
+        '<button class="chart-toggle about-toggle" data-action="about-toggle" data-key="'+s.key+'" '+
+          'aria-expanded="'+(open?'true':'false')+'">'+
+          '<span class="field-label">'+esc(s.title)+'</span>'+
+          '<span class="cat-caret '+(open?'':'collapsed')+'">'+icon('chevronDown')+'</span>'+
+        '</button>'+
+        (open ? '<div class="about-body">'+s.body+'</div>' : '')+
+      '</div>';
+    }).join('');
+}
+
 function renderSettingsModal(){
   var wrap = document.getElementById('settings-modal');
   var c = dataCounts(data);
@@ -5274,6 +5476,8 @@ function renderSettingsModal(){
           '</div></div>';
     }
   }
+
+  html += aboutSectionsHTML();
 
   html += '<div class="settings-section-label">Danger Zone</div>'+
     '<div class="settings-row"><div class="settings-row-text"><span>Reset All Data</span><span class="settings-row-sub">Erases everything in this browser</span></div>'+
@@ -5733,6 +5937,12 @@ function handleAction(action, el){
       });
       break;
     }
+    case 'about-toggle': {
+      var aKey = el.dataset.key;
+      ui.aboutOpen = (ui.aboutOpen === aKey) ? null : aKey;
+      renderSettingsModal();
+      break;
+    }
     case 'body-type': {
       data.settings.bodyType = el.dataset.body==='female' ? 'female' : 'male';
       save(); resetMuscleMaps(); renderSettingsModal(); renderMain();
@@ -6113,6 +6323,7 @@ function onInput(e){
     var btn = document.getElementById('ex-save-btn');
     if (btn) btn.disabled = !(t.value.trim() && ui.exerciseDraft.fields.length);
     if (autofillMuscles(ui.exerciseDraft)) refreshMusclePicker();
+    refreshNameSuggestions(t.value);
     return;
   }
   if (t.id==='picker-search'){ ui.picker.query = t.value; renderPickerResults(); return; }
