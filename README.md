@@ -12,6 +12,15 @@ Progress photos live under **Progress → Photos**, tagged by angle (front, side
 back, or your own). When you crop a new one, the last shot in that angle is
 laid over the frame so the months actually line up.
 
+**Muscle coverage** sits at the top of **Progress → Sessions**: front and back
+diagrams coloured by how much each muscle was worked over the last 7 days, and
+the same pair inside each plan showing what that session emphasises. It counts
+*sets*, not exercises — five sets of pull-ups should outweigh one set of curls.
+The weekly view scores against a target rather than against your own best
+muscle, so the ones you keep skipping stay grey instead of being normalised up
+into colour. It shows volume, not strength; the load and 1RM charts are still
+their own thing.
+
 **Live:** https://neirko.github.io/athleticism/
 
 ---
@@ -31,6 +40,8 @@ package.json
 tools/
   icon.py              regenerates the app icons from SVG
   legacy-build/        how index.html was originally generated (see below)
+  muscle-map-kit/      the body diagrams, as shipped (MIT). Reference only —
+                       the renderer and geometry are inlined into index.html
 ```
 
 `docs/index.html` is a single self-contained file — all CSS, JavaScript, the
