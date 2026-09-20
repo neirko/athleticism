@@ -6094,7 +6094,7 @@ function handleAction(action, el){
       data = defaultData(); save();
       clearMuscleSidecar();
       reconcilePhotoStore();   /* metadata is empty now, so this empties the store */
-      ui.importPreview = null; ui.settingsMessage = null;
+      ui.importPreview = null; ui.settingsMessage = null; ui.aboutOpen = null;
       document.getElementById('settings-modal').hidden = true;
       setView('home');
     }); break;
