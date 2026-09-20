@@ -735,10 +735,20 @@ body.photos-hidden .photo-veil{display:flex;}
 .mm-untrained-lbl{display:block;font-size:11px;font-weight:800;letter-spacing:.06em;
   text-transform:uppercase;color:var(--text-dim);margin-bottom:3px;}
 .mm-empty{font-size:13px;color:var(--text-faint);line-height:1.5;}
+/* The figures are the point, so give them the room a wide screen has. */
+@media (min-width:900px){
+  .mm-canvas{width:150px;height:300px;}
+  .mm-figs{gap:16px;}
+}
+/* On a phone, side by side leaves the bodies too small to read and squeezes
+   the labels to ellipsis. Stack instead: the figures get the full width. */
 @media (max-width:560px){
-  .mm-card{gap:16px;}
-  .mm-canvas{width:88px;height:176px;}
-  .mm-name{flex-basis:70px;}
+  .mm-card{flex-direction:column;gap:16px;}
+  .mm-figs{width:100%;justify-content:center;gap:14px;}
+  .mm-canvas{width:132px;height:264px;}
+  .mm-side{width:100%;flex:1 1 auto;}
+  .mm-name{flex-basis:88px;}
+  .mm-sets{display:none;}
 }
 
 /* ---- muscle picker ---- */
@@ -753,7 +763,7 @@ body.photos-hidden .photo-veil{display:flex;}
 .mus-chip{background:var(--surface-2);border:2px solid var(--border);color:var(--text-dim);
   border-radius:20px;padding:5px 12px;font-size:12.5px;font-weight:700;}
 .mus-chip:hover{border-color:var(--accent-soft-border);}
-.mus-chip.s{background:var(--accent-soft);border-color:var(--accent-soft-border);color:var(--accent-deep);}
+.mus-chip.s{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);}
 .mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
 .chip.chip-soft{background:var(--surface-2);border-color:var(--border);color:var(--text-dim);}
 .split-item-nudge{margin-left:auto;font-size:11px;font-weight:800;color:var(--accent-deep);
@@ -4050,6 +4060,11 @@ function openExerciseModal(editingExercise, pickerContext){
         muscles: exerciseMuscles(editingExercise), musclesTouched: hasMuscleData(editingExercise), musclesAutofilled: false,
         fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
     : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], defaultRestSec:null };
+  /* An exercise that predates this feature, or one being created, gets its
+     muscles filled in from its name the moment the editor opens - otherwise
+     "add muscles" would mean facing 21 empty chips. Anything already set by
+     hand is left exactly as it is. */
+  autofillMuscles(ui.exerciseDraft);
   ui.pickerContextForModal = pickerContext || null;
   ui.showCustomFieldForm = false;
   document.getElementById('exercise-modal').hidden = false;
