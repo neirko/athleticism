@@ -1341,14 +1341,11 @@ function planRawScores(plan){
 function workoutSetCount(wex){
   return (wex.sets || []).filter(function(s){ return (s.kind||'set')==='set' && s.done; }).length;
 }
-function workoutRawScores(w){
-  var raw = {};
-  if (!w) return raw;
+function addWorkoutVolume(raw, w){
   (w.exercises || []).forEach(function(wex){
     if ((wex.kind||'exercise') !== 'exercise') return;
     addMuscleVolume(raw, exerciseById(wex.exerciseId), workoutSetCount(wex));
   });
-  return raw;
 }
 
 function daysAgoISO(n){
@@ -1362,12 +1359,7 @@ function recentWorkouts(days){
 }
 function weeklyRawScores(){
   var raw = {};
-  recentWorkouts(WEEKLY_WINDOW_DAYS).forEach(function(w){
-    (w.exercises || []).forEach(function(wex){
-      if ((wex.kind||'exercise') !== 'exercise') return;
-      addMuscleVolume(raw, exerciseById(wex.exerciseId), workoutSetCount(wex));
-    });
-  });
+  recentWorkouts(WEEKLY_WINDOW_DAYS).forEach(function(w){ addWorkoutVolume(raw, w); });
   return raw;
 }
 
