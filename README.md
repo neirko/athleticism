@@ -123,7 +123,8 @@ entered on:
 | Where | Stored under |
 |---|---|
 | Laptop browser | `neirko.github.io` |
-| iPhone home screen | same origin, same store as Safari |
+| Android home screen | same origin, same store as the Chrome it was installed from |
+| iPhone home screen | its own store, **not** Safari's — iOS gives a standalone web app a separate storage container, so anything logged in Safari first is not there |
 | Android APK | the app's own WebView storage |
 
 Progress photos are the one exception to "it's all one blob". Everything else

@@ -768,13 +768,13 @@ body.photos-hidden .photo-veil{display:flex;}
 
 /* ---- about ---- */
 .about-block{border-bottom:2px solid var(--border);}
-.about-toggle{padding:13px 0;}
+.about-toggle{margin:0;padding:13px 0;}
 .about-toggle .field-label{font-size:14.5px;font-weight:700;color:var(--text);}
 .about-body{padding:0 2px 16px;font-size:13.5px;font-weight:600;color:var(--text-dim);line-height:1.62;}
 .about-body p{margin:0 0 11px;}
 .about-body p:last-child{margin-bottom:0;}
 .about-body b{color:var(--text);font-weight:800;}
-.about-body i{font-style:normal;color:var(--text);}
+.about-body i{font-style:italic;color:var(--text);}
 .about-body code{font-family:var(--font-ui);font-weight:800;font-size:12.5px;
   background:var(--surface-2);border:1px solid var(--border);border-radius:5px;padding:0 4px;}
 .about-where{margin:0 0 11px;border:2px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;}
@@ -1683,34 +1683,39 @@ var MIN_SUGGEST_CHARS = 2;
    spellings the muscle lookup keeps. Typing "ba" and being offered "Bench
    Press" - because "barbell bench press" is one of its aliases - reads as a
    bug, however correct it is. Every suggestion visibly starts with what was
-   typed. The squashed pass is prefix-only, so "pushup" still finds "Push Up"
-   without "run" finding "Trunk Rotation". */
+   typed.
+
+   There is deliberately no spaces-closed-up pass. The browser runs its own
+   filter over the <datalist> on top of this one, and it will not show "Push
+   Up" to someone typing "pushup" whatever we hand it - so matching that way
+   would only add options nobody ever sees. */
 function nameStartsWith(candidate, q){
-  if (candidate.indexOf(q) === 0) return true;
-  if ((' '+candidate).indexOf(' '+q) >= 0) return true;
-  return candidate.replace(/ /g,'').indexOf(q.replace(/ /g,'')) === 0;
+  return candidate.indexOf(q) === 0 || (' '+candidate).indexOf(' '+q) >= 0;
 }
 
 function exerciseNameSuggestions(query, excludeId){
   var q = normaliseExerciseName(query);
   if (q.length < MIN_SUGGEST_CHARS) return [];
   var out = [], seen = {};
+  /* prefixed so a name like "constructor" cannot collide with Object.prototype,
+     and spaces closed up so your own "Pushup" hides the built-in "Push Up" */
+  function mark(n){ return 'k' + n.replace(/ /g,''); }
 
   /* what you actually train beats what was guessed for you */
   data.exercises.forEach(function(ex){
     if (out.length >= MAX_NAME_SUGGESTIONS) return;
     if (!ex.name || ex.id === excludeId) return;
     var n = normaliseExerciseName(ex.name);
-    if (seen[n] || n === q || !nameStartsWith(n, q)) return;
-    seen[n] = 1;
+    if (!n || seen[mark(n)] || n === q || !nameStartsWith(n, q)) return;
+    seen[mark(n)] = 1;
     out.push(ex.name);
   });
 
   EXERCISE_NAME_SUGGESTIONS.forEach(function(label){
     if (out.length >= MAX_NAME_SUGGESTIONS) return;
     var n = normaliseExerciseName(label);
-    if (seen[n] || n === q || !nameStartsWith(n, q)) return;
-    seen[n] = 1;
+    if (seen[mark(n)] || n === q || !nameStartsWith(n, q)) return;
+    seen[mark(n)] = 1;
     out.push(label);
   });
 
@@ -1723,9 +1728,12 @@ function refreshNameSuggestions(query){
   var el = document.getElementById('ex-name-options');
   if (!el) return;
   var d = ui.exerciseDraft;
-  el.innerHTML = exerciseNameSuggestions(query, d && d.editingId).map(function(s){
-    return '<option value="'+esc(s)+'">';
-  }).join('');
+  var list = exerciseNameSuggestions(query, d && d.editingId);
+  /* rewriting an unchanged list can close a dropdown that is already open */
+  var key = list.join('\n');
+  if (el.getAttribute('data-list') === key) return;
+  el.setAttribute('data-list', key);
+  el.innerHTML = list.map(function(s){ return '<option value="'+esc(s)+'">'; }).join('');
 }
 
 /* ---- Migration ----------------------------------------------------------
@@ -4271,7 +4279,7 @@ function renderExerciseModal(){
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>'+(d.editingId?'Edit Exercise':'New Exercise')+'</h2><button class="icon-btn" data-action="ex-modal-close">'+icon('x')+'</button></div>'+
     '<label class="field-label">Name</label>'+
-    '<input id="ex-name-input" class="input" list="ex-name-options" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
+    '<input id="ex-name-input" class="input" list="ex-name-options" aria-label="Exercise name" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
     /* filled in by refreshNameSuggestions() once two characters are typed */
     '<datalist id="ex-name-options"></datalist>'+
     '<div id="ex-muscle-picker">'+musclePickerHTML(d)+'</div>'+
@@ -4321,6 +4329,7 @@ function renderExerciseModal(){
   '</div>';
 
   wrap.innerHTML = html;
+  refreshNameSuggestions(d.name);
   var nameInput = document.getElementById('ex-name-input');
   if (focusIfPointer(nameInput)) nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
 }
@@ -5310,9 +5319,9 @@ var ABOUT_SECTIONS = [
 
     '<p><b>Muscle suggestions.</b> If the name matches something known, the muscle chips fill '+
     'in — solid for the ones doing the work, soft for the ones helping. Tap any of them to '+
-    'change it. Clear them all and it stays cleared. An unrecognised name fills in nothing at '+
-    'all rather than guessing, because a confidently wrong answer is worse than an empty '+
-    'one.</p>'+
+    'change it. Clear them all and it stays cleared. If it recognises nothing in the name it '+
+    'fills in nothing, rather than guessing — a confidently wrong answer is worse '+
+    'than an empty one.</p>'+
 
     '<p>The suggestions exist to save you typing on your fiftieth set of pull-ups. They were '+
     'never meant to tell you what you are allowed to do.</p>' },
@@ -5331,15 +5340,18 @@ var ABOUT_SECTIONS = [
     '<div class="about-where">'+
       '<div class="about-where-row"><span class="about-where-k">Browser</span>'+
         '<span>Laptop, desktop or phone. Storage for that web address, in that browser.</span></div>'+
-      '<div class="about-where-row"><span class="about-where-k">Home Screen</span>'+
-        '<span>iPhone or Android. The same storage as the browser you installed it from, '+
-        'and harder for the phone to clear.</span></div>'+
+      '<div class="about-where-row"><span class="about-where-k">Home Screen, Android</span>'+
+        '<span>The same storage as the Chrome you installed it from, and harder for the '+
+        'phone to clear.</span></div>'+
+      '<div class="about-where-row"><span class="about-where-k">Home Screen, iPhone</span>'+
+        '<span>Its own storage, <b>not</b> Safari’s. Anything logged in Safari first '+
+        'will not be there — install it, then import a backup into it.</span></div>'+
       '<div class="about-where-row"><span class="about-where-k">Android APK</span>'+
         '<span>The app’s own private storage. Separate from Chrome on the same phone, '+
         'even though it is the same app.</span></div>'+
       '<div class="about-where-row"><span class="about-where-k">Portable copy</span>'+
-        '<span>An exported <code>.html</code> gets its own storage again, separate from all '+
-        'of the above.</span></div>'+
+        '<span>An exported <code>.html</code> keeps its own history, separate from the app '+
+        'you exported it from.</span></div>'+
     '</div>'+
 
     '<p>There is no iOS app to install — on iPhone and iPad, Add to Home Screen <i>is</i> '+
@@ -5355,24 +5367,48 @@ var ABOUT_SECTIONS = [
     'Neither is a promise.</p>'+
 
     '<p><b>Exporting a real file is the only actual guarantee.</b> <code>.json</code> is small '+
-    'and easy to keep anywhere. The portable <code>.html</code> is a complete working copy of '+
-    'the app with your data inside it — open it on any machine, in any browser, with no '+
-    'internet, and it just runs.</p>' }
+    'and easy to keep anywhere. The portable <code>.html</code> carries your data inside a '+
+    'working copy of the app — open it on any machine, in any browser, with no '+
+    'internet, and it just runs.</p>'+
+
+    '<p>Both of them <b>leave progress photos out</b> unless you turn on <i>Include Progress '+
+    'Photos</i>, because inlining them turns a backup you can email into one you cannot. '+
+    'Photos have their own export, which writes a <code>.zip</code> of dated images.</p>' }
 ];
 
+function aboutRowsHTML(){
+  return ABOUT_SECTIONS.map(function(s){
+    var open = ui.aboutOpen === s.key;
+    var panelId = 'about-panel-'+s.key;
+    return '<div class="about-block">'+
+      '<button class="chart-toggle about-toggle" data-action="about-toggle" data-key="'+s.key+'" '+
+        'aria-expanded="'+(open?'true':'false')+'" aria-controls="'+panelId+'">'+
+        '<span class="field-label">'+esc(s.title)+'</span>'+
+        '<span class="cat-caret '+(open?'':'collapsed')+'">'+icon('chevronDown')+'</span>'+
+      '</button>'+
+      (open ? '<div class="about-body" id="'+panelId+'" role="region">'+s.body+'</div>' : '')+
+    '</div>';
+  }).join('');
+}
 function aboutSectionsHTML(){
-  return '<div class="settings-section-label">About</div>' +
-    ABOUT_SECTIONS.map(function(s){
-      var open = ui.aboutOpen === s.key;
-      return '<div class="about-block">'+
-        '<button class="chart-toggle about-toggle" data-action="about-toggle" data-key="'+s.key+'" '+
-          'aria-expanded="'+(open?'true':'false')+'">'+
-          '<span class="field-label">'+esc(s.title)+'</span>'+
-          '<span class="cat-caret '+(open?'':'collapsed')+'">'+icon('chevronDown')+'</span>'+
-        '</button>'+
-        (open ? '<div class="about-body">'+s.body+'</div>' : '')+
-      '</div>';
-    }).join('');
+  return '<div class="settings-section-label">About</div>'+
+    '<div id="about-sections">'+aboutRowsHTML()+'</div>';
+}
+/* Only this block is redrawn. Rebuilding the whole settings modal would reset
+   its scroll to the top - and About sits at the bottom of a long one - drop
+   focus, and replay the modal's pop-in animation. */
+function refreshAboutSections(focusKey){
+  var el = document.getElementById('about-sections');
+  if (!el) return;
+  /* While the swap is in flight this block has no height, so a modal scrolled
+     to its foot - which is exactly where About is - gets its scrollTop
+     clamped to zero and never comes back. Put it back by hand. */
+  var scroller = el.closest ? el.closest('.modal') : null;
+  var keep = scroller ? scroller.scrollTop : 0;
+  el.innerHTML = aboutRowsHTML();
+  if (scroller) scroller.scrollTop = keep;
+  var btn = focusKey && el.querySelector('[data-key="'+focusKey+'"]');
+  if (btn){ try{ btn.focus({preventScroll:true}); }catch(e){ btn.focus(); } }
 }
 
 function renderSettingsModal(){
@@ -5941,7 +5977,7 @@ function handleAction(action, el){
     case 'about-toggle': {
       var aKey = el.dataset.key;
       ui.aboutOpen = (ui.aboutOpen === aKey) ? null : aKey;
-      renderSettingsModal();
+      refreshAboutSections(aKey);
       break;
     }
     case 'body-type': {
