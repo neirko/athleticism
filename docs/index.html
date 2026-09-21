@@ -1407,10 +1407,12 @@ function parseDecimal(raw){
   if (s.indexOf(',') >= 0 && s.indexOf('.') < 0) s = s.replace(',', '.');
   return parseFloat(s);
 }
-/* Seconds work on every device - a phone's number pad has no ":" key - so an
-   empty time field asks for them everywhere: "90" is 1:30, "120" is 2:00.
-   Typing 1:30 still works wherever a colon can be typed. */
-function timeHint(){ return 'sec'; }
+/* A phone's number pad has no ":" key, so there a time goes in as seconds -
+   "90" is 1:30, "120" is 2:00 - and the empty field says so. A keyboard can
+   still type 1:30 either way. */
+function timeHint(){
+  return window.matchMedia && window.matchMedia('(pointer:coarse)').matches ? 'sec' : 'mm:ss';
+}
 function fmtRest(sec){
   if (sec===null||sec===undefined) return null;
   if (sec>=60){ var m=Math.floor(sec/60), s=sec%60; return s===0 ? (m+'m') : (m+':'+pad2(s)); }
