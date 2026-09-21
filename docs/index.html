@@ -4749,7 +4749,11 @@ function renderExerciseDetailHTML(){
           : '<button class="btn btn-tag" data-action="edit-exercise" data-id="'+ex.id+'">'+icon('plus')+' Add muscles</button>'))+
     '<div class="field-label" style="margin-top:16px;">Tracking fields</div>'+
     '<div class="chip-row">'+ex.fields.map(function(f){
-      return '<div class="chip" style="padding:6px 12px;"><span>'+esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'')+' &middot; '+FIELD_TYPE_NAMES[f.type]+'</span></div>';
+      /* only your own fields say what kind they are - "Band · Text" - since a
+         built-in one is already named for what it is: "Reps · Reps" said it twice */
+      var custom = f.type === 'number' || f.type === 'text';
+      return '<div class="chip" style="padding:6px 12px;"><span>'+esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'')+
+        (custom ? ' &middot; '+FIELD_TYPE_NAMES[f.type] : '')+'</span></div>';
     }).join('')+'</div>'+
     '<div class="field-label">Default Rest</div>'+
     '<div style="color:var(--text-dim);font-size:14px;">'+(ex.defaultRestSec!=null?fmtRest(ex.defaultRestSec):'Not set')+'</div>'+
