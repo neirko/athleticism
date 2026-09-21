@@ -767,6 +767,11 @@ body.photos-hidden .photo-veil{display:flex;}
 .mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* ---- about ---- */
+/* A chip that arrived on its own says so, briefly. Deliberately local: a
+   whole-modal flash is what made adding a field feel like a page reload. */
+@keyframes chip-in{from{opacity:0;transform:translateY(-5px) scale(.94);}to{opacity:1;transform:none;}}
+.chip.chip-new,.mus-chip.chip-new{animation:chip-in .24s cubic-bezier(.34,1.4,.64,1) both;}
+
 /* ---- suggestion dropdown, units drawer ---- */
 .combo-pop{position:fixed;z-index:80;overflow-y:auto;background:var(--surface);
   border:2px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);
@@ -1659,6 +1664,19 @@ var EXERCISE_MUSCLE_LOOKUP = (function(){
   return map;
 })();
 
+/* Every spelling in a row points back at the row's first name, so whatever
+   matched can be traced to one canonical exercise. Muscles and tracking
+   fields then agree about what you typed - "pull ups" cannot fill one and
+   not the other. */
+var EXERCISE_CANONICAL = (function(){
+  var map = {};
+  EXERCISE_MUSCLE_SEED.forEach(function(row){
+    var names = row[0].split('|');
+    names.forEach(function(n){ map[n] = names[0]; });
+  });
+  return map;
+})();
+
 function normaliseExerciseName(s){
   return String(s||'').toLowerCase().replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim();
 }
@@ -1682,15 +1700,16 @@ var SQUASHED_MUSCLE_LOOKUP = (function(){
    name for a closed-up key as a plain substring finds "run" inside "trunk
    rotation" and "rdl" inside "hurdle jump", and a confidently wrong
    auto-fill is worse than none at all. */
-function lookupExerciseMuscles(name){
+/* Returns the canonical name of whatever the typed text matched, or null. */
+function lookupExerciseKey(name){
   var n = normaliseExerciseName(name);
   if (!n) return null;
-  if (EXERCISE_MUSCLE_LOOKUP[n]) return EXERCISE_MUSCLE_LOOKUP[n];
+  if (EXERCISE_CANONICAL[n]) return EXERCISE_CANONICAL[n];
 
   var best = null, bestLen = 0, k;
-  for (k in EXERCISE_MUSCLE_LOOKUP){
+  for (k in EXERCISE_CANONICAL){
     if (k.length > bestLen && (' '+n+' ').indexOf(' '+k+' ') >= 0){
-      best = EXERCISE_MUSCLE_LOOKUP[k]; bestLen = k.length;
+      best = EXERCISE_CANONICAL[k]; bestLen = k.length;
     }
   }
   if (best) return best;
@@ -1704,11 +1723,16 @@ function lookupExerciseMuscles(name){
       if (cand.length > 3 && cand.slice(-2) === 'es') tries.push(cand.slice(0, -2));
       if (cand.length > 2 && cand.slice(-1) === 's') tries.push(cand.slice(0, -1));
       for (var t = 0; t < tries.length; t++){
-        if (SQUASHED_MUSCLE_LOOKUP[tries[t]]) return SQUASHED_MUSCLE_LOOKUP[tries[t]].hit;
+        if (SQUASHED_MUSCLE_LOOKUP[tries[t]]) return EXERCISE_CANONICAL[SQUASHED_MUSCLE_LOOKUP[tries[t]].key];
       }
     }
   }
   return null;
+}
+
+function lookupExerciseMuscles(name){
+  var k = lookupExerciseKey(name);
+  return k ? EXERCISE_MUSCLE_LOOKUP[k] : null;
 }
 
 /* ---- Name suggestions ---------------------------------------------------
@@ -1872,18 +1896,11 @@ var EXERCISE_FIELD_PRESET = (function(){
 })();
 
 function presetFieldsFor(name){
-  var n = normaliseExerciseName(name);
-  if (!n) return null;
-  var code = EXERCISE_FIELD_PRESET[n];
-  if (!code){
-    /* only names the suggestion list actually offers get the default, so a
-       name nobody recognises still arrives with an empty form */
-    var known = EXERCISE_NAME_SUGGESTIONS.some(function(label){
-      return normaliseExerciseName(label) === n;
-    });
-    if (!known) return null;
-    code = 'wr';
-  }
+  /* Same matcher the muscles use, so "pull ups" and "Squats" are recognised
+     here too. A name nobody recognises still arrives with an empty form. */
+  var key = lookupExerciseKey(name);
+  if (!key) return null;
+  var code = EXERCISE_FIELD_PRESET[key] || 'wr';
   return FIELD_SETS[code].map(function(spec){
     var f = { id: uid('f'), type: spec[0], label: spec[1], unit: '' };
     if (spec[2]) f.distScale = spec[2];
@@ -1892,16 +1909,41 @@ function presetFieldsFor(name){
 }
 
 /* Returns true when it actually put something in. */
+/* Fields are ours to change only while every one of them was put there by a
+   guess and you have not touched the list yourself. */
+function fieldsAreOurs(d){
+  if (!d || d.fieldsTouched) return false;
+  return d.fields.length === 0 || !!d.fieldsFromPreset;
+}
+
 function applyPreset(d, name){
-  if (!d) return false;
-  /* Fields that arrived with a previous pick are not fields you chose, so a
-     second pick replaces them. Anything you added or removed yourself sets
-     fieldsFromPreset false and is never touched again. */
-  if (d.fields.length && !d.fieldsFromPreset) return false;
+  if (!fieldsAreOurs(d)) return false;
   var fields = presetFieldsFor(name);
   if (!fields) return false;
   d.fields = fields;
   d.fieldsFromPreset = true;
+  d.flashFields = true;
+  return true;
+}
+
+/* The typing counterpart, mirroring autofillMuscles: keeps up with the name
+   while it is still a guess, and lets go the moment you edit the list. */
+function autofillFields(d){
+  if (!fieldsAreOurs(d)) return false;
+  var next = presetFieldsFor(d.name);
+  var shape = function(list){
+    return (list||[]).map(function(f){ return f.type+':'+(f.distScale||''); }).join(',');
+  };
+  if (shape(next) === shape(d.fields)) return false;
+  if (!next){
+    if (!d.fields.length) return false;
+    d.fields = [];
+    d.fieldsFromPreset = false;
+    return true;
+  }
+  d.fields = next;
+  d.fieldsFromPreset = true;
+  d.flashFields = true;
   return true;
 }
 
@@ -4399,7 +4441,7 @@ function cycleMuscleTier(d, slug){
    out of the name field. */
 function refreshMusclePicker(){
   var el = document.getElementById('ex-muscle-picker');
-  if (el && ui.exerciseDraft) el.innerHTML = musclePickerHTML(ui.exerciseDraft);
+  if (el && ui.exerciseDraft){ el.innerHTML = musclePickerHTML(ui.exerciseDraft); ui.exerciseDraft.flashMuscles = false; }
 }
 /* Pre-fills from the typed name until the moment the user edits the
    muscles themselves, after which their choice is left alone. */
@@ -4410,6 +4452,7 @@ function autofillMuscles(d){
   var changed = JSON.stringify(next) !== JSON.stringify(d.muscles);
   d.muscles = next;
   d.musclesAutofilled = !!hit;
+  if (changed && hit) d.flashMuscles = true;
   return changed;
 }
 
@@ -4424,7 +4467,7 @@ function musclePickerHTML(d){
       return '<div class="mus-group"><span class="mus-group-lbl">'+esc(g[0])+'</span><div class="mus-grid">'+
         g[1].map(function(slug){
           var t = muscleTier(d, slug);
-          return '<button type="button" class="mus-chip '+t+'" data-action="ex-toggle-muscle" data-slug="'+slug+'" '+
+          return '<button type="button" class="mus-chip '+t+(t&&d.flashMuscles?' chip-new':'')+'" data-action="ex-toggle-muscle" data-slug="'+slug+'" '+
             'aria-pressed="'+(t?'true':'false')+'">'+esc(muscleLabel(slug))+'</button>';
         }).join('')+
       '</div></div>';
@@ -4439,8 +4482,9 @@ function openExerciseModal(editingExercise, pickerContext){
     ? { editingId: editingExercise.id, name: editingExercise.name, tags: exerciseTags(editingExercise).slice(),
         muscles: exerciseMuscles(editingExercise),
         musclesTouched: !!editingExercise.musclesSet || hasMuscleData(editingExercise), musclesAutofilled: false,
-        fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
-    : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], fieldsFromPreset:false, defaultRestSec:null };
+        fields: snapshotFields(editingExercise), fieldsTouched: editingExercise.fields.length > 0,
+        defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
+    : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], fieldsFromPreset:false, fieldsTouched:false, defaultRestSec:null };
   /* An exercise that predates this feature, or one being created, gets its
      muscles filled in from its name the moment the editor opens - otherwise
      "add muscles" would mean facing 21 empty chips. Anything already set by
@@ -4501,6 +4545,42 @@ function paintModal(wrap, html){
   return false;
 }
 
+/* Repainted on its own while you type, so the name field keeps its caret. */
+function fieldsSectionHTML(d){
+  function hasType(t){ return d.fields.some(function(f){return f.type===t;}); }
+  var flash = d.flashFields ? ' chip-new' : '';
+  return '<div class="chip-row">'+
+      d.fields.map(function(f){
+        var chipLabel = esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'');
+        var chipInner = FIELD_INFO[f.type]
+          ? '<span class="field-info" data-info="'+f.type+'" role="button" tabindex="0">'+chipLabel+'<span class="fi-dot" aria-hidden="true">i</span></span>'
+          : '<span>'+chipLabel+'</span>';
+        return '<div class="chip'+flash+'">'+chipInner+'<button data-action="ex-remove-field" data-fieldid="'+f.id+'">'+icon('x')+'</button></div>';
+      }).join('')+
+      (d.fields.length===0?'<div class="empty-hint">No fields yet \u2014 add at least one below.</div>':'')+
+      (d.fieldsFromPreset&&d.fields.length?'<div class="empty-hint mus-auto">Fields came with the name \u2014 change or remove any of them.</div>':'')+
+    '</div>'+
+    distanceScaleRowHTML(d)+
+    '<div class="preset-row">'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="weight" '+(hasType('weight')?'disabled':'')+'>'+icon('plus')+' Weight</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="assisted" '+(hasType('assisted')?'disabled':'')+'>'+icon('plus')+' Assisted</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="reps" '+(hasType('reps')?'disabled':'')+'>'+icon('plus')+' Reps</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="distance" '+(hasType('distance')?'disabled':'')+' title="How far \u2014 stored in metres, shown in whichever unit you pick">'+icon('plus')+' Distance</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="timer" '+(hasType('timer')?'disabled':'')+' title="A duration you pre-set in a plan and count down during the workout">'+icon('plus')+' Time (Target)</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="time" '+(hasType('time')?'disabled':'')+' title="A duration you measure and record during the workout, e.g. a max hang">'+icon('plus')+' Time (Measured)</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="rir" '+(hasType('rir')?'disabled':'')+' title="Reps in Reserve - how many reps you had left in the tank">'+icon('plus')+' RIR</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="rpe" '+(hasType('rpe')?'disabled':'')+' title="Rate of Perceived Exertion - how hard the set felt, 6 to 10">'+icon('plus')+' RPE</button>'+
+      '<button class="btn btn-tag" data-action="ex-toggle-custom">'+icon('plus')+' Custom</button>'+
+    '</div>';
+}
+
+function refreshFieldsSection(){
+  var el = document.getElementById('ex-fields');
+  if (!el || !ui.exerciseDraft) return;
+  el.innerHTML = fieldsSectionHTML(ui.exerciseDraft);
+  ui.exerciseDraft.flashFields = false;
+}
+
 function renderExerciseModal(){
   var wrap = document.getElementById('exercise-modal');
   var d = ui.exerciseDraft;
@@ -4516,29 +4596,7 @@ function renderExerciseModal(){
     '<div class="mus-legend">Free text, comma separated. Used for search and labels \u2014 never for the map.</div>'+
     '<input id="ex-tags-input" class="input" data-commit="ex-tags" role="combobox" aria-autocomplete="list" aria-expanded="false" autocomplete="off" placeholder="e.g. Chest, Cardio, Mobility" value="'+esc(d.tags.join(', '))+'">'+
     '<label class="field-label">Tracking Fields</label>'+
-    '<div class="chip-row">'+
-      d.fields.map(function(f){
-        var chipLabel = esc(f.label)+(f.unit?(' ('+esc(f.unit)+')'):'');
-        var chipInner = FIELD_INFO[f.type]
-          ? '<span class="field-info" data-info="'+f.type+'" role="button" tabindex="0">'+chipLabel+'<span class="fi-dot" aria-hidden="true">i</span></span>'
-          : '<span>'+chipLabel+'</span>';
-        return '<div class="chip">'+chipInner+'<button data-action="ex-remove-field" data-fieldid="'+f.id+'">'+icon('x')+'</button></div>';
-      }).join('')+
-      (d.fields.length===0?'<div class="empty-hint">No fields yet — add at least one below.</div>':'')+
-      (d.fieldsFromPreset&&d.fields.length?'<div class="empty-hint mus-auto">Fields came with the name — change or remove any of them.</div>':'')+
-    '</div>'+
-    distanceScaleRowHTML(d)+
-    '<div class="preset-row">'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="weight" '+(hasType('weight')?'disabled':'')+'>'+icon('plus')+' Weight</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="assisted" '+(hasType('assisted')?'disabled':'')+'>'+icon('plus')+' Assisted</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="reps" '+(hasType('reps')?'disabled':'')+'>'+icon('plus')+' Reps</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="distance" '+(hasType('distance')?'disabled':'')+' title="How far \u2014 stored in metres, shown in whichever unit you pick">'+icon('plus')+' Distance</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="timer" '+(hasType('timer')?'disabled':'')+' title="A duration you pre-set in a plan and count down during the workout">'+icon('plus')+' Time (Target)</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="time" '+(hasType('time')?'disabled':'')+' title="A duration you measure and record during the workout, e.g. a max hang">'+icon('plus')+' Time (Measured)</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="rir" '+(hasType('rir')?'disabled':'')+' title="Reps in Reserve - how many reps you had left in the tank">'+icon('plus')+' RIR</button>'+
-      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="rpe" '+(hasType('rpe')?'disabled':'')+' title="Rate of Perceived Exertion - how hard the set felt, 6 to 10">'+icon('plus')+' RPE</button>'+
-      '<button class="btn btn-tag" data-action="ex-toggle-custom">'+icon('plus')+' Custom</button>'+
-    '</div>';
+    '<div id="ex-fields">'+fieldsSectionHTML(d)+'</div>';
 
   if (ui.showCustomFieldForm){
     html += '<div class="custom-field-form">'+
@@ -4564,6 +4622,7 @@ function renderExerciseModal(){
      after every button press drags a scrolled modal back to the top, which
      is the other half of why adding a field felt like a page reload. */
   var freshMount = paintModal(wrap, html);
+  d.flashFields = false;
   var nameInput = document.getElementById('ex-name-input');
   if (freshMount && focusIfPointer(nameInput)) nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
 }
@@ -6270,6 +6329,7 @@ function handleAction(action, el){
         if (type==='distance') nf.distScale = 'large';
         ui.exerciseDraft.fields.push(nf);
         ui.exerciseDraft.fieldsFromPreset = false;
+        ui.exerciseDraft.fieldsTouched = true;
       }
       renderExerciseModal();
       break;
@@ -6284,6 +6344,7 @@ function handleAction(action, el){
     case 'ex-remove-field': {
       ui.exerciseDraft.fields = ui.exerciseDraft.fields.filter(function(f){return f.id!==el.dataset.fieldid;});
       ui.exerciseDraft.fieldsFromPreset = false;
+      ui.exerciseDraft.fieldsTouched = true;
       renderExerciseModal();
       break;
     }
@@ -6300,6 +6361,7 @@ function handleAction(action, el){
       var cunit = document.getElementById('ex-custom-unit').value.trim();
       ui.exerciseDraft.fields.push({ id: uid('f'), type: ctype, label: cname, unit: ctype==='number' ? cunit : '' });
       ui.exerciseDraft.fieldsFromPreset = false;
+      ui.exerciseDraft.fieldsTouched = true;
       ui.showCustomFieldForm = false;
       renderExerciseModal();
       break;
@@ -6798,6 +6860,7 @@ function onInput(e){
     var btn = document.getElementById('ex-save-btn');
     if (btn) btn.disabled = !(t.value.trim() && ui.exerciseDraft.fields.length);
     if (autofillMuscles(ui.exerciseDraft)) refreshMusclePicker();
+    if (autofillFields(ui.exerciseDraft)) refreshFieldsSection();
     openNameSuggestions(t);
     return;
   }
