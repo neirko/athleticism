@@ -46,6 +46,10 @@
   --inverse:#2A2233; --on-inverse:#FFFFFF; --inverse-ledge:#17121D;
   /* a selected pill sitting on a track: the lighter of the two in either theme */
   --raised:#FFFFFF;
+  /* ink on the green "done" colour, and the red fill behind a destructive
+     confirm - both carry white in light mode, which a brighter dark-mode
+     green or red would wash out */
+  --on-good:#FFFFFF; --danger-fill:#E8434E;
   --scrim:rgba(42,34,51,.45);
   --danger-soft:#FCE4E5; --danger-ink:#9C2830;
   --warn-soft:#FFF4D6; --warn-border:#FFE1A0;
@@ -79,7 +83,7 @@
   /* faint text clears 4.5:1 on every surface it sits on (the light theme's
      faint is a quieter 2.4:1 - a dark ground needs the extra) */
   --text:#F2EDF5; --text-dim:#B4A9BF; --text-faint:#91869C;
-  --accent:#FF6A3D; --accent-hover:#FF8257; --accent-deep:#FF9A74;
+  --accent:#FF6A3D; --accent-hover:#F2542B; --accent-deep:#FF9A74;
   --accent-soft:#3A2219; --accent-soft-border:#5E3524;
   --good:#1FC48A; --good-soft:#15352A; --good-deep:#5FE0B0;
   --danger:#F0555F; --danger-deep:#A8242E; --sun:#E8B23A; --grape:#8C7CF0;
@@ -88,6 +92,7 @@
   --accent-ledge:#A63A17; --good-ledge:#0B6E4C;
   --inverse:#2E2738; --on-inverse:#F2EDF5; --inverse-ledge:#0B090E;
   --raised:#3A3244;
+  --on-good:#141118; --danger-fill:#D93A45;
   --scrim:rgba(8,6,10,.68);
   --danger-soft:#3A1A1E; --danger-ink:#FF9AA3;
   --warn-soft:#33290F; --warn-border:#56451B;
@@ -96,6 +101,19 @@
   --mm-outline:#4A4153;
   color-scheme:dark;
 }
+/* Dark-only corrections, scoped so light mode is untouched. */
+:root[data-theme="dark"] ::placeholder{color:var(--text-faint);}
+:root[data-theme="dark"] .timerbar.done .timerbar-inner button{background:rgba(20,17,24,.14);color:var(--on-good);}
+:root[data-theme="dark"] .pose-chip .pose-count{opacity:.8;}
+/* list rows only ever set a top and left border, so the button's UA border
+   drew the other two - a faint line in light, a bright one in the dark */
+:root[data-theme="dark"] .split-item{border-right:none;border-bottom:none;}
+:root[data-theme="dark"] .chart-metric{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23B4A9BF' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");}
+/* the three-way switch is wide; on a small phone let it drop below its label
+   rather than squeeze the label to nothing */
+.settings-row.theme-row{flex-wrap:wrap;}
+.settings-row.theme-row .settings-row-text{flex:1 1 130px;}
+.settings-row.theme-row .segmented{margin-left:auto;}
 *{box-sizing:border-box;}
 html,body{height:100%;}
 /* An app, not a document: no pinch or double-tap zoom, no sideways drift. */
@@ -172,7 +190,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:var(--ledge);}
 .btn-ghost:hover{border-color:var(--text-faint);}
 .btn-ghost:active{transform:translateY(3px);box-shadow:none;}
-.btn-danger{background:var(--danger) !important;color:#fff !important;border-color:var(--danger) !important;
+.btn-danger{background:var(--danger-fill) !important;color:#fff !important;border-color:var(--danger-fill) !important;
   box-shadow:0 3px 0 var(--danger-deep) !important;}
 .btn-danger:active{transform:translateY(3px);box-shadow:none !important;}
 .btn-tag{background:var(--surface);border-color:var(--border);padding:8px 14px;font-size:13.5px;font-weight:700;box-shadow:var(--ledge);}
@@ -310,7 +328,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .ex-card-name{font-family:var(--font-display);font-weight:700;font-size:19px;margin-bottom:2px;}
 .ex-default-rest{font-size:13px;font-weight:600;color:var(--text-dim);display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
 .ex-default-rest button{background:none;border:none;color:var(--accent);font-size:13px;font-weight:800;padding:0;}
-.ex-default-rest input{width:64px;font-weight:700;font-size:13px;padding:5px 7px;border:2px solid var(--border);border-radius:8px;}
+.ex-default-rest input{width:64px;font-weight:700;font-size:13px;padding:5px 7px;border:2px solid var(--border);border-radius:8px;background:var(--surface);}
 
 .set-table{width:100%;border-collapse:collapse;min-width:420px;}
 .set-table th{font-size:12px;color:var(--text-faint);font-weight:800;text-align:center;padding:0 6px 8px;white-space:nowrap;}
@@ -334,7 +352,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
   color:var(--text-faint);display:inline-flex;align-items:center;justify-content:center;
   transition:transform .12s cubic-bezier(.34,1.56,.64,1),background .14s ease,border-color .14s ease,color .14s ease;}
 .check-btn:hover{border-color:var(--good);color:var(--good);}
-.check-btn.done{background:var(--good);border-color:var(--good);color:#fff;transform:scale(1.06);}
+.check-btn.done{background:var(--good);border-color:var(--good);color:var(--on-good);transform:scale(1.06);}
 .rest-card{background:var(--surface-2);border-style:dashed;display:flex;align-items:center;justify-content:center;padding:14px;box-shadow:none;}
 .rest-block-row td{background:var(--surface-2);}
 .rest-block-row td:first-child{border-radius:10px 0 0 10px;}
@@ -402,7 +420,7 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
   transform:translateY(120%);transition:transform .28s cubic-bezier(.34,1.3,.64,1);
   border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom);}
 .timerbar.show{transform:translateY(0);}
-.timerbar.done{background:var(--good);}
+.timerbar.done{background:var(--good);color:var(--on-good);}
 .timerbar-inner{max-width:1080px;width:100%;display:flex;align-items:center;gap:14px;padding:14px 24px;}
 .timerbar-label{font-size:13.5px;font-weight:700;opacity:.8;flex-shrink:0;}
 .timerbar-time{font-family:var(--font-display);font-size:30px;font-weight:800;font-variant-numeric:tabular-nums;flex:1;line-height:1;}
@@ -867,11 +885,13 @@ body.photos-hidden .photo-veil{display:flex;}
    Typed on purpose: buildPortableHTML looks for the last UNTYPED script to
    hang the data snapshot in front of, and that has to stay the app script. */
 (function(){
-  var pref = 'system';
-  try { pref = localStorage.getItem('athleticism_theme') || 'system'; } catch(e){}
+  var root = document.documentElement;
+  var pref = null;
+  try { pref = localStorage.getItem('athleticism_theme'); } catch(e){}
+  /* no mirror yet: a portable copy says what its exporter had chosen */
+  pref = pref || root.getAttribute('data-theme-pref') || 'system';
   var dark = pref === 'dark' ||
     (pref !== 'light' && !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
-  var root = document.documentElement;
   root.setAttribute('data-theme', dark ? 'dark' : 'light');
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', getComputedStyle(root).getPropertyValue('--surface').trim() || (dark ? '#1E1924' : '#FFFFFF'));
@@ -2372,6 +2392,9 @@ function exportJSON(cb){
    backup file is itself a fully working copy of the app. */
 function buildPortableHTML(){
   var clone = document.documentElement.cloneNode(true);
+  /* a copy opened on a new device has no theme mirror yet; this tells its
+     pre-paint script what the exporter had chosen */
+  clone.setAttribute('data-theme-pref', themePreference());
 
   /* strip anything the app rebuilds on load, plus any embed from a file
      this copy was itself opened from */
@@ -5993,6 +6016,17 @@ function applyTheme(){
   try { localStorage.setItem(THEME_KEY, themePreference()); } catch(e){}
   var meta = document.querySelector('meta[name="theme-color"]');
   if (meta) meta.setAttribute('content', getComputedStyle(root).getPropertyValue('--surface').trim());
+  /* The Android app's status-bar icons are native, so the web theme cannot
+     reach them. Capacitor 8 ships a SystemBars plugin that can; told on every
+     call, because at launch it assumes the phone's theme, not the app's. DARK
+     there means light icons for a dark bar. Absent everywhere but the APK. */
+  var bars = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SystemBars;
+  if (bars && bars.setStyle){
+    try {
+      var pending = bars.setStyle({ style: next === 'dark' ? 'DARK' : 'LIGHT' });
+      if (pending && pending['catch']) pending['catch'](function(){});
+    } catch(e){}
+  }
   /* the muscle maps bake their body outline in when they are built */
   if (changed) resetMuscleMaps();
   return changed;
@@ -6000,8 +6034,14 @@ function applyTheme(){
 function watchSystemTheme(){
   if (!window.matchMedia) return;
   var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  /* Every colour follows the CSS tokens on its own; only the muscle maps
+     bake one in. So a live change rebuilds just those - a full renderMain
+     would throw away whatever was half-typed when the phone flipped. */
   var onChange = function(){
-    if (themePreference() === 'system' && applyTheme()) renderMain();
+    if (themePreference() !== 'system' || !applyTheme()) return;
+    var slots = document.querySelectorAll('[data-musclemap]');
+    for (var i = 0; i < slots.length; i++) slots[i].innerHTML = '';
+    paintMuscleMaps();
   };
   if (mq.addEventListener) mq.addEventListener('change', onChange);
   else if (mq.addListener) mq.addListener(onChange);   /* older Android WebViews */
@@ -6012,7 +6052,7 @@ function appearanceRowHTML(){
   function btn(v, label){
     return '<button class="'+(p===v?'active':'')+'" data-action="theme" data-theme-choice="'+v+'">'+label+'</button>';
   }
-  return '<div class="settings-row"><div class="settings-row-text"><span>Appearance</span>'+
+  return '<div class="settings-row theme-row"><div class="settings-row-text"><span>Appearance</span>'+
       '<span class="settings-row-sub">'+(p==='system' ? 'Follows your phone' : (p==='dark' ? 'Always dark' : 'Always light'))+'</span></div>'+
       '<div class="segmented">'+btn('light','Light')+btn('dark','Dark')+btn('system','System')+'</div>'+
     '</div>';
