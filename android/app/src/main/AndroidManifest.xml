@@ -39,4 +39,14 @@
     <!-- Permissions -->
 
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- "Take Photo" hands off to the phone's camera app. Since Android 11 an
+         app cannot see another app's activities unless it says which it
+         needs, and without this the camera was never found and the file
+         picker opened instead. -->
+    <queries>
+        <intent>
+            <action android:name="android.media.action.IMAGE_CAPTURE" />
+        </intent>
+    </queries>
 </manifest>
