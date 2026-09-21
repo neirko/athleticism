@@ -767,7 +767,7 @@ body.photos-hidden .photo-veil{display:flex;}
 .mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* ---- about ---- */
-/* ---- suggestion dropdown ---- */
+/* ---- suggestion dropdown, units drawer ---- */
 .combo-pop{position:fixed;z-index:80;overflow-y:auto;background:var(--surface);
   border:2px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);
   -webkit-overflow-scrolling:touch;}
@@ -1133,7 +1133,7 @@ function pickMetric(ex){
   if (!avail.length) return null;
   var saved = avail.filter(function(m){ return m.key===data.settings.chartMetric; })[0];
   if (saved) return saved;
-  var order = ['top','bestreps','hold','far','totdist','totreps','assist','rpe','rir','e1rm','volume'];
+  var order = ['top','bestreps','far','totdist','hold','totreps','assist','rpe','rir','e1rm','volume'];
   for (var i=0;i<order.length;i++){
     var hit = avail.filter(function(m){ return m.key===order[i]; })[0];
     if (hit) return hit;
@@ -1209,14 +1209,20 @@ var DISTANCE_UNITS = {
   metric:   { small:'m',  large:'km' },
   imperial: { small:'ft', large:'mi' }
 };
-/* Decimals worth showing at each scale. Three at the large scale, not two:
-   a metre of resolution, so a 5123 m run reads back as 5.123 km rather than
-   being quietly rounded to 5.12 the next time the row is edited. Trailing
-   zeros never appear - these are numbers, not strings. */
-var DISTANCE_DP = { m:0, ft:0, km:3, mi:3 };
+/* Decimals worth showing at each scale, chosen so that displaying a value
+   and committing it back cannot lose anything: 5123 m reads as 5.123 km and
+   400.5 m reads as 400.5, not 400. Trailing zeros never appear - these are
+   numbers, not strings, so a plain 5 km still shows as 5. */
+var DISTANCE_DP = { m:1, ft:1, km:3, mi:3 };
 
 function distanceSystem(){
-  return (data.settings && data.settings.distanceSystem === 'imperial') ? 'imperial' : 'metric';
+  var set = data.settings || {};
+  if (set.distanceSystem === 'imperial' || set.distanceSystem === 'metric') return set.distanceSystem;
+  /* Unset - on a fresh install, and on every install that predates this,
+     because loadData merges settings shallowly and an old blob never gains
+     the key. Follow the weight unit rather than sitting in a "mixed" state
+     nobody chose. */
+  return set.weightUnit === 'lb' ? 'imperial' : 'metric';
 }
 function distanceScale(f){ return (f && f.distScale === 'small') ? 'small' : 'large'; }
 function distanceUnit(f){ return DISTANCE_UNITS[distanceSystem()][distanceScale(f)]; }
@@ -1887,7 +1893,11 @@ function presetFieldsFor(name){
 
 /* Returns true when it actually put something in. */
 function applyPreset(d, name){
-  if (!d || d.fields.length) return false;
+  if (!d) return false;
+  /* Fields that arrived with a previous pick are not fields you chose, so a
+     second pick replaces them. Anything you added or removed yourself sets
+     fieldsFromPreset false and is never touched again. */
+  if (d.fields.length && !d.fieldsFromPreset) return false;
   var fields = presetFieldsFor(name);
   if (!fields) return false;
   d.fields = fields;
@@ -2227,7 +2237,7 @@ function buildPortableHTML(){
   /* A portable copy runs from a file:// path, where service workers and
      manifests are invalid. Strip the PWA wiring so the archive never tries
      to register anything and never claims to be installable. */
-  var popovers = clone.querySelectorAll('.field-pop');
+  var popovers = clone.querySelectorAll('.field-pop, .combo-pop');
   for (var pi=0; pi<popovers.length; pi++){ popovers[pi].parentNode.removeChild(popovers[pi]); }
   var pwaBits = clone.querySelectorAll('link[rel="manifest"], [data-pwa]');
   for (var q=0;q<pwaBits.length;q++){
@@ -4542,6 +4552,7 @@ function renderExerciseModal(){
 var combo = { input:null, items:[], el:null, index:-1, onPick:null };
 
 function comboOpen(input, items, onPick){
+  if (combo.input && combo.input !== input) combo.input.setAttribute('aria-expanded','false');
   if (!items.length){ comboClose(); return; }
   combo.input = input; combo.items = items; combo.index = -1; combo.onPick = onPick;
   if (!combo.el){
@@ -4569,15 +4580,22 @@ function comboPosition(){
   var el = combo.el, input = combo.input;
   if (!el || !input || !input.isConnected) return comboClose();
   var r = input.getBoundingClientRect();
-  var vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  /* Two frames here, and mixing them puts the flipped list on top of the
+     field. getBoundingClientRect and `position:fixed` both live in the
+     LAYOUT viewport; visualViewport is what the keyboard actually shrinks.
+     So decide with the visual one, place with the layout one. */
+  var vv = window.visualViewport;
+  var vTop = vv ? vv.offsetTop : 0;
+  var vh = vv ? vv.height : window.innerHeight;
+  var lh = window.innerHeight;
   el.style.left = Math.round(r.left) + 'px';
   el.style.width = Math.round(r.width) + 'px';
   el.style.maxHeight = '';
-  var below = vh - r.bottom - 8;
-  var above = r.top - 8;
+  var below = vh - (r.bottom - vTop) - 8;
+  var above = (r.top - vTop) - 8;
   if (below < 120 && above > below){
     el.style.top = '';
-    el.style.bottom = Math.round(vh - r.top + 4) + 'px';
+    el.style.bottom = Math.round(lh - r.top + 4) + 'px';
     el.style.maxHeight = Math.max(80, Math.round(above)) + 'px';
   } else {
     el.style.bottom = '';
@@ -4607,18 +4625,37 @@ function comboPick(i){
   fn(value);
 }
 
-/* Pointerdown rather than click: a click would land after the input's blur,
-   by which time the list is gone. */
+/* Pointerdown claims the gesture - it must, or the input's blur would tear
+   the list down before a click could land - but the pick waits for pointerup
+   so that dragging a long list to scroll it does not choose whatever was
+   under your thumb. */
+var comboDown = null;
 document.addEventListener('pointerdown', function(e){
   var el = combo.el;
   if (!el) return;
   var hit = e.target.closest ? e.target.closest('.combo-item') : null;
   if (hit && el.contains(hit)){
     e.preventDefault();
-    comboPick(Number(hit.getAttribute('data-combo-i')));
+    comboDown = { i: Number(hit.getAttribute('data-combo-i')), x: e.clientX, y: e.clientY };
     return;
   }
+  comboDown = null;
   if (e.target !== combo.input) comboClose();
+}, true);
+document.addEventListener('pointerup', function(e){
+  var down = comboDown;
+  comboDown = null;
+  if (!down || !combo.el) return;
+  /* a real tap barely moves; anything further was a scroll */
+  if (Math.abs(e.clientX - down.x) > 10 || Math.abs(e.clientY - down.y) > 10) return;
+  e.preventDefault();
+  comboPick(down.i);
+}, true);
+document.addEventListener('pointercancel', function(){ comboDown = null; }, true);
+
+/* Tabbing away, or the keyboard moving on, takes the list with it. */
+document.addEventListener('focusin', function(e){
+  if (combo.input && e.target !== combo.input) comboClose();
 }, true);
 
 document.addEventListener('keydown', function(e){
@@ -4626,7 +4663,10 @@ document.addEventListener('keydown', function(e){
   if (e.key === 'ArrowDown'){ e.preventDefault(); comboHighlight(combo.index + 1); }
   else if (e.key === 'ArrowUp'){ e.preventDefault(); comboHighlight(combo.index - 1); }
   else if (e.key === 'Enter'){ if (combo.index >= 0){ e.preventDefault(); comboPick(combo.index); } }
-  else if (e.key === 'Escape'){ e.preventDefault(); comboClose(); }
+  /* stopPropagation, not just preventDefault: the app closes the exercise
+     modal on Escape, and losing a half-typed exercise to dismissing a
+     dropdown would be a rotten trade */
+  else if (e.key === 'Escape'){ e.preventDefault(); e.stopPropagation(); comboClose(); }
 }, true);
 
 window.addEventListener('resize', comboPosition);
