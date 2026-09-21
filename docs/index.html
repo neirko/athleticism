@@ -488,6 +488,11 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .segmented button.active{background:var(--accent);color:#fff;}
 .settings-row-text{display:flex;flex-direction:column;gap:2px;min-width:0;padding-right:12px;}
 .settings-row-sub{font-size:12.5px;font-weight:600;color:var(--text-dim);line-height:1.45;}
+.storage-meter{flex:0 0 96px;height:8px;border-radius:99px;background:var(--surface-2);
+  border:1px solid var(--border);overflow:hidden;}
+.storage-meter span{display:block;height:100%;border-radius:99px;background:var(--good);}
+.storage-meter.full span{background:var(--danger);}
+.settings-row-sub.storage-warn{color:var(--danger-ink);}
 .settings-section-label{font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--text-faint);margin:22px 0 8px;}
 .settings-note{font-size:13px;font-weight:600;color:var(--text-dim);line-height:1.55;margin-bottom:10px;}
 .settings-stat{font-size:12.5px;font-weight:700;color:var(--text-dim);background:var(--surface-2);
@@ -3138,6 +3143,42 @@ function deletePhoto(id){
 }
 function photoLibraryBytes(){
   return allPhotos().reduce(function(n,p){ return n + (p.bytes||0); }, 0);
+}
+
+/* ---- Storage used -------------------------------------------------------
+   Everything but the photos is one blob in local storage, which a browser
+   caps at about 5 MB a site - years of workouts, since it is all text. This
+   shows how close it is, so moving to a bigger store can wait until it is
+   actually needed. Counted as two bytes a character, the way Safari counts
+   against its 5 MB; other browsers are roomier, so the bar errs early. */
+var LOCAL_STORAGE_LIMIT = 5 * 1024 * 1024;
+function localStorageBytes(){
+  var chars = 0;
+  try{
+    for (var i = 0; i < localStorage.length; i++){
+      var k = localStorage.key(i);
+      chars += k.length + (localStorage.getItem(k) || '').length;
+    }
+  }catch(e){}
+  return chars * 2;
+}
+function storageUsedHTML(){
+  var used = localStorageBytes();
+  var pct = Math.min(100, used / LOCAL_STORAGE_LIMIT * 100);
+  var nearlyFull = pct >= 80;
+  var photos = allPhotos().length ? ' · photos '+fmtBytes(photoLibraryBytes())+', kept separately' : '';
+  return '<div class="settings-row"><div class="settings-row-text"><span>Storage Used</span>'+
+      '<span class="settings-row-sub'+(nearlyFull?' storage-warn':'')+'">'+
+        fmtStorage(used)+' of about 5 MB'+(nearlyFull ? ' — getting full, export a backup' : '')+photos+'</span></div>'+
+    '<div class="storage-meter'+(nearlyFull?' full':'')+'" role="img" aria-label="'+Math.round(pct)+'% of storage used">'+
+      '<span style="width:'+Math.max(1, Math.round(pct))+'%"></span></div>'+
+  '</div>';
+}
+/* One decimal in MB even for small amounts - "0.3 MB of about 5 MB" reads at
+   a glance, "310 KB of about 5 MB" makes you do sums. */
+function fmtStorage(n){
+  var mb = n / (1024*1024);
+  return (mb < 0.1 ? '< 0.1' : mb.toFixed(1)) + ' MB';
 }
 function fmtBytes(n){
   if (n < 1024) return n+' B';
@@ -6551,11 +6592,12 @@ function renderSettingsModal(){
         '<button class="'+(data.settings.blurPhotos?'active':'')+'" data-action="blur-photos-toggle" data-on="1">On</button>'+
       '</div></div>'+
 
+    '<div class="settings-section-label">Storage</div>'+
+    storageUsedHTML()+
     /* A browser may clear a site's storage to free space; the Android app's
        storage is its own and only goes when the app is uninstalled, so there
        is nothing to protect it from and the row only confused. */
     (native ? '' :
-    '<div class="settings-section-label">Storage</div>'+
     '<div class="settings-row"><div class="settings-row-text"><span>Protect From Automatic Clearing</span>'+
       '<span class="settings-row-sub">'+esc(persistStateLine())+'</span></div>'+
       (storageCanPersist() && storagePersisted !== true
