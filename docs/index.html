@@ -767,6 +767,18 @@ body.photos-hidden .photo-veil{display:flex;}
 .mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
 
 /* ---- about ---- */
+/* ---- suggestion dropdown ---- */
+.combo-pop{position:fixed;z-index:80;overflow-y:auto;background:var(--surface);
+  border:2px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);
+  -webkit-overflow-scrolling:touch;}
+.combo-item{display:block;width:100%;text-align:left;background:none;border:none;
+  padding:11px 14px;font-size:14.5px;font-weight:700;color:var(--text);}
+.combo-item + .combo-item{border-top:2px solid var(--border);}
+.combo-item:hover,.combo-item.on{background:var(--accent-soft);color:var(--accent-deep);}
+.units-detail{border-bottom:2px solid var(--border);}
+.units-detail .settings-row:last-child{border-bottom:none;}
+.units-detail #units-panel{padding-bottom:4px;}
+.dist-scale-row{border-bottom:none;padding-top:4px;}
 .about-block{border-bottom:2px solid var(--border);}
 .about-toggle{margin:0;padding:13px 0;}
 .about-toggle .field-label{font-size:14.5px;font-weight:700;color:var(--text);}
@@ -1121,14 +1133,14 @@ function pickMetric(ex){
   if (!avail.length) return null;
   var saved = avail.filter(function(m){ return m.key===data.settings.chartMetric; })[0];
   if (saved) return saved;
-  var order = ['top','bestreps','hold','totreps','assist','rpe','rir','e1rm','volume'];
+  var order = ['top','bestreps','hold','far','totdist','totreps','assist','rpe','rir','e1rm','volume'];
   for (var i=0;i<order.length;i++){
     var hit = avail.filter(function(m){ return m.key===order[i]; })[0];
     if (hit) return hit;
   }
   return avail[0];
 }
-var FIELD_TYPE_NAMES = {weight:'Weight', assisted:'Assisted', reps:'Reps', timer:'Target Time', time:'Measured Time', rir:'Reps in Reserve', rpe:'RPE', number:'Number', text:'Text'};
+var FIELD_TYPE_NAMES = {weight:'Weight', assisted:'Assisted', reps:'Reps', distance:'Distance', timer:'Target Time', time:'Measured Time', rir:'Reps in Reserve', rpe:'RPE', number:'Number', text:'Text'};
 
 var ICONS = {
   plus:'<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
@@ -1182,6 +1194,41 @@ function displayToKg(val, unit){
   if (val===null||val===undefined||isNaN(val)) return null;
   return unit==='lb' ? val*KG_PER_LB : val;
 }
+/* ---- Distance -----------------------------------------------------------
+   Stored in metres, always, exactly as weight is stored in kilograms. One
+   number, converted on the way out, so switching systems re-reads every
+   number you have ever logged without touching a byte of it.
+
+   The unit is two decisions, not one. The SYSTEM is yours (Settings), the
+   SCALE is the exercise's: a 400 m sprint and a 5 km run are both metric and
+   would be unreadable in each other's unit. So a field remembers 'small' or
+   'large' and the system decides what those are called. */
+
+var METRES_PER = { m:1, km:1000, ft:0.3048, mi:1609.344 };
+var DISTANCE_UNITS = {
+  metric:   { small:'m',  large:'km' },
+  imperial: { small:'ft', large:'mi' }
+};
+/* how many decimals are worth showing at each scale */
+var DISTANCE_DP = { m:0, ft:0, km:2, mi:2 };
+
+function distanceSystem(){
+  return (data.settings && data.settings.distanceSystem === 'imperial') ? 'imperial' : 'metric';
+}
+function distanceScale(f){ return (f && f.distScale === 'small') ? 'small' : 'large'; }
+function distanceUnit(f){ return DISTANCE_UNITS[distanceSystem()][distanceScale(f)]; }
+
+function metresToDisplay(m, unit){
+  if (m===null || m===undefined || isNaN(m)) return null;
+  var dp = DISTANCE_DP[unit], p = Math.pow(10, dp);
+  return Math.round((m / METRES_PER[unit]) * p) / p;
+}
+function displayToMetres(val, unit){
+  if (val===null || val===undefined || isNaN(val)) return null;
+  return val * METRES_PER[unit];
+}
+function isDistanceType(t){ return t === 'distance'; }
+
 function secToMMSS(totalSec){
   if (totalSec===null||totalSec===undefined||isNaN(totalSec)) return '';
   var s = Math.round(totalSec), m = Math.floor(Math.abs(s)/60), sec = Math.abs(s)%60;
@@ -1210,6 +1257,7 @@ function fieldDisplayValue(f, raw, unit){
   if (raw===null||raw===undefined||raw==='') return '';
   if (f.type==='weight') return String(kgToDisplay(raw, unit));
   if (f.type==='assisted') return '\u2212' + String(kgToDisplay(raw, unit));
+  if (f.type==='distance') return String(metresToDisplay(raw, distanceUnit(f)));
   if (f.type==='time' || f.type==='timer') return secToMMSS(raw);
   return String(raw);
 }
@@ -1259,6 +1307,7 @@ function fieldUnitSuffix(f, unit){
   if (f.unit) return ' ('+esc(f.unit)+')';
   if (f.type==='weight') return ' ('+unit+')';
   if (f.type==='assisted') return ' (\u2212'+unit+')';
+  if (f.type==='distance') return ' ('+distanceUnit(f)+')';
   return '';
 }
 function esc(s){
@@ -1685,12 +1734,14 @@ var MIN_SUGGEST_CHARS = 2;
    bug, however correct it is. Every suggestion visibly starts with what was
    typed.
 
-   There is deliberately no spaces-closed-up pass. The browser runs its own
-   filter over the <datalist> on top of this one, and it will not show "Push
-   Up" to someone typing "pushup" whatever we hand it - so matching that way
-   would only add options nobody ever sees. */
+   The spaces-closed-up pass is back now that we draw the list ourselves: a
+   native <datalist> ran its own substring filter on top of ours and would
+   never show "Push Up" to someone typing "pushup". It is prefix-only, so it
+   cannot make "run" find "Trunk Rotation". */
 function nameStartsWith(candidate, q){
-  return candidate.indexOf(q) === 0 || (' '+candidate).indexOf(' '+q) >= 0;
+  if (candidate.indexOf(q) === 0) return true;
+  if ((' '+candidate).indexOf(' '+q) >= 0) return true;
+  return candidate.replace(/ /g,'').indexOf(q.replace(/ /g,'')) === 0;
 }
 
 function exerciseNameSuggestions(query, excludeId){
@@ -1724,16 +1775,121 @@ function exerciseNameSuggestions(query, excludeId){
 
 /* The <datalist> is refilled as you type rather than carrying all 144 names,
    so tapping an empty field never drops a wall of options over the keyboard. */
-function refreshNameSuggestions(query){
-  var el = document.getElementById('ex-name-options');
-  if (!el) return;
+function openNameSuggestions(input){
   var d = ui.exerciseDraft;
-  var list = exerciseNameSuggestions(query, d && d.editingId);
-  /* rewriting an unchanged list can close a dropdown that is already open */
-  var key = list.join('\n');
-  if (el.getAttribute('data-list') === key) return;
-  el.setAttribute('data-list', key);
-  el.innerHTML = list.map(function(s){ return '<option value="'+esc(s)+'">'; }).join('');
+  if (!d) return comboClose();
+  comboOpen(input, exerciseNameSuggestions(input.value, d.editingId), function(picked){
+    input.value = picked;
+    d.name = picked;
+    /* the half-typed name matched nothing, so the muscles were cleared as you
+       went - fill them from the name that was actually chosen */
+    autofillMuscles(d);
+    applyPreset(d, picked);
+    renderExerciseModal();
+  });
+}
+
+/* Tags are comma separated, so only the fragment after the last comma is
+   being typed - suggest against that, and replace only that. */
+function tagFragment(value){
+  var parts = String(value||'').split(',');
+  return { parts: parts, frag: parts[parts.length-1].trim().toLowerCase() };
+}
+function openTagSuggestions(input){
+  var d = ui.exerciseDraft;
+  if (!d) return comboClose();
+  var cut = tagFragment(input.value);
+  if (!cut.frag){ return comboClose(); }
+  var used = cut.parts.slice(0,-1).map(function(t){ return t.trim().toLowerCase(); });
+  var list = allTagOptions().filter(function(t){
+    var lt = t.toLowerCase();
+    return used.indexOf(lt) < 0 && lt !== cut.frag && lt.indexOf(cut.frag) === 0;
+  }).slice(0, MAX_NAME_SUGGESTIONS);
+  comboOpen(input, list, function(picked){
+    var parts = tagFragment(input.value).parts;
+    parts[parts.length-1] = (parts.length > 1 ? ' ' : '') + picked;
+    input.value = parts.join(',');
+    d.tags = parseTagInput(input.value);
+  });
+}
+
+/* ---- Field presets ------------------------------------------------------
+   Picking a name off the suggestion list is a deliberate act, so it may bring
+   its tracking fields with it. Typing the same words by hand does not - that
+   is the line between choosing a preset and naming an exercise.
+
+   It only ever fills an EMPTY field list. Nothing you set is overwritten,
+   nothing is removed, and every field it adds is editable exactly like one
+   you added yourself.
+
+   Codes, because most of the 144 want the same two columns:
+     wr  weight + reps      (the default for anything not listed)
+     r   reps               bodyweight
+     t   measured time      holds and skills
+     d   distance + time    long cardio, shown in km/mi
+     ds  distance + time    short efforts, shown in m/ft
+     wd  weight + distance  loaded carries */
+var FIELD_SETS = {
+  wr: [['weight','Weight'], ['reps','Reps']],
+  r:  [['reps','Reps']],
+  t:  [['time','Time']],
+  d:  [['distance','Distance','large'], ['time','Time']],
+  ds: [['distance','Distance','small'], ['time','Time']],
+  wd: [['weight','Weight'], ['distance','Distance','small']]
+};
+
+var EXERCISE_FIELD_PRESET = (function(){
+  var map = {};
+  function set(code, names){ names.split('|').forEach(function(n){ map[n] = code; }); }
+
+  set('r', 'push up|incline push up|decline push up|diamond push up|wide push up|archer push up|'+
+           'pseudo planche push up|dip|bench dip|handstand push up|pike push up|pull up|chin up|'+
+           'wide grip pull up|muscle up|inverted row|bodyweight squat|pistol squat|box jump|'+
+           'jump squat|burpee|crunch|hanging leg raise|leg raise|knee raise|toes to bar|'+
+           'russian twist|ab wheel|bicycle crunch|dead bug|mountain climber|superman|'+
+           'back extension|nordic curl|glute bridge|kip up|six step|windmill|flare|swipe|'+
+           'turtle|windshield wiper');
+
+  set('t', 'handstand|forearm stand|dead hang|plank|side plank|hollow hold|l sit|v sit|'+
+           'dragon flag|front lever|back lever|planche|human flag|headstand|crow pose|bridge|'+
+           'neck bridge|wall sit|freeze|chair freeze|elbow freeze|headspin|toprock|jump rope|'+
+           'battle ropes');
+
+  set('d',  'running|cycling|swimming|rowing');
+  set('ds', 'sprint');
+  set('wd', 'farmer carry|sled push');
+
+  return map;
+})();
+
+function presetFieldsFor(name){
+  var n = normaliseExerciseName(name);
+  if (!n) return null;
+  var code = EXERCISE_FIELD_PRESET[n];
+  if (!code){
+    /* only names the suggestion list actually offers get the default, so a
+       name nobody recognises still arrives with an empty form */
+    var known = EXERCISE_NAME_SUGGESTIONS.some(function(label){
+      return normaliseExerciseName(label) === n;
+    });
+    if (!known) return null;
+    code = 'wr';
+  }
+  return FIELD_SETS[code].map(function(spec){
+    var f = { id: uid('f'), type: spec[0], label: spec[1], unit: '' };
+    if (spec[2]) f.distScale = spec[2];
+    return f;
+  });
+}
+
+/* Returns true when it actually put something in. */
+function applyPreset(d, name){
+  if (!d || d.fields.length) return false;
+  var fields = presetFieldsFor(name);
+  if (!fields) return false;
+  d.fields = fields;
+  d.fieldsFromPreset = true;
+  return true;
 }
 
 /* ---- Migration ----------------------------------------------------------
@@ -1857,7 +2013,7 @@ var DEFAULT_POSES = [{id:'front',label:'Front'},{id:'side',label:'Side'},{id:'ba
 function defaultData(){
   return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, lastPhotoExportAt:null, backupNudgeDismissedAt:null, persistRequested:false,
     progressPhotos:[], photoPoses: DEFAULT_POSES.map(function(p){ return {id:p.id, label:p.label}; }),
-    settings:{weightUnit:'lb', progressTab:'sessions', blurPhotos:false, bodyType:'male'} };
+    settings:{weightUnit:'lb', distanceSystem:'metric', progressTab:'sessions', blurPhotos:false, bodyType:'male'} };
 }
 function loadData(){
   try{
@@ -3134,6 +3290,7 @@ var ui = {
   exerciseDraft: null,
   showCustomFieldForm: false,
   aboutOpen: null,
+  unitsOpen: false,
   editingRest: null,
   editingDefaultRest: null,
   editingPlanRest: null,
@@ -3657,6 +3814,16 @@ function fmtWeightVal(v){
   var d = kgToDisplay(v, u);
   return (Math.round(d*10)/10) + ' ' + u;
 }
+/* Charts read the scale off the exercise being charted, so a sprint stays in
+   metres and a long run stays in kilometres. */
+var chartDistanceField = null;
+function fmtDistanceVal(v){
+  var u = distanceUnit(chartDistanceField);
+  return metresToDisplay(v, u) + ' ' + u;
+}
+function fmtDistanceAxis(v){
+  return String(metresToDisplay(v, distanceUnit(chartDistanceField)));
+}
 function fmtWeightAxis(v){
   var d = kgToDisplay(v, data.settings.weightUnit);
   return String(Math.abs(d)>=100 ? Math.round(d) : Math.round(d*10)/10);
@@ -3684,6 +3851,12 @@ var CHART_METRICS = [
   { key:'assist', label:'Least Assistance', needs:['assisted'], agg:'min',
     calc:function(w){ return chMin(chVals(w,'assisted')); },
     value:fmtWeightVal, axis:fmtWeightAxis, note:'Lower is better - less help each session' },
+  { key:'far', label:'Farthest', needs:['distance'], agg:'max',
+    calc:function(w){ return chMax(chVals(w,'distance')); },
+    value:fmtDistanceVal, axis:fmtDistanceAxis },
+  { key:'totdist', label:'Total Distance', needs:['distance'], agg:'sum',
+    calc:function(w){ return chSum(chVals(w,'distance')); },
+    value:fmtDistanceVal, axis:fmtDistanceAxis, note:'Summed across every set in the session' },
   { key:'rpe', label:'Avg RPE', needs:['rpe'], agg:'avg',
     calc:function(w){ return chAvg(chVals(w,'rpe')); },
     value:function(v){ return 'RPE '+(Math.round(v*10)/10); }, axis:function(v){ return String(Math.round(v*10)/10); },
@@ -3710,6 +3883,7 @@ function customNumberMetrics(ex){
   });
 }
 function metricsFor(ex){
+  chartDistanceField = ex.fields.filter(function(f){ return f.type==='distance'; })[0] || null;
   var types = ex.fields.map(function(f){ return f.type; });
   var base = CHART_METRICS.filter(function(m){
     return m.needs.every(function(t){ return types.indexOf(t)>=0; });
@@ -4253,7 +4427,7 @@ function openExerciseModal(editingExercise, pickerContext){
         muscles: exerciseMuscles(editingExercise),
         musclesTouched: !!editingExercise.musclesSet || hasMuscleData(editingExercise), musclesAutofilled: false,
         fields: snapshotFields(editingExercise), defaultRestSec: (editingExercise.defaultRestSec===undefined?null:editingExercise.defaultRestSec) }
-    : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], defaultRestSec:null };
+    : { editingId: null, name:'', tags: [], muscles: emptyMuscles(), musclesTouched: false, musclesAutofilled: false, fields:[], fieldsFromPreset:false, defaultRestSec:null };
   /* An exercise that predates this feature, or one being created, gets its
      muscles filled in from its name the moment the editor opens - otherwise
      "add muscles" would mean facing 21 empty chips. Anything already set by
@@ -4265,28 +4439,41 @@ function openExerciseModal(editingExercise, pickerContext){
   renderExerciseModal();
 }
 function closeExerciseModal(){
+  comboClose();
   ui.exerciseDraft = null;
   ui.pickerContextForModal = null;
   document.getElementById('exercise-modal').hidden = true;
 }
+/* The exercise picks the scale; Settings picks the system. Offering "m or km"
+   to someone on imperial would be meaningless, so the two buttons are named
+   for whichever system is switched on. */
+function distanceScaleRowHTML(d){
+  var f = d.fields.filter(function(x){ return x.type==='distance'; })[0];
+  if (!f) return '';
+  var units = DISTANCE_UNITS[distanceSystem()];
+  var scale = distanceScale(f);
+  return '<div class="settings-row dist-scale-row"><div class="settings-row-text"><span>Distance in</span>'+
+    '<span class="settings-row-sub">Stored the same either way \u2014 this is only how it reads</span></div>'+
+    '<div class="segmented">'+
+      '<button class="'+(scale==='small'?'active':'')+'" data-action="ex-dist-scale" data-scale="small">'+esc(units.small)+'</button>'+
+      '<button class="'+(scale==='large'?'active':'')+'" data-action="ex-dist-scale" data-scale="large">'+esc(units.large)+'</button>'+
+    '</div></div>';
+}
+
 function renderExerciseModal(){
   var wrap = document.getElementById('exercise-modal');
   var d = ui.exerciseDraft;
   if (!d) { wrap.innerHTML=''; return; }
   function hasType(t){ return d.fields.some(function(f){return f.type===t;}); }
-  var tagOptions = allTagOptions();
 
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>'+(d.editingId?'Edit Exercise':'New Exercise')+'</h2><button class="icon-btn" data-action="ex-modal-close">'+icon('x')+'</button></div>'+
     '<label class="field-label">Name</label>'+
-    '<input id="ex-name-input" class="input" list="ex-name-options" aria-label="Exercise name" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
-    /* filled in by refreshNameSuggestions() once two characters are typed */
-    '<datalist id="ex-name-options"></datalist>'+
+    '<input id="ex-name-input" class="input" aria-label="Exercise name" role="combobox" aria-autocomplete="list" aria-expanded="false" autocomplete="off" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
     '<div id="ex-muscle-picker">'+musclePickerHTML(d)+'</div>'+
     '<label class="field-label" style="margin-top:14px;">Tags <span class="field-optional">Optional</span></label>'+
     '<div class="mus-legend">Free text, comma separated. Used for search and labels \u2014 never for the map.</div>'+
-    '<input class="input" list="ex-tag-options" data-commit="ex-tags" placeholder="e.g. Chest, Cardio, Mobility" value="'+esc(d.tags.join(', '))+'">'+
-    '<datalist id="ex-tag-options">'+tagOptions.map(function(t){return '<option value="'+esc(t)+'">';}).join('')+'</datalist>'+
+    '<input id="ex-tags-input" class="input" data-commit="ex-tags" role="combobox" aria-autocomplete="list" aria-expanded="false" autocomplete="off" placeholder="e.g. Chest, Cardio, Mobility" value="'+esc(d.tags.join(', '))+'">'+
     '<label class="field-label">Tracking Fields</label>'+
     '<div class="chip-row">'+
       d.fields.map(function(f){
@@ -4297,11 +4484,14 @@ function renderExerciseModal(){
         return '<div class="chip">'+chipInner+'<button data-action="ex-remove-field" data-fieldid="'+f.id+'">'+icon('x')+'</button></div>';
       }).join('')+
       (d.fields.length===0?'<div class="empty-hint">No fields yet — add at least one below.</div>':'')+
+      (d.fieldsFromPreset&&d.fields.length?'<div class="empty-hint mus-auto">Fields came with the name — change or remove any of them.</div>':'')+
     '</div>'+
+    distanceScaleRowHTML(d)+
     '<div class="preset-row">'+
       '<button class="btn btn-tag" data-action="ex-add-preset" data-type="weight" '+(hasType('weight')?'disabled':'')+'>'+icon('plus')+' Weight</button>'+
       '<button class="btn btn-tag" data-action="ex-add-preset" data-type="assisted" '+(hasType('assisted')?'disabled':'')+'>'+icon('plus')+' Assisted</button>'+
       '<button class="btn btn-tag" data-action="ex-add-preset" data-type="reps" '+(hasType('reps')?'disabled':'')+'>'+icon('plus')+' Reps</button>'+
+      '<button class="btn btn-tag" data-action="ex-add-preset" data-type="distance" '+(hasType('distance')?'disabled':'')+' title="How far \u2014 stored in metres, shown in whichever unit you pick">'+icon('plus')+' Distance</button>'+
       '<button class="btn btn-tag" data-action="ex-add-preset" data-type="timer" '+(hasType('timer')?'disabled':'')+' title="A duration you pre-set in a plan and count down during the workout">'+icon('plus')+' Time (Target)</button>'+
       '<button class="btn btn-tag" data-action="ex-add-preset" data-type="time" '+(hasType('time')?'disabled':'')+' title="A duration you measure and record during the workout, e.g. a max hang">'+icon('plus')+' Time (Measured)</button>'+
       '<button class="btn btn-tag" data-action="ex-add-preset" data-type="rir" '+(hasType('rir')?'disabled':'')+' title="Reps in Reserve - how many reps you had left in the tank">'+icon('plus')+' RIR</button>'+
@@ -4328,11 +4518,117 @@ function renderExerciseModal(){
     '</div>'+
   '</div>';
 
+  comboClose();
   wrap.innerHTML = html;
-  refreshNameSuggestions(d.name);
   var nameInput = document.getElementById('ex-name-input');
   if (focusIfPointer(nameInput)) nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
 }
+
+/* ---- Suggestion dropdown ------------------------------------------------
+   Drawn here rather than handed to a native <datalist>. Android's WebView
+   renders one as a translucent sheet over the whole modal, misaligned and
+   flickering as the options change - and the APK is the way this app is
+   actually used. This also puts the filtering back under our control, so
+   "pushup" can find "Push Up" again; the native element ran its own
+   substring filter on top of ours and hid anything that did not literally
+   contain what was typed.
+
+   One list exists at a time, parked on document.body so no modal's overflow
+   can clip it, positioned under whichever input asked for it. */
+
+var combo = { input:null, items:[], el:null, index:-1, onPick:null };
+
+function comboOpen(input, items, onPick){
+  if (!items.length){ comboClose(); return; }
+  combo.input = input; combo.items = items; combo.index = -1; combo.onPick = onPick;
+  if (!combo.el){
+    combo.el = document.createElement('div');
+    combo.el.className = 'combo-pop';
+    combo.el.setAttribute('role','listbox');
+    document.body.appendChild(combo.el);
+  }
+  combo.el.innerHTML = items.map(function(s, i){
+    return '<button type="button" class="combo-item" role="option" aria-selected="false" data-combo-i="'+i+'">'+esc(s)+'</button>';
+  }).join('');
+  input.setAttribute('aria-expanded','true');
+  comboPosition();
+}
+
+function comboClose(){
+  if (combo.el && combo.el.parentNode) combo.el.parentNode.removeChild(combo.el);
+  if (combo.input) combo.input.setAttribute('aria-expanded','false');
+  combo.el = null; combo.input = null; combo.items = []; combo.index = -1; combo.onPick = null;
+}
+
+/* Fixed to the viewport, and flipped above the field when the keyboard has
+   eaten the space below it. */
+function comboPosition(){
+  var el = combo.el, input = combo.input;
+  if (!el || !input || !input.isConnected) return comboClose();
+  var r = input.getBoundingClientRect();
+  var vh = (window.visualViewport ? window.visualViewport.height : window.innerHeight);
+  el.style.left = Math.round(r.left) + 'px';
+  el.style.width = Math.round(r.width) + 'px';
+  el.style.maxHeight = '';
+  var below = vh - r.bottom - 8;
+  var above = r.top - 8;
+  if (below < 120 && above > below){
+    el.style.top = '';
+    el.style.bottom = Math.round(vh - r.top + 4) + 'px';
+    el.style.maxHeight = Math.max(80, Math.round(above)) + 'px';
+  } else {
+    el.style.bottom = '';
+    el.style.top = Math.round(r.bottom + 4) + 'px';
+    el.style.maxHeight = Math.max(80, Math.round(below)) + 'px';
+  }
+}
+
+function comboHighlight(next){
+  if (!combo.el) return;
+  var opts = combo.el.querySelectorAll('.combo-item');
+  if (!opts.length) return;
+  combo.index = (next + opts.length) % opts.length;
+  for (var i=0; i<opts.length; i++){
+    var on = i === combo.index;
+    opts[i].classList.toggle('on', on);
+    opts[i].setAttribute('aria-selected', on ? 'true' : 'false');
+  }
+  opts[combo.index].scrollIntoView({ block:'nearest' });
+}
+
+function comboPick(i){
+  var value = combo.items[i];
+  var fn = combo.onPick;
+  if (value === undefined || !fn) return comboClose();
+  comboClose();
+  fn(value);
+}
+
+/* Pointerdown rather than click: a click would land after the input's blur,
+   by which time the list is gone. */
+document.addEventListener('pointerdown', function(e){
+  var el = combo.el;
+  if (!el) return;
+  var hit = e.target.closest ? e.target.closest('.combo-item') : null;
+  if (hit && el.contains(hit)){
+    e.preventDefault();
+    comboPick(Number(hit.getAttribute('data-combo-i')));
+    return;
+  }
+  if (e.target !== combo.input) comboClose();
+}, true);
+
+document.addEventListener('keydown', function(e){
+  if (!combo.el || e.target !== combo.input) return;
+  if (e.key === 'ArrowDown'){ e.preventDefault(); comboHighlight(combo.index + 1); }
+  else if (e.key === 'ArrowUp'){ e.preventDefault(); comboHighlight(combo.index - 1); }
+  else if (e.key === 'Enter'){ if (combo.index >= 0){ e.preventDefault(); comboPick(combo.index); } }
+  else if (e.key === 'Escape'){ e.preventDefault(); comboClose(); }
+}, true);
+
+window.addEventListener('resize', comboPosition);
+window.addEventListener('scroll', comboPosition, true);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', comboPosition);
 
 /* --------------------------------------------------------------- picker */
 
@@ -5071,6 +5367,7 @@ function renderWorkoutDetailHTML(w){
         if (v!==null && v!==undefined && v!==''){
           if (f.type==='weight') disp = kgToDisplay(v, unit);
           else if (f.type==='assisted') disp = '\u2212' + kgToDisplay(v, unit);
+          else if (f.type==='distance') disp = metresToDisplay(v, distanceUnit(f));
           else if (f.type==='time' || f.type==='timer') disp = secToMMSS(v);
           else disp = v;
         }
@@ -5276,6 +5573,7 @@ function closeSettings(){
   ui.importPreview = null;
   ui.settingsMessage = null;
   ui.aboutOpen = null;   /* reopen compact, not on a wall of prose */
+  ui.unitsOpen = false;
   document.getElementById('settings-modal').hidden = true;
   renderMain();
 }
@@ -5411,6 +5709,42 @@ function refreshAboutSections(focusKey){
   if (btn){ try{ btn.focus({preventScroll:true}); }catch(e){ btn.focus(); } }
 }
 
+/* One switch for people who think in a system, and a drawer underneath for
+   people who do not. Plenty of us lift in kilos and run in miles. */
+function unitSystem(){
+  var w = data.settings.weightUnit === 'lb' ? 'imperial' : 'metric';
+  return w === distanceSystem() ? w : 'mixed';
+}
+function unitsSectionHTML(){
+  var sys = unitSystem(), open = !!ui.unitsOpen;
+  var ds = distanceSystem();
+  return '<div class="settings-row"><div class="settings-row-text"><span>Units</span>'+
+      '<span class="settings-row-sub">'+(sys==='mixed'
+        ? esc((data.settings.weightUnit==='lb'?'lb':'kg')+' \u00b7 '+DISTANCE_UNITS[ds].large)
+        : 'Weight and distance together')+'</span></div>'+
+      '<div class="segmented">'+
+        '<button class="'+(sys==='metric'?'active':'')+'" data-action="unit-system" data-sys="metric">Metric</button>'+
+        '<button class="'+(sys==='imperial'?'active':'')+'" data-action="unit-system" data-sys="imperial">Imperial</button>'+
+      '</div></div>'+
+
+    '<div class="units-detail">'+
+      '<button class="chart-toggle about-toggle" data-action="units-toggle" aria-expanded="'+(open?'true':'false')+'" aria-controls="units-panel">'+
+        '<span class="field-label">Mix them</span>'+
+        '<span class="cat-caret '+(open?'':'collapsed')+'">'+icon('chevronDown')+'</span>'+
+      '</button>'+
+      (open ? '<div id="units-panel" role="region">'+
+        '<div class="settings-row"><span>Weight</span><div class="segmented">'+
+          '<button class="'+(data.settings.weightUnit==='kg'?'active':'')+'" data-action="unit-kg">kg</button>'+
+          '<button class="'+(data.settings.weightUnit==='lb'?'active':'')+'" data-action="unit-lb">lb</button>'+
+        '</div></div>'+
+        '<div class="settings-row"><span>Distance</span><div class="segmented">'+
+          '<button class="'+(ds==='metric'?'active':'')+'" data-action="unit-distance" data-sys="metric">m \u00b7 km</button>'+
+          '<button class="'+(ds==='imperial'?'active':'')+'" data-action="unit-distance" data-sys="imperial">ft \u00b7 mi</button>'+
+        '</div></div>'+
+      '</div>' : '')+
+    '</div>';
+}
+
 function renderSettingsModal(){
   var wrap = document.getElementById('settings-modal');
   var c = dataCounts(data);
@@ -5420,10 +5754,7 @@ function renderSettingsModal(){
 
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>Settings</h2><button class="icon-btn" data-action="settings-close">'+icon('x')+'</button></div>'+
-    '<div class="settings-row"><span>Weight Unit</span><div class="segmented">'+
-      '<button class="'+(data.settings.weightUnit==='lb'?'active':'')+'" data-action="unit-lb">lb</button>'+
-      '<button class="'+(data.settings.weightUnit==='kg'?'active':'')+'" data-action="unit-kg">kg</button>'+
-    '</div></div>'+
+    unitsSectionHTML()+
 
     '<div class="settings-row"><div class="settings-row-text"><span>Body Diagram</span>'+
       '<span class="settings-row-sub">Which figure the muscle coverage map draws</span></div>'+
@@ -5857,15 +6188,26 @@ function handleAction(action, el){
     case 'ex-modal-close': closeExerciseModal(); break;
     case 'ex-add-preset': {
       var type = el.dataset.type;
-      var labels = {weight:'Weight', assisted:'Assisted', reps:'Reps', timer:'Target Time', time:'Time', rir:'RIR', rpe:'RPE'};
+      var labels = {weight:'Weight', assisted:'Assisted', reps:'Reps', distance:'Distance', timer:'Target Time', time:'Time', rir:'RIR', rpe:'RPE'};
       if (!ui.exerciseDraft.fields.some(function(f){return f.type===type;})){
-        ui.exerciseDraft.fields.push({ id: uid('f'), type: type, label: labels[type], unit: '' });
+        var nf = { id: uid('f'), type: type, label: labels[type], unit: '' };
+        if (type==='distance') nf.distScale = 'large';
+        ui.exerciseDraft.fields.push(nf);
+        ui.exerciseDraft.fieldsFromPreset = false;
       }
+      renderExerciseModal();
+      break;
+    }
+    case 'ex-dist-scale': {
+      ui.exerciseDraft.fields.forEach(function(f){
+        if (f.type==='distance') f.distScale = el.dataset.scale==='small' ? 'small' : 'large';
+      });
       renderExerciseModal();
       break;
     }
     case 'ex-remove-field': {
       ui.exerciseDraft.fields = ui.exerciseDraft.fields.filter(function(f){return f.id!==el.dataset.fieldid;});
+      ui.exerciseDraft.fieldsFromPreset = false;
       renderExerciseModal();
       break;
     }
@@ -5881,6 +6223,7 @@ function handleAction(action, el){
       var ctype = document.getElementById('ex-custom-type').value;
       var cunit = document.getElementById('ex-custom-unit').value.trim();
       ui.exerciseDraft.fields.push({ id: uid('f'), type: ctype, label: cname, unit: ctype==='number' ? cunit : '' });
+      ui.exerciseDraft.fieldsFromPreset = false;
       ui.showCustomFieldForm = false;
       renderExerciseModal();
       break;
@@ -5978,6 +6321,23 @@ function handleAction(action, el){
       var aKey = el.dataset.key;
       ui.aboutOpen = (ui.aboutOpen === aKey) ? null : aKey;
       refreshAboutSections(aKey);
+      break;
+    }
+    case 'unit-system': {
+      var sys = el.dataset.sys === 'imperial' ? 'imperial' : 'metric';
+      data.settings.weightUnit = sys === 'imperial' ? 'lb' : 'kg';
+      data.settings.distanceSystem = sys;
+      save(); renderSettingsModal(); renderMain();
+      break;
+    }
+    case 'unit-distance': {
+      data.settings.distanceSystem = el.dataset.sys === 'imperial' ? 'imperial' : 'metric';
+      save(); renderSettingsModal(); renderMain();
+      break;
+    }
+    case 'units-toggle': {
+      ui.unitsOpen = !ui.unitsOpen;
+      renderSettingsModal();
       break;
     }
     case 'body-type': {
@@ -6094,7 +6454,7 @@ function handleAction(action, el){
       data = defaultData(); save();
       clearMuscleSidecar();
       reconcilePhotoStore();   /* metadata is empty now, so this empties the store */
-      ui.importPreview = null; ui.settingsMessage = null; ui.aboutOpen = null;
+      ui.importPreview = null; ui.settingsMessage = null; ui.aboutOpen = null; ui.unitsOpen = false;
       document.getElementById('settings-modal').hidden = true;
       setView('home');
     }); break;
@@ -6245,6 +6605,7 @@ function handlePlanSetCommit(kind, t){
       else {
         if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
         else if (field.type==='assisted') set.values[field.id] = displayToKg(Math.abs(n), data.settings.weightUnit);
+        else if (field.type==='distance') set.values[field.id] = displayToMetres(n, distanceUnit(field));
         else if (field.type==='reps') set.values[field.id] = Math.round(n);
         else if (isEffortType(field.type)) set.values[field.id] = clampEffort(field.type, n);
         else set.values[field.id] = n;
@@ -6323,6 +6684,7 @@ function onFocusOut(e){
         else {
           if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
           else if (field.type==='assisted') set.values[field.id] = displayToKg(Math.abs(n), data.settings.weightUnit);
+          else if (field.type==='distance') set.values[field.id] = displayToMetres(n, distanceUnit(field));
           else if (field.type==='reps') set.values[field.id] = Math.round(n);
           else if (isEffortType(field.type)) set.values[field.id] = clampEffort(field.type, n);
           else set.values[field.id] = n;
@@ -6360,7 +6722,12 @@ function onInput(e){
     var btn = document.getElementById('ex-save-btn');
     if (btn) btn.disabled = !(t.value.trim() && ui.exerciseDraft.fields.length);
     if (autofillMuscles(ui.exerciseDraft)) refreshMusclePicker();
-    refreshNameSuggestions(t.value);
+    openNameSuggestions(t);
+    return;
+  }
+  if (t.id==='ex-tags-input'){
+    if (ui.exerciseDraft) ui.exerciseDraft.tags = parseTagInput(t.value);
+    openTagSuggestions(t);
     return;
   }
   if (t.id==='picker-search'){ ui.picker.query = t.value; renderPickerResults(); return; }
