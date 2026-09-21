@@ -131,7 +131,7 @@ html,body{touch-action:pan-x pan-y;}
 body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-ui);font-weight:600;
   font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;overscroll-behavior-y:none;}
 button,input,select{font-family:inherit;color:inherit;font-size:14px;font-weight:600;}
-button{cursor:pointer;-webkit-tap-highlight-color:transparent;}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;}
 a{color:inherit;}
 ::selection{background:var(--accent-soft);}
 button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--grape);outline-offset:2px;}
@@ -469,7 +469,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 
 /* --------------------------------------------------------------- modals */
 .modal-overlay{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;
-  justify-content:center;z-index:50;padding:20px;backdrop-filter:blur(2px);
+  justify-content:center;z-index:50;padding:20px;-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
   /* the scrim still covers the phone's bars, the card itself stays clear */
   padding-top:max(20px, calc(var(--safe-top) + 8px));padding-bottom:max(20px, calc(var(--safe-bottom) + 8px));
   padding-left:max(20px, calc(var(--safe-left) + 8px));padding-right:max(20px, calc(var(--safe-right) + 8px));}
@@ -495,6 +495,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .settings-msg{font-size:13px;font-weight:700;line-height:1.5;border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:12px;}
 .settings-msg.ok{background:var(--good-soft);color:var(--good-deep);}
 .settings-msg.error{background:var(--danger-soft);color:var(--danger-ink);}
+.settings-msg .msg-action{margin-left:6px;vertical-align:middle;}
 .import-confirm{border:2px solid var(--accent-soft-border);background:var(--accent-soft);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;}
 .import-confirm-title{font-weight:800;font-size:14.5px;margin-bottom:10px;}
 .import-confirm-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:600;padding:4px 0;color:var(--text-dim);}
@@ -515,6 +516,11 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .backup-nudge-text strong{font-size:14.5px;font-weight:800;}
 .backup-nudge-text span{font-size:13px;font-weight:600;color:var(--text-dim);line-height:1.45;}
 .backup-nudge-actions{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+/* The failed-save warning sits above every screen, lined up with the page. */
+.save-alert-wrap{max-width:1080px;margin:0 auto;padding:0 24px;
+  padding-left:calc(24px + var(--safe-left));padding-right:calc(24px + var(--safe-right));}
+#save-alert{margin:18px 0 -8px;border-color:var(--danger);}
+#save-alert[hidden]{display:none;}
 
 /* -------------------------------------------------------------- profile */
 .avatar-btn{background:none;border:none;padding:0;width:38px;height:38px;border-radius:50%;overflow:hidden;
@@ -552,6 +558,10 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .crop-zoom-row{display:flex;align-items:center;gap:10px;}
 .crop-zoom-row input[type=range]{flex:1;accent-color:var(--accent);}
 #cropper-modal .modal::before{content:none;}
+/* the Android app's camera-or-gallery question */
+.photo-source{max-width:340px;}
+.photo-source .btn + .btn{margin-top:10px;}
+#photo-source-modal .modal::before{content:none;}
 
 /* --------------------------------------------------------------- mobile */
 @media (max-width:640px){
@@ -607,6 +617,8 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .tab-fab.shooting{background:var(--grape);box-shadow:0 4px 0 #4B3BA8;}
   .main{padding:20px 14px calc(104px + env(safe-area-inset-bottom));
     padding-left:calc(14px + var(--safe-left));padding-right:calc(14px + var(--safe-right));}
+  .save-alert-wrap{padding-left:calc(14px + var(--safe-left));padding-right:calc(14px + var(--safe-right));}
+  #save-alert{margin-top:14px;}
   .timerbar{bottom:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:0;border-radius:24px 24px 0 0;}
   /* the workout name is on the workout screen anyway, so the pill can be
      trimmed here rather than shoving the settings and profile icons off */
@@ -952,6 +964,7 @@ body.photos-hidden .photo-veil{display:flex;}
   </div>
 </header>
 
+<div class="save-alert-wrap"><div class="backup-nudge" id="save-alert" role="alert" hidden></div></div>
 <main class="main" id="main"></main>
 
 <div class="timerbar" id="timerbar"></div>
@@ -962,6 +975,7 @@ body.photos-hidden .photo-veil{display:flex;}
 <div class="modal-overlay" id="cropper-modal" hidden></div>
 <input type="file" id="photo-file-input" accept="image/*" style="display:none">
 <div class="modal-overlay" id="exercise-modal" hidden></div>
+<div class="modal-overlay" id="photo-source-modal" hidden></div>
 
 <!-- ---------------------------------------------------------------------
      Muscle map kit (tools/muscle-map-kit/, MIT - see its LICENSE).
@@ -1381,8 +1395,17 @@ function mmssToSec(str){
     var mi = parseInt(parts[0],10)||0, se = parseInt(parts[1],10)||0;
     return mi*60+se;
   }
-  var n = parseFloat(t);
+  var n = parseDecimal(t);
   return isNaN(n) ? null : n;
+}
+/* A German keypad - and most of Europe's - offers only a comma for the
+   decimal point, and parseFloat stops at it: "82,5" was saved as 82. A comma
+   with no dot anywhere is that decimal comma. Anything with a dot is read as
+   before, so nothing that worked changes meaning. */
+function parseDecimal(raw){
+  var s = String(raw).trim();
+  if (s.indexOf(',') >= 0 && s.indexOf('.') < 0) s = s.replace(',', '.');
+  return parseFloat(s);
 }
 function fmtRest(sec){
   if (sec===null||sec===undefined) return null;
@@ -2255,8 +2278,9 @@ function defaultData(){
     settings:{weightUnit:'lb', distanceSystem:'metric', theme:'system', progressTab:'sessions', blurPhotos:false, bodyType:'male'} };
 }
 function loadData(){
+  var raw = null;
   try{
-    var raw = localStorage.getItem(STORAGE_KEY);
+    raw = localStorage.getItem(STORAGE_KEY);
     /* one-time carry-over from the app's previous name (IronLog).
        The old key is left untouched as a safety copy. */
     if (!raw){
@@ -2269,7 +2293,17 @@ function loadData(){
     if (!raw) return defaultData();
     var parsed = JSON.parse(raw);
     return Object.assign(defaultData(), parsed);
-  }catch(e){ return defaultData(); }
+  }catch(e){
+    /* Starting empty is the only way to open at all, but the first save would
+       then write over whatever could not be read. Set it aside first, under a
+       key nothing else writes, so it can still be recovered by hand. */
+    if (raw){
+      try{
+        if (!localStorage.getItem(STORAGE_KEY+'_unreadable')) localStorage.setItem(STORAGE_KEY+'_unreadable', raw);
+      }catch(e2){ console.error('Athleticism: could not set unreadable data aside', e2); }
+    }
+    return defaultData();
+  }
 }
 var data = loadData();
 /* When this file was produced by "Export portable copy" it carries a data
@@ -2293,9 +2327,62 @@ var pendingRestore = null;
     pendingRestore = snap;
   }
 })();
+/* Two copies open at once - a browser tab and the installed app, or two
+   windows - each hold everything in memory and write all of it back on every
+   save, so the one left open behind quietly put an old copy back over
+   workouts logged in the other (its rest timer finishing was enough). The
+   moment another copy saves, this one stops saving and asks for a reload. */
+var staleCopy = false;
+window.addEventListener('storage', function(e){
+  if (e.key !== STORAGE_KEY || staleCopy) return;
+  staleCopy = true;
+  renderSaveAlert();
+});
+/* Returns whether it stuck. A failed save used to go only to the console:
+   the app kept running from memory, and everything since was gone the moment
+   it closed. Now it says so, on every screen, until a save works again - and
+   the export it offers is built from memory, so it carries all of it. */
+var saveFailing = false, saveAlertExported = false;
 function save(){
-  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
-  catch(e){ console.error('Athleticism: save failed', e); }
+  if (staleCopy) return false;
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    if (saveFailing){ saveFailing = false; renderSaveAlert(); }
+    return true;
+  }catch(e){
+    console.error('Athleticism: save failed', e);
+    if (!saveFailing){ saveFailing = true; renderSaveAlert(); }
+    return false;
+  }
+}
+function renderSaveAlert(){
+  var el = document.getElementById('save-alert');
+  if (!el) return;
+  el.hidden = !(saveFailing || staleCopy);
+  if (staleCopy){
+    el.innerHTML = '<div class="backup-nudge-text">'+
+        '<strong>Open in Another Window Too</strong>'+
+        '<span>The app was used in another tab or window since this one loaded, so this copy is out of date. '+
+          'It has stopped saving, so it cannot write older data over newer. Reload to carry on from there.</span>'+
+      '</div>'+
+      '<div class="backup-nudge-actions">'+
+        '<button class="btn btn-primary small" data-action="reload-app">Reload</button>'+
+      '</div>';
+    return;
+  }
+  if (!saveFailing) saveAlertExported = false;
+  el.innerHTML = !saveFailing ? '' :
+    '<div class="backup-nudge-text">'+
+      '<strong>Changes Are Not Being Saved</strong>'+
+      '<span>'+(saveAlertExported
+        ? 'Backup exported, with everything in it. Free up some space and the app will save again on its own.'
+        : 'There is no room left for the app’s data, so anything since the last save is lost when the app closes. '+
+          'Export a backup now — it includes everything — then free up some space.')+'</span>'+
+    '</div>'+
+    (saveAlertExported ? '' :
+    '<div class="backup-nudge-actions">'+
+      '<button class="btn btn-primary small" data-action="save-alert-export">Export Now</button>'+
+    '</div>');
 }
 
 /* ---- Durable storage ----------------------------------------------------
@@ -2408,14 +2495,115 @@ function downloadFile(filename, mime, content){
     return false;
   }
 }
+/* Inside the Android app a download has nowhere to go: the WebView gives a
+   blob: URL no destination and has no share sheet, so the file used to vanish
+   while the page said "Backup saved". There it goes through Android's own
+   "Save to" screen instead - SaveFilePlugin.java beside MainActivity. */
+function isNativeApp(){
+  var cap = window.Capacitor;
+  return !!(cap && cap.isNativePlatform && cap.isNativePlatform());
+}
+function nativeFileSaver(){
+  if (!isNativeApp()) return null;
+  var cap = window.Capacitor;
+  return (cap.Plugins && cap.Plugins.SaveFile) || null;
+}
+/* Opens the share sheet; a refusal because the tap is too long gone holds the
+   file for the next tap instead. cb('saved' | 'cancelled' | 'ready' |
+   'failed') - and after 'ready', once more with how that next tap went. */
+function shareOrHold(filename, mime, content, cb){
+  shareFile(filename, mime, content, function(status){
+    if (status === 'shared') cb('saved');
+    else if (status === 'blocked'){ heldShare = { filename: filename, mime: mime, content: content, cb: cb }; cb('ready'); }
+    else cb(status);
+  });
+}
+/* A cancelled save screen gets no message at all - backing out is a choice. */
+function exportMessage(status, savedText){
+  if (status === 'saved') return { kind:'ok', text: savedText };
+  if (status === 'ready') return readyMessage();
+  if (status === 'failed') return { kind:'error', text: isNativeApp()
+    ? 'Could not save the file. Try again, or pick another folder.'
+    : 'Could not create the file. Try again, or use a different browser.' };
+  return null;
+}
+/* The Share buttons: a closed sheet says nothing, a refused one says so and
+   points at Save, which always has a way through. */
+function shareMessage(status, sharedText){
+  if (status === 'saved') return { kind:'ok', text: sharedText };
+  if (status === 'ready') return readyMessage();
+  if (status === 'failed') return { kind:'error', text:'Could not share that file here. Use Save instead.' };
+  return null;
+}
+function readyMessage(){
+  return { kind:'ok', text:'Your file is ready.', action:'share-held', actionLabel:'Save Now' };
+}
+/* Settings and the Photos pane show these; a message may carry one button. */
+function messageHTML(msg){
+  if (!msg) return '';
+  return '<div class="settings-msg '+(msg.kind==='error'?'error':'ok')+'">'+esc(msg.text)+
+    (msg.action ? ' <button class="btn btn-primary small msg-action" data-action="'+esc(msg.action)+'">'+esc(msg.actionLabel)+'</button>' : '')+
+  '</div>';
+}
+function bytesToBase64(bytes){
+  var s = '';
+  for (var i = 0; i < bytes.length; i += 0x8000){
+    s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+  }
+  return btoa(s);
+}
+/* cb('saved' | 'cancelled' | 'ready' | 'failed'). Only 'saved' means the file
+   really exists somewhere, and only that may count as a backup. 'ready' is an
+   iPhone share sheet that wants one more tap (see shareOrHold). */
+function saveFile(filename, mime, content, cb){
+  var native = nativeFileSaver();
+  if (!native){
+    if (savesThroughShare(filename, mime)){ shareOrHold(filename, mime, content, cb); return; }
+    cb(downloadFile(filename, mime, content) ? 'saved' : 'failed');
+    return;
+  }
+  var payload;
+  try { payload = typeof content === 'string' ? { text: content } : { base64: bytesToBase64(content) }; }
+  catch(e){ cb('failed'); return; }
+  /* staged first, so the request left waiting on the picker stays small */
+  native.stage(payload).then(function(){
+    return native.save({ filename: filename, mime: mime });
+  }).then(function(res){
+    cb(res && res.saved ? 'saved' : 'cancelled');
+  }).catch(function(err){
+    console.error('Athleticism: saving through Android failed', err);
+    cb('failed');
+  });
+}
 /* On phones the OS share sheet is a far better destination than a silent
-   download - it puts the file straight into Files, iCloud Drive or AirDrop. */
-function canShareFiles(){
+   download - it puts the file straight into Files, iCloud Drive or AirDrop.
+   Asked per file: Chrome shares only a fixed list of types and .json and
+   .zip are not on it, so asking about a .txt said yes and the share then
+   failed without a word. */
+function canShareFile(filename, mime){
   try{
     if (!navigator.share || !navigator.canShare || typeof File !== 'function') return false;
-    return navigator.canShare({ files: [ new File(['x'], 'x.txt', {type:'text/plain'}) ] });
+    return navigator.canShare({ files: [ new File(['x'], filename, {type: mime}) ] });
   }catch(e){ return false; }
 }
+/* iPhone and iPad. iPadOS asks for desktop sites, so it reports itself as a
+   Mac - the touch points give it away. */
+function isAppleMobile(){
+  return /iP(hone|ad|od)/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+/* On an iPhone or iPad, Save goes through the share sheet, where Save to
+   Files is. A download in the home-screen app opens a preview that takes over
+   the whole app with no way back out, and in Safari its prompt can be
+   dismissed unseen - either way the backup had already been counted. The
+   sheet says when a file really went somewhere. */
+function savesThroughShare(filename, mime){
+  return !isNativeApp() && isAppleMobile() && canShareFile(filename, mime);
+}
+/* A file the share sheet refused because preparing it took too long after
+   the tap - reading photos, building the zip. The next tap opens the sheet
+   straight away, since the file is already made. */
+var heldShare = null;
 function markExported(){
   data.lastExportAt = Date.now();
   data.backupNudgeDismissedAt = null;
@@ -2428,26 +2616,35 @@ function markPhotosExported(){
   data.backupNudgeDismissedAt = null;
   save();
 }
+/* done('shared' | 'cancelled' | 'blocked' | 'failed'). AbortError is the
+   person closing the sheet; NotAllowedError is the sheet refusing to open
+   this long after the tap, which one more tap fixes. Anything else used to
+   pass for a cancel and left no file and no word. */
 function shareFile(filename, mime, content, done){
-  var file;
-  try { file = new File([content], filename, {type: mime}); }
-  catch(e){ return false; }
-  navigator.share({ files:[file], title: filename })
-    .then(function(){ done(true); })
-    .catch(function(){ done(false); });  /* cancelled or unsupported - stay put */
-  return true;
+  var file, sharing;
+  try {
+    file = new File([content], filename, {type: mime});
+    sharing = navigator.share({ files:[file], title: filename });
+  } catch(e){ done('failed'); return; }
+  sharing.then(function(){ done('shared'); }).catch(function(err){
+    var name = err && err.name;
+    done(name === 'AbortError' ? 'cancelled' : name === 'NotAllowedError' ? 'blocked' : 'failed');
+  });
 }
 function jsonBackupText(){ return JSON.stringify(backupPayload(), null, 2); }
 function jsonBackupName(){ return 'athleticism-backup-'+backupStamp()+'.json'; }
 function portableBackupName(){ return 'athleticism-backup-'+backupStamp()+'.html'; }
 
+/* cb(status) - see saveFile */
 function exportJSON(cb){
   stagePhotoBlobs(includePhotosInBackup(), function(){
     var carried = !!pendingPhotoBlobs;
-    var ok = downloadFile(jsonBackupName(), 'application/json', jsonBackupText());
+    var text = jsonBackupText();
     pendingPhotoBlobs = null;
-    if (ok){ markExported(); if (carried) markPhotosExported(); }
-    if (cb) cb(ok);
+    saveFile(jsonBackupName(), 'application/json', text, function(status){
+      if (status === 'saved'){ markExported(); if (carried) markPhotosExported(); }
+      if (cb) cb(status);
+    });
   });
 }
 /* Serialise a clean copy of this page with the current data embedded, so the
@@ -2466,6 +2663,10 @@ function buildPortableHTML(){
   /* A portable copy runs from a file:// path, where service workers and
      manifests are invalid. Strip the PWA wiring so the archive never tries
      to register anything and never claims to be installable. */
+  /* the Android app sets this per pick; a copy opened elsewhere must not
+     inherit "camera only" */
+  var photoInput = clone.querySelector('#photo-file-input');
+  if (photoInput) photoInput.removeAttribute('capture');
   var popovers = clone.querySelectorAll('.field-pop, .combo-pop');
   for (var pi=0; pi<popovers.length; pi++){ popovers[pi].parentNode.removeChild(popovers[pi]); }
   var pwaBits = clone.querySelectorAll('link[rel="manifest"], [data-pwa]');
@@ -2514,13 +2715,16 @@ function buildPortableHTML(){
 
   return '<!DOCTYPE html>\n' + clone.outerHTML;
 }
+/* cb(status) - see saveFile */
 function exportPortable(cb){
   stagePhotoBlobs(includePhotosInBackup(), function(){
     var carried = !!pendingPhotoBlobs;
-    var ok = downloadFile(portableBackupName(), 'text/html', buildPortableHTML());
+    var html = buildPortableHTML();
     pendingPhotoBlobs = null;
-    if (ok){ markExported(); if (carried) markPhotosExported(); }
-    if (cb) cb(ok);
+    saveFile(portableBackupName(), 'text/html', html, function(status){
+      if (status === 'saved'){ markExported(); if (carried) markPhotosExported(); }
+      if (cb) cb(status);
+    });
   });
 }
 /* Accepts a .json backup, or a portable .html backup (data pulled out of
@@ -2610,11 +2814,18 @@ function mergeImportedData(payload){
 
 function applyImportedData(payload){
   var incoming = takePhotoBlobs(payload);
+  /* Progress photos ride through a Replace. A backup leaves the images out
+     unless asked to, so one made before this month's photos - or on another
+     phone - lists none of them, and replacing used to delete every image it
+     did not list. The data is replaced; a picture only leaves by being
+     deleted. */
+  var ownPhotos = allPhotos().slice(), ownPoses = photoPoses().slice();
   clearInterval(runtime.timerHandle);
   runtime.timerHandle = null;
   runtime.timer = null;
   runtime.pendingBeep = false;
   data = Object.assign(defaultData(), payload);
+  keepPhotosThroughReplace(ownPhotos, ownPoses);
   data.restTimer = null;
   if (!data.settings || !data.settings.weightUnit) data.settings = { weightUnit:'lb' };
   data.plans.forEach(function(plan){
@@ -2625,9 +2836,25 @@ function applyImportedData(payload){
   migrateMuscleData();
   applyTheme();
   renderAvatarButton();
-  /* whatever the old install had in IndexedDB is now unreferenced */
+  /* only images nothing refers to any more - the kept photos above still are */
   if (incoming) absorbPhotoBlobs(incoming, function(){ reconcilePhotoStore(); renderMain(); });
   else reconcilePhotoStore();
+}
+/* Adds back the photos (and any custom angle they were filed under) that the
+   incoming data does not already list. */
+function keepPhotosThroughReplace(photos, poses){
+  var listed = {};
+  allPhotos().forEach(function(p){ listed[p.id] = true; });
+  var kept = photos.filter(function(p){ return !listed[p.id]; });
+  if (!kept.length) return;
+  data.progressPhotos = allPhotos().concat(kept);
+  var known = {};
+  photoPoses().forEach(function(p){ known[p.id] = true; });
+  poses.forEach(function(p){
+    if (known[p.id] || !kept.some(function(k){ return k.pose === p.id; })) return;
+    data.photoPoses.push(p);
+    known[p.id] = true;
+  });
 }
 
 /* ---- Progress photos ----------------------------------------------------
@@ -2792,12 +3019,39 @@ function photoImgTag(id, size, cls){
    phone opens straight into the camera and the photo library is unreachable,
    and plenty of progress shots are taken by someone else, or already sitting
    in Photos. Without it iOS offers Photo Library / Take Photo / Choose File
-   and Android its equivalent chooser. It lives in the static body markup so
-   the dock's round button can reach it too. */
+   and Android's browser its equivalent chooser. It lives in the static body
+   markup so the dock's round button can reach it too.
+
+   The Android app is the exception: its WebView has no chooser of its own -
+   without capture it opens only the gallery, with it only the camera - so
+   there the app asks first, and sets the attribute to match the answer. */
 function startPhotoCapture(poseId){
   ui.photoDraftPose = poseId || (ui.photoPose || photoPoses()[0].id);
+  if (isNativeApp()){ openPhotoSource(); return; }
   var input = document.getElementById('photo-file-input');
   if (input) input.click();
+}
+function openPhotoSource(){
+  var wrap = document.getElementById('photo-source-modal');
+  wrap.innerHTML = '<div class="modal photo-source">'+
+    '<div class="modal-head"><h2>Add a Photo</h2><button class="icon-btn" data-action="photo-source-close">'+icon('x')+'</button></div>'+
+    '<button class="btn btn-primary full-width" data-action="photo-source" data-source="camera">'+icon('camera')+' Take Photo</button>'+
+    '<button class="btn btn-ghost full-width" data-action="photo-source" data-source="library">Choose From Gallery</button>'+
+  '</div>';
+  wrap.hidden = false;
+}
+function closePhotoSource(){
+  var wrap = document.getElementById('photo-source-modal');
+  wrap.hidden = true;
+  wrap.innerHTML = '';
+}
+function pickPhotoFrom(source){
+  closePhotoSource();
+  var input = document.getElementById('photo-file-input');
+  if (!input) return;
+  if (source === 'camera') input.setAttribute('capture', 'environment');
+  else input.removeAttribute('capture');
+  input.click();
 }
 /* The previous shot in the same pose, loaded so it can be ghosted under the
    crop frame. Lining each month's photo up with the last is the whole point. */
@@ -3000,25 +3254,23 @@ function runPhotoZipExport(report){
   report({ kind:'ok', text:'Packing your photos\u2026' });
   buildPhotosZip(function(bytes){
     if (!bytes){ report({ kind:'error', text:'Could not build the photo archive.' }); return; }
-    var ok = downloadFile(photosZipName(), 'application/zip', bytes);
-    if (ok) markPhotosExported();
-    report(ok
-      ? { kind:'ok', text:'Photo archive saved \u2014 dated .jpg files in a .zip. It is for keeping, not for importing back.' }
-      : { kind:'error', text:'Could not create the file.' });
+    saveFile(photosZipName(), 'application/zip', bytes, function(status){
+      if (status === 'saved') markPhotosExported();
+      /* backing out of the save screen is a choice, not an error */
+      report(status === 'saved'
+        ? { kind:'ok', text:'Photo archive saved \u2014 dated .jpg files in a .zip. It is for keeping, not for importing back.' }
+        : status === 'ready' ? readyMessage()
+        : status === 'failed' ? { kind:'error', text:'Could not create the file.' } : null);
+    });
   });
 }
 function runPhotoZipShare(report){
   report({ kind:'ok', text:'Packing your photos\u2026' });
   buildPhotosZip(function(bytes){
     if (!bytes){ report({ kind:'error', text:'Could not build the photo archive.' }); return; }
-    report(null);
-    shareFile(photosZipName(), 'application/zip', bytes, function(sent){
-      if (sent){
-        markPhotosExported();
-        report({ kind:'ok', text:'Photo archive shared.' });
-      } else {
-        report(null);
-      }
+    shareOrHold(photosZipName(), 'application/zip', bytes, function(status){
+      if (status === 'saved') markPhotosExported();
+      report(shareMessage(status, 'Photo archive shared.'));
     });
   });
 }
@@ -3387,12 +3639,13 @@ function commitCrop(){
 }
 function setAvatar(dataUrl){
   var p = profile();
+  var was = p.avatar;
   p.avatar = dataUrl;
   if (!p.createdAt) p.createdAt = Date.now();
-  try{
+  if (!save()){
+    /* the picture is what did not fit - put the old one back and keep the rest */
+    p.avatar = was;
     save();
-  }catch(e){
-    p.avatar = null;
     return false;
   }
   renderAvatarButton();
@@ -3631,8 +3884,16 @@ function updateInProgressBar(){
   var live = !!data.activeWorkout && ui.view!=='workout';
   if (live){
     btn.hidden = false;
-    btn.innerHTML = '<span class="dot"></span><span class="ip-name">' + esc(data.activeWorkout.name) +
-      '</span><span class="ip-time">' + fmtElapsed(Date.now()-data.activeWorkout.startedAt) + '</span>';
+    /* this runs every second - only the clock changes, so only the clock is
+       rewritten; a rebuilt button loses a tap that spans the swap */
+    var ipTime = fmtElapsed(Date.now()-data.activeWorkout.startedAt);
+    var ipName = btn.querySelector('.ip-name'), ipTimeEl = btn.querySelector('.ip-time');
+    if (ipName && ipTimeEl && ipName.textContent === data.activeWorkout.name){
+      if (ipTimeEl.textContent !== ipTime) ipTimeEl.textContent = ipTime;
+    } else {
+      btn.innerHTML = '<span class="dot"></span><span class="ip-name">' + esc(data.activeWorkout.name) +
+        '</span><span class="ip-time">' + ipTime + '</span>';
+    }
   } else {
     btn.hidden = true;
   }
@@ -3648,7 +3909,11 @@ function updateInProgressBar(){
     fab.classList.toggle('shooting', shooting);
     var label = shooting ? 'Add a progress photo' : (data.activeWorkout ? 'Resume workout' : 'Start a workout');
     fab.title = label; fab.setAttribute('aria-label', label);
-    fab.innerHTML = shooting ? FAB_CAMERA_SVG : FAB_BARBELL_SVG;
+    var fabIcon = shooting ? 'camera' : 'barbell';
+    if (fab.dataset.icon !== fabIcon){
+      fab.dataset.icon = fabIcon;
+      fab.innerHTML = shooting ? FAB_CAMERA_SVG : FAB_BARBELL_SVG;
+    }
   }
 }
 
@@ -5544,7 +5809,7 @@ function photosPaneHTML(){
   var msg = ui.photoMessage;
   var html = '';
 
-  if (msg) html += '<div class="settings-msg '+(msg.kind==='error'?'error':'ok')+'">'+esc(msg.text)+'</div>';
+  html += messageHTML(msg);
 
   html += poseChipsHTML();
 
@@ -5592,7 +5857,8 @@ function photosPaneHTML(){
       'Or keep them as dated images anywhere you like:'+
       '<div class="photo-warn-actions">'+
         '<button class="btn btn-ghost small" data-action="photo-zip-save">'+icon('download')+' Export Photos (.zip)</button>'+
-        (canShareFiles() ? '<button class="btn btn-ghost small" data-action="photo-zip-share">Share</button>' : '')+
+        (canShareFile(photosZipName(), 'application/zip') && !savesThroughShare(photosZipName(), 'application/zip')
+          ? '<button class="btn btn-ghost small" data-action="photo-zip-share">Share</button>' : '')+
       '</div>'+
     '</div>';
   }
@@ -5794,7 +6060,9 @@ function ensureAudio(){
   if (!runtime.audioCtx){
     try{ runtime.audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){}
   }
-  if (runtime.audioCtx && runtime.audioCtx.state==='suspended'){
+  /* not only "suspended": after a call or Siri, Safari leaves it "interrupted",
+     and it stayed silent from then on */
+  if (runtime.audioCtx && runtime.audioCtx.state!=='running' && runtime.audioCtx.state!=='closed'){
     runtime.audioCtx.resume().catch(function(){});
   }
 }
@@ -5919,15 +6187,28 @@ function restoreTimer(){
   clearInterval(runtime.timerHandle);
   runtime.timerHandle = setInterval(timerTick, 250);
 }
+/* Rebuilt only when what it shows changes shape; every other tick just
+   rewrites the time. Rebuilding it four times a second swapped the buttons
+   out from under any press that spanned a tick, and that press never became
+   a click - about one tap in three on -15, pause, +15 or close did nothing. */
+var timerBarShape = '';
 function renderTimerBar(){
   var bar = document.getElementById('timerbar');
-  if (!runtime.timer){ bar.className='timerbar'; bar.innerHTML=''; return; }
+  if (!runtime.timer){ bar.className='timerbar'; bar.innerHTML=''; timerBarShape=''; return; }
   var t = runtime.timer;
   var running = timerIsRunning(t);
+  var shape = t.done ? 'done' : (running ? 'running' : 'paused');
+  var time = fmtElapsed(timerRemainingMs(t));
   bar.className = 'timerbar show' + (t.done?' done':'');
+  var timeEl = shape === timerBarShape ? bar.querySelector('.timerbar-time') : null;
+  if (timeEl){
+    if (timeEl.textContent !== time) timeEl.textContent = time;
+    return;
+  }
+  timerBarShape = shape;
   bar.innerHTML = '<div class="timerbar-inner">'+
     '<div class="timerbar-label">'+(t.done?'Rest Complete':(running?'Resting':'Paused'))+'</div>'+
-    '<div class="timerbar-time">'+fmtElapsed(timerRemainingMs(t))+'</div>'+
+    '<div class="timerbar-time">'+time+'</div>'+
     (!t.done ? (
       '<button data-action="timer-adjust" data-delta="-15">&minus;15</button>'+
       '<button data-action="timer-pause-resume">'+(running?icon('pause'):icon('play'))+'</button>'+
@@ -6075,8 +6356,9 @@ var ABOUT_SECTIONS = [
 
     '<p><b>Exporting a real file is the only actual guarantee.</b> <code>.json</code> is small '+
     'and easy to keep anywhere. The portable <code>.html</code> carries your data inside a '+
-    'working copy of the app — open it on any machine, in any browser, with no '+
-    'internet, and it just runs.</p>'+
+    'working copy of the app — open it on a computer or an Android phone, in any browser, '+
+    'with no internet, and it just runs. An iPhone only previews a file like that without '+
+    'running it, so there use <i>Import Backup</i> instead.</p>'+
 
     '<p>Both of them <b>leave progress photos out</b> unless you turn on <i>Include Progress '+
     'Photos</i>, because inlining them turns a backup you can email into one you cannot. '+
@@ -6229,7 +6511,13 @@ function renderSettingsModal(){
   var c = dataCounts(data);
   var imp = ui.importPreview;
   var msg = ui.settingsMessage;
-  var sharing = canShareFiles();
+  /* a Share button of its own only where it adds something: not where Save
+     already opens the share sheet, and not for a type this browser refuses */
+  function extraShare(filename, mime){ return canShareFile(filename, mime) && !savesThroughShare(filename, mime); }
+  var shareJson = extraShare(jsonBackupName(), 'application/json');
+  var shareHtml = extraShare(portableBackupName(), 'text/html');
+  var shareZip = extraShare(photosZipName(), 'application/zip');
+  var native = isNativeApp();
 
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>Settings</h2><button class="icon-btn" data-action="settings-close">'+icon('x')+'</button></div>'+
@@ -6250,21 +6538,25 @@ function renderSettingsModal(){
         '<button class="'+(data.settings.blurPhotos?'active':'')+'" data-action="blur-photos-toggle" data-on="1">On</button>'+
       '</div></div>'+
 
+    /* A browser may clear a site's storage to free space; the Android app's
+       storage is its own and only goes when the app is uninstalled, so there
+       is nothing to protect it from and the row only confused. */
+    (native ? '' :
     '<div class="settings-section-label">Storage</div>'+
     '<div class="settings-row"><div class="settings-row-text"><span>Protect From Automatic Clearing</span>'+
       '<span class="settings-row-sub">'+esc(persistStateLine())+'</span></div>'+
       (storageCanPersist() && storagePersisted !== true
         ? '<button class="btn btn-ghost" data-action="request-persist">Protect</button>'
         : '')+
-    '</div>'+
+    '</div>')+
 
     '<div class="settings-section-label">Backup</div>'+
-    '<div class="settings-note">Your data lives in this browser only. Browsers can clear that storage without warning &mdash; on iPhone especially, unless this page is added to your Home Screen.</div>'+
+    (native
+      ? '<div class="settings-note">Your data lives in this app only. Uninstalling it, or clearing its storage, deletes everything &mdash; so keep a backup somewhere else.</div>'
+      : '<div class="settings-note">Your data lives in this browser only. Browsers can clear that storage without warning &mdash; on iPhone especially, unless this page is added to your Home Screen.</div>')+
     '<div class="settings-stat">'+countsLine(c)+'<br>'+esc(lastExportLine())+'</div>';
 
-  if (msg){
-    html += '<div class="settings-msg '+(msg.kind==='error'?'error':'ok')+'">'+esc(msg.text)+'</div>';
-  }
+  html += messageHTML(msg);
 
   if (imp){
     var ic = dataCounts(imp.data);
@@ -6280,7 +6572,7 @@ function renderSettingsModal(){
         '</button>'+
         '<button class="import-mode-btn danger" data-action="import-replace">'+
           '<span class="import-mode-title">Replace Everything</span>'+
-          '<span class="import-mode-sub">Discards current data and uses the file exactly as it is.</span>'+
+          '<span class="import-mode-sub">Discards current data and uses the file exactly as it is. Your progress photos stay.</span>'+
         '</button>'+
       '</div>'+
       '<div style="display:flex;gap:10px;margin-top:12px;">'+
@@ -6300,12 +6592,12 @@ function renderSettingsModal(){
       : '')+
     '<div class="settings-row"><div class="settings-row-text"><span>Export Data File</span><span class="settings-row-sub">A small .json backup &mdash; best for regular saves and moving between devices</span></div>'+
       '<div class="settings-row-actions">'+
-        (sharing ? '<button class="btn btn-ghost" data-action="share-json">Share</button>' : '')+
+        (shareJson ? '<button class="btn btn-ghost" data-action="share-json">Share</button>' : '')+
         '<button class="btn btn-ghost" data-action="export-json">Save</button>'+
       '</div></div>'+
     '<div class="settings-row"><div class="settings-row-text"><span>Export Portable Copy</span><span class="settings-row-sub">An .html archive that opens as a full working copy, offline, with no server</span></div>'+
       '<div class="settings-row-actions">'+
-        (sharing ? '<button class="btn btn-ghost" data-action="share-html">Share</button>' : '')+
+        (shareHtml ? '<button class="btn btn-ghost" data-action="share-html">Share</button>' : '')+
         '<button class="btn btn-ghost" data-action="export-html">Save</button>'+
       '</div></div>'+
     '<div class="settings-row"><div class="settings-row-text"><span>Import Backup</span><span class="settings-row-sub">Accepts .json or a portable .html &mdash; you choose merge or replace next</span></div>'+
@@ -6319,7 +6611,7 @@ function renderSettingsModal(){
         '<div class="settings-row"><div class="settings-row-text"><span>Export Progress Photos</span>'+
           '<span class="settings-row-sub">A .zip of dated .jpg files for your photo library or computer &mdash; an archive to keep, not a file the app reads back</span></div>'+
           '<div class="settings-row-actions">'+
-            (sharing ? '<button class="btn btn-ghost" data-action="share-photos">Share</button>' : '')+
+            (shareZip ? '<button class="btn btn-ghost" data-action="share-photos">Share</button>' : '')+
             '<button class="btn btn-ghost" data-action="export-photos">Save</button>'+
           '</div></div>';
     }
@@ -6328,7 +6620,7 @@ function renderSettingsModal(){
   html += aboutSectionsHTML();
 
   html += '<div class="settings-section-label">Danger Zone</div>'+
-    '<div class="settings-row"><div class="settings-row-text"><span>Reset All Data</span><span class="settings-row-sub">Erases everything in this browser</span></div>'+
+    '<div class="settings-row"><div class="settings-row-text"><span>Reset All Data</span><span class="settings-row-sub">Erases everything in this '+(native?'app':'browser')+'</span></div>'+
       '<button class="btn btn-ghost" data-action="confirm-reset-data">Reset</button></div>'+
     '<input type="file" id="import-file-input" accept=".json,.html,application/json,text/html" style="display:none">'+
   '</div>';
@@ -6782,7 +7074,7 @@ function handleAction(action, el){
       if (cropped.error){
         ui.profileMessage = { kind:'error', text: cropped.error };
       } else if (!setAvatar(cropped.dataUrl)){
-        ui.profileMessage = { kind:'error', text:'Not enough room left in this browser to save the picture. Export a backup, then try again.' };
+        ui.profileMessage = { kind:'error', text:'Not enough room left to save the picture. Export a backup, then try again.' };
       } else {
         ui.profileMessage = { kind:'ok', text:'Picture updated \u2014 stored at '+Math.round(cropped.bytes/1024)+' KB.' };
       }
@@ -6859,19 +7151,18 @@ function handleAction(action, el){
     case 'unit-kg': data.settings.weightUnit='kg'; save(); renderSettingsModal(); renderMain(); break;
 
     case 'export-json': {
-      exportJSON(function(okJson){
-        ui.settingsMessage = okJson
-          ? { kind:'ok', text:'Backup saved. Move it somewhere that is not this browser \u2014 Files, iCloud Drive, or your computer.' }
-          : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
+      exportJSON(function(jsonStatus){
+        ui.settingsMessage = exportMessage(jsonStatus, isNativeApp()
+          ? 'Backup saved where you picked. Keep a copy off this phone too \u2014 uninstalling the app deletes everything in it.'
+          : 'Backup saved. Move it somewhere that is not this browser \u2014 Files, iCloud Drive, or your computer.');
         renderSettingsModal();
       });
       break;
     }
     case 'export-html': {
-      exportPortable(function(okHtml){
-        ui.settingsMessage = okHtml
-          ? { kind:'ok', text:'Portable copy saved. Opening that file gives you the app with this data already in it, with no internet needed.' }
-          : { kind:'error', text:'Could not create the file. Try again, or use a different browser.' };
+      exportPortable(function(htmlStatus){
+        ui.settingsMessage = exportMessage(htmlStatus,
+          'Portable copy saved. Opening that file gives you the app with this data already in it, with no internet needed.');
         renderSettingsModal();
       });
       break;
@@ -6881,12 +7172,9 @@ function handleAction(action, el){
         var jsonText = jsonBackupText();
         var jsonCarried = !!pendingPhotoBlobs;
         pendingPhotoBlobs = null;
-        shareFile(jsonBackupName(), 'application/json', jsonText, function(sent){
-          if (sent){
-            markExported();
-            if (jsonCarried) markPhotosExported();
-            ui.settingsMessage = { kind:'ok', text:'Backup shared.' };
-          }
+        shareOrHold(jsonBackupName(), 'application/json', jsonText, function(jsonShare){
+          if (jsonShare === 'saved'){ markExported(); if (jsonCarried) markPhotosExported(); }
+          ui.settingsMessage = shareMessage(jsonShare, 'Backup shared.');
           renderSettingsModal();
         });
       });
@@ -6897,14 +7185,20 @@ function handleAction(action, el){
         var htmlText = buildPortableHTML();
         var htmlCarried = !!pendingPhotoBlobs;
         pendingPhotoBlobs = null;
-        shareFile(portableBackupName(), 'text/html', htmlText, function(sent){
-          if (sent){
-            markExported();
-            if (htmlCarried) markPhotosExported();
-            ui.settingsMessage = { kind:'ok', text:'Portable copy shared.' };
-          }
+        shareOrHold(portableBackupName(), 'text/html', htmlText, function(htmlShare){
+          if (htmlShare === 'saved'){ markExported(); if (htmlCarried) markPhotosExported(); }
+          ui.settingsMessage = shareMessage(htmlShare, 'Portable copy shared.');
           renderSettingsModal();
         });
+      });
+      break;
+    }
+    case 'share-held': {
+      var held = heldShare;
+      heldShare = null;
+      /* a fresh tap, and the file already made - the sheet opens this time */
+      if (held) shareFile(held.filename, held.mime, held.content, function(heldStatus){
+        held.cb(heldStatus === 'shared' ? 'saved' : heldStatus === 'blocked' ? 'failed' : heldStatus);
       });
       break;
     }
@@ -6912,12 +7206,24 @@ function handleAction(action, el){
       data.backupNudgeDismissedAt = Date.now();
       save(); renderMain();
       break;
-    case 'backup-nudge-export':
+    case 'backup-nudge-export': {
+      var nudgeWas = data.backupNudgeDismissedAt;
       data.backupNudgeDismissedAt = Date.now();
       /* if photos are what is unprotected, the file has to carry them */
       if (photosSinceExport() > 0) ui.backupIncludePhotos = true;
-      exportJSON(function(){ renderMain(); });
+      exportJSON(function(nudgeStatus){
+        /* a save screen backed out of is not a backup - the reminder stays */
+        if (nudgeStatus !== 'saved'){ data.backupNudgeDismissedAt = nudgeWas; save(); }
+        renderMain();
+      });
       break;
+    }
+    case 'save-alert-export':
+      exportJSON(function(alertStatus){
+        if (alertStatus === 'saved'){ saveAlertExported = true; renderSaveAlert(); }
+      });
+      break;
+    case 'reload-app': location.reload(); break;
     case 'import-pick': {
       var fi = document.getElementById('import-file-input');
       if (fi) fi.click();
@@ -7012,6 +7318,8 @@ function handleAction(action, el){
       startPhotoCapture(ui.photoPose);
       break;
     }
+    case 'photo-source': pickPhotoFrom(el.dataset.source); break;
+    case 'photo-source-close': closePhotoSource(); break;
     case 'photo-pose':
       ui.photoPose = el.dataset.pose || null;
       ui.addingPose = false;
@@ -7111,7 +7419,7 @@ function handlePlanSetCommit(kind, t){
     var raw = t.value.trim();
     if (raw===''){ set.values[field.id] = null; }
     else {
-      var n = parseFloat(raw);
+      var n = parseDecimal(raw);
       if (isNaN(n)){ set.values[field.id] = null; t.value=''; }
       else {
         if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
@@ -7190,7 +7498,7 @@ function onFocusOut(e){
       var raw = t.value.trim();
       if (raw===''){ set.values[field.id] = null; }
       else {
-        var n = parseFloat(raw);
+        var n = parseDecimal(raw);
         if (isNaN(n)){ set.values[field.id] = null; t.value=''; }
         else {
           if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
@@ -7317,12 +7625,44 @@ function onKeyDown(e){
     var finModal = document.getElementById('finish-modal');
     var cropModal = document.getElementById('cropper-modal');
     if (!cropModal.hidden){ closeCropper(); return; }
+    if (!document.getElementById('photo-source-modal').hidden){ closePhotoSource(); return; }
     if (!exModal.hidden){ closeExerciseModal(); return; }
     if (!finModal.hidden){ closeFinishModal(); return; }
     if (!settingsModal.hidden){ closeSettings(); return; }
     if (ui.editingRest || ui.editingDefaultRest!==null){ ui.editingRest=null; ui.editingDefaultRest=null; renderMain(); return; }
   }
 }
+
+/* Android's back button - the APK's MainActivity asks here before doing
+   anything itself. Closes the innermost thing that is open, the way Escape
+   does, then steps out of a detail screen, then back to Home. False means
+   there was nothing left to close, and the app may go to the background. */
+var REST_EDITS = ['editingRest','editingDefaultRest','editingPlanRest','editingPlanSetRest','editingPlanRestBlock','editingRestBlock','editingTopRest'];
+function handleBack(){
+  if (combo.el){ comboClose(); return true; }
+  if (infoPop.el){ hideFieldInfo(); return true; }
+  if (!document.getElementById('cropper-modal').hidden){ closeCropper(); return true; }
+  if (!document.getElementById('photo-source-modal').hidden){ closePhotoSource(); return true; }
+  if (!document.getElementById('exercise-modal').hidden){ closeExerciseModal(); return true; }
+  if (!document.getElementById('finish-modal').hidden){ closeFinishModal(); return true; }
+  if (!document.getElementById('settings-modal').hidden){ closeSettings(); return true; }
+  if (ui.picker){ handleAction('picker-close'); return true; }
+  var editing = REST_EDITS.filter(function(k){ return ui[k] != null; });
+  if (editing.length){ editing.forEach(function(k){ ui[k] = null; }); renderMain(); return true; }
+  if (ui.view==='exercises' && ui.selectedExerciseId){ handleAction('deselect-exercise'); return true; }
+  if (ui.view==='plans' && ui.selectedPlanId){ handleAction('deselect-plan'); return true; }
+  if (ui.view==='progress'){
+    if (ui.addingPose){ handleAction('pose-add-cancel'); return true; }
+    if (ui.compareOpen){ handleAction('compare-close'); return true; }
+    if (ui.viewingPhotoId){ handleAction('photo-close'); return true; }
+    if (ui.viewingWorkoutId){ handleAction('back-to-history'); return true; }
+  }
+  if (ui.view==='profile'){ handleAction('profile-back'); return true; }
+  /* a running workout is only minimised - it is still there to resume */
+  if (ui.view!=='home'){ setView('home'); return true; }
+  return false;
+}
+window.athleticismBack = handleBack;
 
 function onClick(e){
   var btn = e.target.closest('[data-action]');
@@ -7331,11 +7671,18 @@ function onClick(e){
     handleAction(btn.dataset.action, btn);
     return;
   }
+  /* Only a press that began on the backdrop closes the pop-up. Selecting the
+     name with the mouse and letting go past the card's edge also ends in a
+     click on the backdrop, and it threw the whole draft away. */
+  if (e.target !== pressStart) return;
   if (e.target.id==='settings-modal') closeSettings();
   if (e.target.id==='exercise-modal') closeExerciseModal();
   if (e.target.id==='finish-modal') closeFinishModal();
   if (e.target.id==='cropper-modal') closeCropper();
+  if (e.target.id==='photo-source-modal') closePhotoSource();
 }
+var pressStart = null;
+document.addEventListener('pointerdown', function(e){ pressStart = e.target; }, true);
 
 /* ------------------------------------------------------------------ init */
 
@@ -7381,6 +7728,10 @@ function onPointerDown(e){
   if (!handle) return;
   var host = handle.closest('[data-drag-idx]');
   if (!host) return;
+  /* Before anything moves: a half-typed target commits by its card's position,
+     and after the drop that position belongs to another card - and cancelling
+     this press means nothing else would have blurred the field. */
+  commitFocusedField();
   e.preventDefault();
   var items = currentPlan().items;
   var fromIdx = host.dataset.dragIdx*1;
@@ -7591,6 +7942,17 @@ function isTextField(el){
   return !/^(button|submit|reset|checkbox|radio|range|color|file|image)$/i.test(el.type || 'text');
 }
 
+/* Blurring does exactly what tapping elsewhere does - the field's focusout
+   commits what was typed. This is for the moments when nothing else would:
+   a drag that cancels the press, or the app being sent to the background,
+   where iOS keeps the field focused and may then close the app outright. */
+function commitFocusedField(){
+  var el = document.activeElement;
+  if (el && isTextField(el) && el.blur) el.blur();
+}
+document.addEventListener('visibilitychange', function(){ if (document.hidden) commitFocusedField(); });
+window.addEventListener('pagehide', commitFocusedField);
+
 /* Keeps the field being typed into clear of the keyboard, which the dock used
    to do by proxy. visualViewport is the part of the page the keyboard leaves. */
 function keepFieldVisible(el){
@@ -7636,9 +7998,27 @@ new MutationObserver(function(){
   if (!isTextField(document.activeElement)) setKeyboardOpen(false);
 }).observe(document.body, { childList: true, subtree: true });
 
+/* Android hides the keyboard on Back but leaves the field focused, so nothing
+   said the typing was over and the dock stayed away with no keyboard in
+   sight. The page growing back to full height is that signal; taking it as
+   leaving the field also commits what was typed, as a tap elsewhere would.
+   Android only - iOS blurs the field itself when its keyboard goes. The
+   margins are generous because Chrome's own toolbar comes and goes by ~56px,
+   and no keyboard is shorter than 150. */
+var IS_ANDROID = /Android/i.test(navigator.userAgent);
+var kbFullHeight = 0, kbSeenUp = false;
+function watchKeyboardClose(){
+  var h = window.visualViewport.height;
+  var el = document.activeElement;
+  if (!isTextField(el)){ kbFullHeight = h; kbSeenUp = false; return; }
+  if (h < kbFullHeight - 150){ kbSeenUp = true; return; }
+  if (kbSeenUp && h >= kbFullHeight - 90){ kbSeenUp = false; el.blur(); }
+}
 if (window.visualViewport){
+  kbFullHeight = window.visualViewport.height;
   window.visualViewport.addEventListener('resize', function(){
     if (document.body.classList.contains('kb-open')) keepFieldVisible(document.activeElement);
+    if (IS_ANDROID) watchKeyboardClose();
   });
 }
 

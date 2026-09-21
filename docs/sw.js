@@ -9,7 +9,7 @@
 
    Bump CACHE_VERSION whenever you deploy. It's what evicts the old files. */
 
-var CACHE_VERSION = 'v20';
+var CACHE_VERSION = 'v21';
 var SHELL = 'athleticism-shell-' + CACHE_VERSION;
 
 /* Fonts are precached, not left to the first online load: a page only asks for
@@ -34,13 +34,24 @@ var SHELL_FILES = [
 ];
 
 /* Cached one at a time. addAll() is all-or-nothing, so a single missing icon
-   would leave the app with no offline copy at all. */
+   would leave the app with no offline copy at all.
+
+   The page itself is the exception. activate() deletes the previous cache,
+   so an install that lost the page to a bad connection left no app offline
+   at all, only the "Offline" notice. Failing the install instead keeps the
+   previous version, and its cache, in charge until the next try.
+
+   Every file is fetched past the browser's HTTP cache: GitHub Pages lets a
+   browser keep a file for ten minutes, and a precache filled from there
+   would hold the version this one was meant to replace. */
+var ESSENTIAL = { './': true, './index.html': true };
 self.addEventListener('install', function (e) {
   e.waitUntil(
     caches.open(SHELL).then(function (cache) {
       return Promise.all(SHELL_FILES.map(function (f) {
-        return cache.add(f).catch(function () {
+        return cache.add(new Request(f, { cache: 'reload' })).catch(function (err) {
           console.warn('Athleticism SW: could not precache', f);
+          if (ESSENTIAL[f]) throw err;
         });
       }));
     }).then(function () {

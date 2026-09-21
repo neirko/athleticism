@@ -113,6 +113,25 @@ That copies `docs/` into the Android project and runs `./gradlew assembleDebug`.
 It uses Homebrew's JDK 21 unless `JAVA_HOME` is already set. The APK lands in
 `android/app/build/outputs/apk/debug/`.
 
+A WebView is not a browser, and three things needed a little native code, all
+in `android/app/src/main/java/com/athleticism/app/`:
+
+- **Saving backups.** A WebView has nowhere to put a download and no share
+  sheet, so exports go through Android's own *Save to* screen
+  (`SaveFilePlugin.java`). The page stages the file first and then asks for the
+  location, because a whole backup inside the waiting request would crash the
+  app when the picker opens.
+- **The back button** asks the page first (`MainActivity.java` →
+  `window.athleticismBack`), so it closes a pop-up or a detail screen before it
+  leaves the app.
+- **Taking a photo.** The WebView offers the camera or the gallery, never a
+  choice, so the page asks first. `AndroidManifest.xml` declares the camera
+  intent; without it Android 11+ never finds the camera app.
+
+On an iPhone or iPad the web app's *Save* opens the share sheet — pick
+*Save to Files*. A plain download in the home-screen app opens a preview with
+no way back into the app.
+
 ---
 
 ## Where your data lives
