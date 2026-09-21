@@ -7493,19 +7493,36 @@ function keepFieldVisible(el){
   }
 }
 
-var kbTimer = null;
+var kbTimer = null, kbHeading = null;
 function setKeyboardOpen(on){
   clearTimeout(kbTimer);
+  kbHeading = on;
   /* Re-rendering a card blurs and refocuses its input. Showing the dock a beat
      late keeps it from flashing in and out while you edit. */
   kbTimer = setTimeout(function(){
-    document.body.classList.toggle('kb-open', on);
+    kbHeading = null;
+    /* the field can be gone again by now - see the observer below */
+    document.body.classList.toggle('kb-open', on && isTextField(document.activeElement));
     if (on) keepFieldVisible(document.activeElement);
   }, on ? 0 : 140);
 }
 
 document.addEventListener('focusin', function(e){ if (isTextField(e.target)) setKeyboardOpen(true); });
 document.addEventListener('focusout', function(e){ if (isTextField(e.target)) setKeyboardOpen(false); });
+
+/* WebKit - so Safari, every other browser on an iPhone, and the home-screen
+   app - takes focus away without any focusout when the focused field itself
+   is removed from the page. Picking a name suggestion repaints the exercise
+   form under the caret, and Return in a rest box redraws its card, so on an
+   iPhone the dock stayed hidden after either until another field was tapped.
+   Whatever removed the field changed the page, so that is the moment to ask
+   whether anything is still being typed in. The rest timer repaints four
+   times a second; once the dock is already on its way back, it is left be. */
+new MutationObserver(function(){
+  if (kbHeading === false || !document.body.classList.contains('kb-open')) return;
+  if (!isTextField(document.activeElement)) setKeyboardOpen(false);
+}).observe(document.body, { childList: true, subtree: true });
+
 if (window.visualViewport){
   window.visualViewport.addEventListener('resize', function(){
     if (document.body.classList.contains('kb-open')) keepFieldVisible(document.activeElement);
