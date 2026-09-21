@@ -4455,7 +4455,9 @@ function closeExerciseModal(){
   comboClose();
   ui.exerciseDraft = null;
   ui.pickerContextForModal = null;
-  document.getElementById('exercise-modal').hidden = true;
+  var exWrap = document.getElementById('exercise-modal');
+  exWrap.hidden = true;
+  exWrap.innerHTML = '';
 }
 /* The exercise picks the scale; Settings picks the system. Offering "m or km"
    to someone on imperial would be meaningless, so the two buttons are named
@@ -4471,6 +4473,32 @@ function distanceScaleRowHTML(d){
       '<button class="'+(scale==='small'?'active':'')+'" data-action="ex-dist-scale" data-scale="small">'+esc(units.small)+'</button>'+
       '<button class="'+(scale==='large'?'active':'')+'" data-action="ex-dist-scale" data-scale="large">'+esc(units.large)+'</button>'+
     '</div></div>';
+}
+
+/* Rebuilding an overlay's innerHTML throws away the .modal element and
+   builds a new one, which costs two things nobody asked for: its scroll
+   position resets to the top, and the pop-in animation replays. Adding a
+   tracking field halfway down the exercise editor therefore threw you back
+   to the top with a flash.
+
+   So reuse the element that is already on screen and swap only what is
+   inside it. A modal being opened has no element yet, so it still animates
+   in - closing one clears its markup to keep that true. */
+function paintModal(wrap, html){
+  var live = wrap.firstElementChild;
+  if (!live || !live.classList || !live.classList.contains('modal')){
+    wrap.innerHTML = html;
+    return true;                 /* freshly mounted */
+  }
+  var keep = live.scrollTop;
+  var holder = document.createElement('div');
+  holder.innerHTML = html;
+  var next = holder.firstElementChild;
+  if (!next){ wrap.innerHTML = html; return true; }
+  if (live.className !== next.className) live.className = next.className;
+  live.innerHTML = next.innerHTML;
+  live.scrollTop = keep;
+  return false;
 }
 
 function renderExerciseModal(){
@@ -4532,9 +4560,12 @@ function renderExerciseModal(){
   '</div>';
 
   comboClose();
-  wrap.innerHTML = html;
+  /* Only the first paint gets the head start. Refocusing the name field
+     after every button press drags a scrolled modal back to the top, which
+     is the other half of why adding a field felt like a page reload. */
+  var freshMount = paintModal(wrap, html);
   var nameInput = document.getElementById('ex-name-input');
-  if (focusIfPointer(nameInput)) nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
+  if (freshMount && focusIfPointer(nameInput)) nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
 }
 
 /* ---- Suggestion dropdown ------------------------------------------------
@@ -5617,7 +5648,9 @@ function closeSettings(){
   ui.settingsMessage = null;
   ui.aboutOpen = null;   /* reopen compact, not on a wall of prose */
   ui.unitsOpen = false;
-  document.getElementById('settings-modal').hidden = true;
+  var setWrap = document.getElementById('settings-modal');
+  setWrap.hidden = true;
+  setWrap.innerHTML = '';
   renderMain();
 }
 
@@ -5896,7 +5929,7 @@ function renderSettingsModal(){
     '<input type="file" id="import-file-input" accept=".json,.html,application/json,text/html" style="display:none">'+
   '</div>';
 
-  wrap.innerHTML = html;
+  paintModal(wrap, html);
 }
 
 function renderRestoreModal(){
