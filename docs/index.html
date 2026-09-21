@@ -4622,7 +4622,10 @@ function renderExerciseModal(){
      after every button press drags a scrolled modal back to the top, which
      is the other half of why adding a field felt like a page reload. */
   var freshMount = paintModal(wrap, html);
+  /* both flags, or a flag left standing replays the animation on whatever
+     repaints next - tapping one muscle chip would pop all of them */
   d.flashFields = false;
+  d.flashMuscles = false;
   var nameInput = document.getElementById('ex-name-input');
   if (freshMount && focusIfPointer(nameInput)) nameInput.setSelectionRange(nameInput.value.length, nameInput.value.length);
 }
