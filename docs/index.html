@@ -6530,6 +6530,13 @@ function renderSettingsModal(){
     appearanceRowHTML()+
     unitsSectionHTML()+
 
+    '<div class="settings-row"><div class="settings-row-text"><span>Start Rest on Tick</span>'+
+      '<span class="settings-row-sub">Ticking a set off starts its rest timer, if it has one. Off leaves that to the ▶ button</span></div>'+
+      '<div class="segmented">'+
+        '<button class="'+(!data.settings.autoRest?'active':'')+'" data-action="auto-rest-toggle" data-on="0">Off</button>'+
+        '<button class="'+(data.settings.autoRest?'active':'')+'" data-action="auto-rest-toggle" data-on="1">On</button>'+
+      '</div></div>'+
+
     '<div class="settings-row"><div class="settings-row-text"><span>Body Diagram</span>'+
       '<span class="settings-row-sub">Which figure the muscle coverage map draws</span></div>'+
       '<div class="segmented">'+
@@ -6842,10 +6849,18 @@ function handleAction(action, el){
       break;
     }
     case 'toggle-set-done': {
-      var set = data.activeWorkout.exercises[el.dataset.wex*1].sets[el.dataset.set*1];
+      var doneWex = data.activeWorkout.exercises[el.dataset.wex*1];
+      var set = doneWex.sets[el.dataset.set*1];
       set.done = !set.done;
       save();
       el.classList.toggle('done', set.done);
+      /* Optional (Settings): ticking a set off starts the rest its own play
+         button would. A set with no rest is simply confirmed, and unticking
+         leaves the timer alone. */
+      if (set.done && data.settings.autoRest){
+        var restAfter = effectiveRest(doneWex, set);
+        if (restAfter) startTimer(restAfter);
+      }
       break;
     }
 
@@ -7381,6 +7396,10 @@ function handleAction(action, el){
     case 'photo-backup-toggle':
       ui.backupIncludePhotos = el.dataset.on === '1';
       renderSettingsModal();
+      break;
+    case 'auto-rest-toggle':
+      data.settings.autoRest = el.dataset.on === '1';
+      save(); renderSettingsModal();
       break;
     case 'blur-photos-toggle':
       data.settings.blurPhotos = el.dataset.on === '1';
