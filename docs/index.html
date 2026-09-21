@@ -36,6 +36,25 @@
   --good:#17B37D; --good-soft:#DCF6EC; --good-deep:#0E8E63;
   --danger:#E8434E; --danger-deep:#BE2B36; --sun:#FFC53D; --grape:#6C5BD4;
   --ink-shadow:rgba(42,34,51,.10);
+  /* ---- roles that need their own value in dark mode ----
+     A shadow under an orange button wants a DARKER orange; accent text on a
+     soft tint wants a LIGHTER one. In light mode both are accent-deep, so
+     they were one token - in dark they pull opposite ways. */
+  --accent-ledge:#C8451C; --good-ledge:#0E8E63;
+  /* the dark slab behind the rest timer and the active workout card; it was
+     var(--text), which turns light in dark mode and whites out the words */
+  --inverse:#2A2233; --on-inverse:#FFFFFF; --inverse-ledge:#17121D;
+  /* a selected pill sitting on a track: the lighter of the two in either theme */
+  --raised:#FFFFFF;
+  --scrim:rgba(42,34,51,.45);
+  --danger-soft:#FCE4E5; --danger-ink:#9C2830;
+  --warn-soft:#FFF4D6; --warn-border:#FFE1A0;
+  --heat-1:#FFE7AE; --heat-2:#FFC53D; --heat-3:#FF9A4D;
+  /* body outline behind the muscle map */
+  --mm-outline:#D9C9B6;
+  /* no color-scheme here on purpose: the default already renders light,
+     and declaring it shifts how native controls anti-alias, so light mode
+     would not be pixel-for-pixel what it was before dark mode existed */
   /* ---- mascot ---- */
   --roo:#7C88C0; --roo-dark:#6773AD; --roo-cream:#FFF1DE; --roo-pink:#FFC2AC;
   /* ---- shape ---- */
@@ -49,6 +68,33 @@
   --roo-rest:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cpath%20d%3D%22M137%20138c17%208%2032%2021%2040%2036%204%207%200%2015-8%2015-6%200-9-4-12-10-7-13-19-21-32-23z%22%20fill%3D%22%236773AD%22%2F%3E%3Cpath%20d%3D%22M86%20176%2048%20178%22%20stroke%3D%22%236773AD%22%20stroke-width%3D%2221%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M114%20176%20152%20178%22%20stroke%3D%22%236773AD%22%20stroke-width%3D%2221%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M100%2094C77%2094%2063%20113%2061%20139c-1%2021%201%2033%207%2037h64c6-4%208-16%207-37-2-26-16-45-39-45z%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%22150%22%20rx%3D%2227%22%20ry%3D%2224%22%20fill%3D%22%23FFF1DE%22%2F%3E%3Cpath%20d%3D%22M72%20112%2062%20140%22%20stroke%3D%22%237C88C0%22%20stroke-width%3D%2219%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M130%20110%20150%2088%22%20stroke%3D%22%237C88C0%22%20stroke-width%3D%2219%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cellipse%20cx%3D%2272%22%20cy%3D%2225%22%20rx%3D%2210.5%22%20ry%3D%2223%22%20transform%3D%22rotate(-15%2072%2025)%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%2273%22%20cy%3D%2228%22%20rx%3D%225%22%20ry%3D%2214%22%20transform%3D%22rotate(-15%2073%2028)%22%20fill%3D%22%23FFC2AC%22%2F%3E%3Cellipse%20cx%3D%22128%22%20cy%3D%2225%22%20rx%3D%2210.5%22%20ry%3D%2223%22%20transform%3D%22rotate(15%20128%2025)%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%22127%22%20cy%3D%2228%22%20rx%3D%225%22%20ry%3D%2214%22%20transform%3D%22rotate(15%20127%2028)%22%20fill%3D%22%23FFC2AC%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2264%22%20rx%3D%2241%22%20ry%3D%2236%22%20fill%3D%22%237C88C0%22%2F%3E%3Cpath%20d%3D%22M66.5%2042.5A41%2036%200%200%201%2077%2032h46a41%2036%200%200%201%2010.5%2010.5c-15.5%203-51.5%203-67%200z%22%20fill%3D%22%23FF6A3D%22%2F%3E%3Cpath%20d%3D%22M70.5%2037.8A41%2036%200%200%201%2077%2032h46a41%2036%200%200%201%206.5%205.8c-12.5-2.2-46.5-2.2-59%200z%22%20fill%3D%22%23FFD3BC%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2280%22%20rx%3D%2224.5%22%20ry%3D%2217.5%22%20fill%3D%22%23FFF1DE%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2270%22%20rx%3D%227.5%22%20ry%3D%225.5%22%20fill%3D%22%232A2233%22%2F%3E%3Cpath%20d%3D%22M100%2075.5v4%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%2079.5q-7%207-13%201%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%2079.5q7%207%2013%201%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2282%22%20cy%3D%2257%22%20r%3D%227.5%22%20fill%3D%22%232A2233%22%2F%3E%3Ccircle%20cx%3D%2284.8%22%20cy%3D%2254%22%20r%3D%222.7%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22118%22%20cy%3D%2257%22%20r%3D%227.5%22%20fill%3D%22%232A2233%22%2F%3E%3Ccircle%20cx%3D%22120.8%22%20cy%3D%2254%22%20r%3D%222.7%22%20fill%3D%22%23fff%22%2F%3E%3Cellipse%20cx%3D%2267%22%20cy%3D%2272%22%20rx%3D%228%22%20ry%3D%225%22%20fill%3D%22%23FF6A3D%22%20opacity%3D%22.28%22%2F%3E%3Cellipse%20cx%3D%22133%22%20cy%3D%2272%22%20rx%3D%228%22%20ry%3D%225%22%20fill%3D%22%23FF6A3D%22%20opacity%3D%22.28%22%2F%3E%3Ccircle%20cx%3D%22152%22%20cy%3D%2286%22%20r%3D%2212%22%20fill%3D%22%23FF6A3D%22%2F%3E%3C%2Fsvg%3E");
   --roo-lift:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cpath%20d%3D%22M137%20138c17%208%2032%2021%2040%2036%204%207%200%2015-8%2015-6%200-9-4-12-10-7-13-19-21-32-23z%22%20fill%3D%22%236773AD%22%2F%3E%3Cpath%20d%3D%22M86%20176%2048%20178%22%20stroke%3D%22%236773AD%22%20stroke-width%3D%2221%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M114%20176%20152%20178%22%20stroke%3D%22%236773AD%22%20stroke-width%3D%2221%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M100%2094C77%2094%2063%20113%2061%20139c-1%2021%201%2033%207%2037h64c6-4%208-16%207-37-2-26-16-45-39-45z%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%22150%22%20rx%3D%2227%22%20ry%3D%2224%22%20fill%3D%22%23FFF1DE%22%2F%3E%3Cpath%20d%3D%22M75%20107%2061%20126%22%20stroke%3D%22%237C88C0%22%20stroke-width%3D%2219%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M125%20107%20139%20126%22%20stroke%3D%22%237C88C0%22%20stroke-width%3D%2219%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cellipse%20cx%3D%2272%22%20cy%3D%2225%22%20rx%3D%2210.5%22%20ry%3D%2223%22%20transform%3D%22rotate(-15%2072%2025)%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%2273%22%20cy%3D%2228%22%20rx%3D%225%22%20ry%3D%2214%22%20transform%3D%22rotate(-15%2073%2028)%22%20fill%3D%22%23FFC2AC%22%2F%3E%3Cellipse%20cx%3D%22128%22%20cy%3D%2225%22%20rx%3D%2210.5%22%20ry%3D%2223%22%20transform%3D%22rotate(15%20128%2025)%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%22127%22%20cy%3D%2228%22%20rx%3D%225%22%20ry%3D%2214%22%20transform%3D%22rotate(15%20127%2028)%22%20fill%3D%22%23FFC2AC%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2264%22%20rx%3D%2241%22%20ry%3D%2236%22%20fill%3D%22%237C88C0%22%2F%3E%3Cpath%20d%3D%22M66.5%2042.5A41%2036%200%200%201%2077%2032h46a41%2036%200%200%201%2010.5%2010.5c-15.5%203-51.5%203-67%200z%22%20fill%3D%22%23FF6A3D%22%2F%3E%3Cpath%20d%3D%22M70.5%2037.8A41%2036%200%200%201%2077%2032h46a41%2036%200%200%201%206.5%205.8c-12.5-2.2-46.5-2.2-59%200z%22%20fill%3D%22%23FFD3BC%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2280%22%20rx%3D%2224.5%22%20ry%3D%2217.5%22%20fill%3D%22%23FFF1DE%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2270%22%20rx%3D%227.5%22%20ry%3D%225.5%22%20fill%3D%22%232A2233%22%2F%3E%3Cpath%20d%3D%22M100%2075.5v4%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%2079.5q-7%207-13%201%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%2079.5q7%207%2013%201%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2282%22%20cy%3D%2257%22%20r%3D%227.5%22%20fill%3D%22%232A2233%22%2F%3E%3Ccircle%20cx%3D%2284.8%22%20cy%3D%2254%22%20r%3D%222.7%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22118%22%20cy%3D%2257%22%20r%3D%227.5%22%20fill%3D%22%232A2233%22%2F%3E%3Ccircle%20cx%3D%22120.8%22%20cy%3D%2254%22%20r%3D%222.7%22%20fill%3D%22%23fff%22%2F%3E%3Cellipse%20cx%3D%2267%22%20cy%3D%2272%22%20rx%3D%228%22%20ry%3D%225%22%20fill%3D%22%23FF6A3D%22%20opacity%3D%22.28%22%2F%3E%3Cellipse%20cx%3D%22133%22%20cy%3D%2272%22%20rx%3D%228%22%20ry%3D%225%22%20fill%3D%22%23FF6A3D%22%20opacity%3D%22.28%22%2F%3E%3Crect%20x%3D%2220%22%20y%3D%22122%22%20width%3D%22160%22%20height%3D%2211%22%20rx%3D%225.5%22%20fill%3D%22%232A2233%22%2F%3E%3Crect%20x%3D%228%22%20y%3D%22101%22%20width%3D%2219%22%20height%3D%2253%22%20rx%3D%228%22%20fill%3D%22%232A2233%22%2F%3E%3Crect%20x%3D%22173%22%20y%3D%22101%22%20width%3D%2219%22%20height%3D%2253%22%20rx%3D%228%22%20fill%3D%22%232A2233%22%2F%3E%3Crect%20x%3D%2213%22%20y%3D%22111%22%20width%3D%229%22%20height%3D%2233%22%20rx%3D%224.5%22%20fill%3D%22%236773AD%22%2F%3E%3Crect%20x%3D%22178%22%20y%3D%22111%22%20width%3D%229%22%20height%3D%2233%22%20rx%3D%224.5%22%20fill%3D%22%236773AD%22%2F%3E%3Ccircle%20cx%3D%2260%22%20cy%3D%22127.5%22%20r%3D%2212.5%22%20fill%3D%22%23FF6A3D%22%2F%3E%3Ccircle%20cx%3D%22140%22%20cy%3D%22127.5%22%20r%3D%2212.5%22%20fill%3D%22%23FF6A3D%22%2F%3E%3C%2Fsvg%3E");
   --roo-cheer:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20200%20200%22%3E%3Cpath%20d%3D%22M137%20138c17%208%2032%2021%2040%2036%204%207%200%2015-8%2015-6%200-9-4-12-10-7-13-19-21-32-23z%22%20fill%3D%22%236773AD%22%2F%3E%3Cpath%20d%3D%22M86%20176%2048%20178%22%20stroke%3D%22%236773AD%22%20stroke-width%3D%2221%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M114%20176%20152%20178%22%20stroke%3D%22%236773AD%22%20stroke-width%3D%2221%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M100%2094C77%2094%2063%20113%2061%20139c-1%2021%201%2033%207%2037h64c6-4%208-16%207-37-2-26-16-45-39-45z%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%22150%22%20rx%3D%2227%22%20ry%3D%2224%22%20fill%3D%22%23FFF1DE%22%2F%3E%3Cpath%20d%3D%22M70%20110%2046%2086%22%20stroke%3D%22%237C88C0%22%20stroke-width%3D%2219%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cpath%20d%3D%22M130%20110%20154%2086%22%20stroke%3D%22%237C88C0%22%20stroke-width%3D%2219%22%20stroke-linecap%3D%22round%22%20fill%3D%22none%22%2F%3E%3Cellipse%20cx%3D%2272%22%20cy%3D%2225%22%20rx%3D%2210.5%22%20ry%3D%2223%22%20transform%3D%22rotate(-15%2072%2025)%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%2273%22%20cy%3D%2228%22%20rx%3D%225%22%20ry%3D%2214%22%20transform%3D%22rotate(-15%2073%2028)%22%20fill%3D%22%23FFC2AC%22%2F%3E%3Cellipse%20cx%3D%22128%22%20cy%3D%2225%22%20rx%3D%2210.5%22%20ry%3D%2223%22%20transform%3D%22rotate(15%20128%2025)%22%20fill%3D%22%237C88C0%22%2F%3E%3Cellipse%20cx%3D%22127%22%20cy%3D%2228%22%20rx%3D%225%22%20ry%3D%2214%22%20transform%3D%22rotate(15%20127%2028)%22%20fill%3D%22%23FFC2AC%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2264%22%20rx%3D%2241%22%20ry%3D%2236%22%20fill%3D%22%237C88C0%22%2F%3E%3Cpath%20d%3D%22M66.5%2042.5A41%2036%200%200%201%2077%2032h46a41%2036%200%200%201%2010.5%2010.5c-15.5%203-51.5%203-67%200z%22%20fill%3D%22%23FF6A3D%22%2F%3E%3Cpath%20d%3D%22M70.5%2037.8A41%2036%200%200%201%2077%2032h46a41%2036%200%200%201%206.5%205.8c-12.5-2.2-46.5-2.2-59%200z%22%20fill%3D%22%23FFD3BC%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2280%22%20rx%3D%2224.5%22%20ry%3D%2217.5%22%20fill%3D%22%23FFF1DE%22%2F%3E%3Cellipse%20cx%3D%22100%22%20cy%3D%2270%22%20rx%3D%227.5%22%20ry%3D%225.5%22%20fill%3D%22%232A2233%22%2F%3E%3Cpath%20d%3D%22M100%2075.5v4%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%2079.5q-7%207-13%201%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M100%2079.5q7%207%2013%201%22%20stroke%3D%22%232A2233%22%20stroke-width%3D%223%22%20fill%3D%22none%22%20stroke-linecap%3D%22round%22%2F%3E%3Ccircle%20cx%3D%2282%22%20cy%3D%2257%22%20r%3D%227.5%22%20fill%3D%22%232A2233%22%2F%3E%3Ccircle%20cx%3D%2284.8%22%20cy%3D%2254%22%20r%3D%222.7%22%20fill%3D%22%23fff%22%2F%3E%3Ccircle%20cx%3D%22118%22%20cy%3D%2257%22%20r%3D%227.5%22%20fill%3D%22%232A2233%22%2F%3E%3Ccircle%20cx%3D%22120.8%22%20cy%3D%2254%22%20r%3D%222.7%22%20fill%3D%22%23fff%22%2F%3E%3Cellipse%20cx%3D%2267%22%20cy%3D%2272%22%20rx%3D%228%22%20ry%3D%225%22%20fill%3D%22%23FF6A3D%22%20opacity%3D%22.28%22%2F%3E%3Cellipse%20cx%3D%22133%22%20cy%3D%2272%22%20rx%3D%228%22%20ry%3D%225%22%20fill%3D%22%23FF6A3D%22%20opacity%3D%22.28%22%2F%3E%3Ccircle%20cx%3D%2244%22%20cy%3D%2284%22%20r%3D%2212%22%20fill%3D%22%23FF6A3D%22%2F%3E%3Ccircle%20cx%3D%22156%22%20cy%3D%2284%22%20r%3D%2212%22%20fill%3D%22%23FF6A3D%22%2F%3E%3Cpath%20d%3D%22M26%2056V44M13%2068%202%2064M39%2041l-4-11%22%20stroke%3D%22%23FF6A3D%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%3Cpath%20d%3D%22M174%2056V44M187%2068l11-4M161%2041l4-11%22%20stroke%3D%22%23FF6A3D%22%20stroke-width%3D%225%22%20stroke-linecap%3D%22round%22%2F%3E%3C%2Fsvg%3E");
+}
+/* ---- dark ----
+   The same identity at night: tangerine and the blue-grey kangaroo stay put,
+   the chalk becomes the deep aubergine the text colour was always made of.
+   Everything below is a value, not a new rule - every surface in the app
+   already reads these tokens. */
+:root[data-theme="dark"]{
+  --bg:#141118; --surface:#1E1924; --surface-2:#27212E; --border:#352D3E;
+  /* faint text clears 4.5:1 on every surface it sits on (the light theme's
+     faint is a quieter 2.4:1 - a dark ground needs the extra) */
+  --text:#F2EDF5; --text-dim:#B4A9BF; --text-faint:#91869C;
+  --accent:#FF6A3D; --accent-hover:#FF8257; --accent-deep:#FF9A74;
+  --accent-soft:#3A2219; --accent-soft-border:#5E3524;
+  --good:#1FC48A; --good-soft:#15352A; --good-deep:#5FE0B0;
+  --danger:#F0555F; --danger-deep:#A8242E; --sun:#E8B23A; --grape:#8C7CF0;
+  --ink-shadow:rgba(0,0,0,.38);
+  --shadow-md:0 18px 44px rgba(0,0,0,.55);
+  --accent-ledge:#A63A17; --good-ledge:#0B6E4C;
+  --inverse:#2E2738; --on-inverse:#F2EDF5; --inverse-ledge:#0B090E;
+  --raised:#3A3244;
+  --scrim:rgba(8,6,10,.68);
+  --danger-soft:#3A1A1E; --danger-ink:#FF9AA3;
+  --warn-soft:#33290F; --warn-border:#56451B;
+  /* the heatmap has to get brighter as it gets busier, on a dark ground too */
+  --heat-1:#4D3C16; --heat-2:#8C6B1C; --heat-3:#D0703A;
+  --mm-outline:#4A4153;
+  color-scheme:dark;
 }
 *{box-sizing:border-box;}
 html,body{height:100%;}
@@ -92,12 +138,12 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .topbar-right{display:flex;align-items:center;gap:10px;margin-left:auto;min-width:0;}
 .topbar-right > .icon-btn,.topbar-right > .avatar-btn{flex-shrink:0;}
 .inprogress-pill{display:flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;
-  border-radius:20px;padding:8px 14px 8px 12px;font-size:13px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--accent-deep);
+  border-radius:20px;padding:8px 14px 8px 12px;font-size:13px;font-weight:800;white-space:nowrap;box-shadow:0 3px 0 var(--accent-ledge);
   min-width:0;overflow:hidden;}
 .inprogress-pill .ip-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
 .inprogress-pill .ip-name::after{content:"\00b7";margin:0 6px;opacity:.7;}
 .inprogress-pill .ip-time{flex-shrink:0;font-variant-numeric:tabular-nums;}
-.inprogress-pill:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent-deep);}
+.inprogress-pill:active{transform:translateY(2px);box-shadow:0 1px 0 var(--accent-ledge);}
 .inprogress-pill[hidden]{display:none;}
 .inprogress-pill .dot{width:8px;height:8px;border-radius:50%;background:#fff;flex-shrink:0;animation:pulse-dot 1.6s ease-in-out infinite;}
 @keyframes pulse-dot{0%,100%{opacity:1;}50%{opacity:.35;}}
@@ -118,9 +164,9 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 .btn{display:inline-flex;align-items:center;gap:7px;border:2px solid transparent;border-radius:14px;
   padding:10px 18px;font-size:14.5px;font-weight:800;white-space:nowrap;
   transition:background .14s ease,border-color .14s ease,color .14s ease,transform .07s ease,box-shadow .07s ease;}
-.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 0 var(--accent-deep);}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 3px 0 var(--accent-ledge);}
 .btn-primary:hover{background:var(--accent-hover);border-color:var(--accent-hover);}
-.btn-primary:active{transform:translateY(3px);box-shadow:0 0 0 var(--accent-deep);}
+.btn-primary:active{transform:translateY(3px);box-shadow:0 0 0 var(--accent-ledge);}
 .btn-primary:disabled{background:var(--surface-2);border-color:var(--surface-2);color:var(--text-faint);
   cursor:not-allowed;box-shadow:none;transform:none;}
 .btn-ghost{background:var(--surface);color:var(--text);border-color:var(--border);box-shadow:var(--ledge);}
@@ -165,18 +211,18 @@ button:focus-visible,input:focus-visible,select:focus-visible,[tabindex]:focus-v
 /* ------------------------------------------------------------------ home */
 .home-greeting{font-family:var(--font-display);font-size:26px;font-weight:700;color:var(--text);margin-bottom:16px;}
 .cta-card{display:flex;align-items:center;gap:18px;background:var(--accent);color:#fff;
-  border-radius:26px;padding:20px 26px;margin-bottom:28px;box-shadow:0 6px 0 var(--accent-deep);}
+  border-radius:26px;padding:20px 26px;margin-bottom:28px;box-shadow:0 6px 0 var(--accent-ledge);}
 .cta-card::before{content:"";width:118px;height:118px;flex-shrink:0;background:center/contain no-repeat var(--roo-rest);}
-.cta-card.active{background:var(--text);color:#fff;border:none;box-shadow:0 6px 0 #17121D;}
+.cta-card.active{background:var(--inverse);color:var(--on-inverse);border:none;box-shadow:0 6px 0 var(--inverse-ledge);}
 .cta-card.active::before{background-image:var(--roo-lift);animation:roo-bob 2.4s ease-in-out infinite;}
 .cta-card > div{flex:1;min-width:0;}
 .cta-eyebrow{font-size:14px;font-weight:700;opacity:.82;margin-bottom:2px;}
 .cta-title{font-family:var(--font-display);font-size:30px;font-weight:800;line-height:1.1;}
-.cta-card > button{background:#fff;color:var(--accent-deep);border:none;border-radius:16px;padding:13px 22px;
+.cta-card > button{background:#fff;color:#C8451C;border:none;border-radius:16px;padding:13px 22px;
   font-size:15.5px;font-weight:800;display:flex;align-items:center;gap:8px;flex-shrink:0;
   box-shadow:0 3px 0 rgba(42,34,51,.22);transition:transform .07s ease,box-shadow .07s ease;}
 .cta-card > button:active{transform:translateY(3px);box-shadow:none;}
-.cta-card.active > button{background:var(--accent);color:#fff;box-shadow:0 3px 0 var(--accent-deep);}
+.cta-card.active > button{background:var(--accent);color:#fff;box-shadow:0 3px 0 var(--accent-ledge);}
 
 .stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:8px;}
 .stat-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-lg);
@@ -351,7 +397,7 @@ body.dragging-exercise .cat-exit-zone{height:26px;opacity:1;margin:4px 0 12px;bo
 body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);border-style:solid;background:var(--accent-soft);}
 
 /* -------------------------------------------------------------- rest bar */
-.timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--text);color:#fff;z-index:40;
+.timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--inverse);color:var(--on-inverse);z-index:40;
   display:flex;justify-content:center;box-shadow:0 -10px 30px rgba(42,34,51,.22);
   transform:translateY(120%);transition:transform .28s cubic-bezier(.34,1.3,.64,1);
   border-radius:24px 24px 0 0;padding-bottom:env(safe-area-inset-bottom);}
@@ -370,9 +416,9 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .heatmap-cell{width:15px;height:15px;border-radius:5px;background:var(--surface-2);border:none;padding:0;cursor:default;}
 button.heatmap-cell{cursor:pointer;}
 button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
-.heatmap-cell[data-level="1"]{background:#FFE7AE;}
-.heatmap-cell[data-level="2"]{background:var(--sun);}
-.heatmap-cell[data-level="3"]{background:#FF9A4D;}
+.heatmap-cell[data-level="1"]{background:var(--heat-1);}
+.heatmap-cell[data-level="2"]{background:var(--heat-2);}
+.heatmap-cell[data-level="3"]{background:var(--heat-3);}
 .heatmap-cell[data-level="4"]{background:var(--accent);}
 .heatmap-cell.today{box-shadow:inset 0 0 0 2px var(--text);}
 .heatmap-cell.selected{box-shadow:inset 0 0 0 3px var(--grape);}
@@ -389,7 +435,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .history-row-sub{font-size:13px;font-weight:600;color:var(--text-dim);margin-top:2px;}
 
 /* --------------------------------------------------------------- modals */
-.modal-overlay{position:fixed;inset:0;background:rgba(42,34,51,.45);display:flex;align-items:center;
+.modal-overlay{position:fixed;inset:0;background:var(--scrim);display:flex;align-items:center;
   justify-content:center;z-index:50;padding:20px;backdrop-filter:blur(2px);}
 .modal-overlay[hidden]{display:none;}
 .modal{background:var(--surface);border-radius:26px;padding:24px;width:100%;max-width:460px;max-height:88vh;
@@ -412,12 +458,12 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   border-radius:var(--radius-sm);padding:9px 11px;margin-bottom:12px;}
 .settings-msg{font-size:13px;font-weight:700;line-height:1.5;border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:12px;}
 .settings-msg.ok{background:var(--good-soft);color:var(--good-deep);}
-.settings-msg.error{background:#FCE4E5;color:#9C2830;}
+.settings-msg.error{background:var(--danger-soft);color:var(--danger-ink);}
 .import-confirm{border:2px solid var(--accent-soft-border);background:var(--accent-soft);border-radius:var(--radius-md);padding:14px;margin-bottom:12px;}
 .import-confirm-title{font-weight:800;font-size:14.5px;margin-bottom:10px;}
 .import-confirm-row{display:flex;justify-content:space-between;gap:12px;font-size:13px;font-weight:600;padding:4px 0;color:var(--text-dim);}
 .import-confirm-row span:last-child{color:var(--text);text-align:right;font-weight:700;}
-.import-confirm-warn{font-size:12.5px;font-weight:700;color:#9C2830;margin-top:10px;line-height:1.5;}
+.import-confirm-warn{font-size:12.5px;font-weight:700;color:var(--danger-ink);margin-top:10px;line-height:1.5;}
 .settings-row-actions{display:flex;gap:8px;flex-shrink:0;}
 .import-mode{display:flex;flex-direction:column;gap:8px;margin-top:12px;}
 .import-mode-btn{display:flex;flex-direction:column;gap:3px;text-align:left;background:var(--surface);
@@ -427,7 +473,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .import-mode-title{font-weight:800;font-size:14.5px;}
 .import-mode-btn.danger .import-mode-title{color:var(--danger);}
 .import-mode-sub{font-size:12.5px;font-weight:600;color:var(--text-dim);line-height:1.45;}
-.backup-nudge{display:flex;align-items:center;gap:12px;background:#FFF4D6;border:2px solid #FFE1A0;
+.backup-nudge{display:flex;align-items:center;gap:12px;background:var(--warn-soft);border:2px solid var(--warn-border);
   border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:20px;}
 .backup-nudge-text{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0;}
 .backup-nudge-text strong{font-size:14.5px;font-weight:800;}
@@ -517,10 +563,10 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .tab-btn[data-tab="progress"]{--ic:url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%23000%22%20stroke-width%3D%222.1%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpath%20d%3D%22M3.4%2016.6%209%2011l3.6%203.6L20.6%206.6%22%2F%3E%3Cpath%20d%3D%22M15.4%206.6h5.2v5.2%22%2F%3E%3Cpath%20d%3D%22M3.4%2020.6h17.2%22%2F%3E%3C%2Fsvg%3E");}
   .tab-fab{display:flex;align-items:center;justify-content:center;width:60px;height:60px;flex-shrink:0;
     margin:-26px 4px 0;border:4px solid var(--surface);border-radius:50%;background:var(--accent);color:#fff;
-    box-shadow:0 4px 0 var(--accent-deep);transition:transform .08s ease,box-shadow .08s ease;}
+    box-shadow:0 4px 0 var(--accent-ledge);transition:transform .08s ease,box-shadow .08s ease;}
   .tab-fab svg{width:27px;height:27px;}
   .tab-fab:active{transform:translateY(4px);box-shadow:none;}
-  .tab-fab.resuming{background:var(--good);box-shadow:0 4px 0 var(--good-deep);}
+  .tab-fab.resuming{background:var(--good);box-shadow:0 4px 0 var(--good-ledge);}
   .tab-fab.shooting{background:var(--grape);box-shadow:0 4px 0 #4B3BA8;}
   .main{padding:20px 14px calc(104px + env(safe-area-inset-bottom));}
   .timerbar{bottom:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:0;border-radius:24px 24px 0 0;}
@@ -606,7 +652,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .chart-sub{font-size:13px;font-weight:700;color:var(--text-dim);margin-top:3px;display:flex;align-items:center;gap:7px;flex-wrap:wrap;}
 .chart-delta{font-weight:800;border-radius:20px;padding:2px 9px;font-size:12px;background:var(--surface-2);color:var(--text-dim);}
 .chart-delta.up{background:var(--good-soft);color:var(--good-deep);}
-.chart-delta.down{background:#FCE4E5;color:#9C2830;}
+.chart-delta.down{background:var(--danger-soft);color:var(--danger-ink);}
 .chart-metric{appearance:none;-webkit-appearance:none;background:var(--surface-2);border:2px solid var(--border);
   border-radius:20px;padding:8px 32px 8px 14px;font-size:13.5px;font-weight:800;color:var(--text);cursor:pointer;
   background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237A6F81' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
@@ -633,7 +679,7 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
 .prog-seg button{flex:1;border:none;background:none;padding:9px 10px;border-radius:18px;font-size:14px;
   font-weight:800;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:7px;}
 .prog-seg button svg{width:16px;height:16px;}
-.prog-seg button.active{background:var(--surface);color:var(--text);box-shadow:var(--ledge);}
+.prog-seg button.active{background:var(--raised);color:var(--text);box-shadow:var(--ledge);}
 
 .pose-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;margin-bottom:6px;
   -webkit-overflow-scrolling:touch;scrollbar-width:none;}
@@ -813,6 +859,24 @@ body.photos-hidden .photo-veil{display:flex;}
   background:var(--accent-soft);border:2px solid var(--accent-soft-border);border-radius:10px;
   padding:1px 7px;white-space:nowrap;}
 </style>
+<script type="text/javascript">
+/* Light or dark is settled here, before the first paint, from a one-word
+   mirror of the setting - otherwise a dark install opens white for a moment,
+   which in a dim gym is the whole problem this setting exists to solve. The
+   setting itself lives in the data blob with the rest; this is a cache of it.
+   Typed on purpose: buildPortableHTML looks for the last UNTYPED script to
+   hang the data snapshot in front of, and that has to stay the app script. */
+(function(){
+  var pref = 'system';
+  try { pref = localStorage.getItem('athleticism_theme') || 'system'; } catch(e){}
+  var dark = pref === 'dark' ||
+    (pref !== 'light' && !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches));
+  var root = document.documentElement;
+  root.setAttribute('data-theme', dark ? 'dark' : 'light');
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', getComputedStyle(root).getPropertyValue('--surface').trim() || (dark ? '#1E1924' : '#FFFFFF'));
+})();
+</script>
 </head>
 <body>
 
@@ -2106,7 +2170,7 @@ var DEFAULT_POSES = [{id:'front',label:'Front'},{id:'side',label:'Side'},{id:'ba
 function defaultData(){
   return { version:1, profile:{ name:'', username:'', avatar:null, createdAt:null }, exercises:[], plans:[], workouts:[], activeWorkout:null, restTimer:null, lastExportAt:null, lastPhotoExportAt:null, backupNudgeDismissedAt:null, persistRequested:false,
     progressPhotos:[], photoPoses: DEFAULT_POSES.map(function(p){ return {id:p.id, label:p.label}; }),
-    settings:{weightUnit:'lb', distanceSystem:'metric', progressTab:'sessions', blurPhotos:false, bodyType:'male'} };
+    settings:{weightUnit:'lb', distanceSystem:'metric', theme:'system', progressTab:'sessions', blurPhotos:false, bodyType:'male'} };
 }
 function loadData(){
   try{
@@ -2474,6 +2538,7 @@ function applyImportedData(payload){
   save();
   migratePlanItems();
   migrateMuscleData();
+  applyTheme();
   renderAvatarButton();
   /* whatever the old install had in IndexedDB is now unreferenced */
   if (incoming) absorbPhotoBlobs(incoming, function(){ reconcilePhotoStore(); renderMain(); });
@@ -4317,7 +4382,8 @@ function muscleMapOptions(side){
     side: side,
     stops: MUSCLE_RAMP,
     inactive: MUSCLE_RAMP[0],
-    outline: '#D9C9B6',
+    /* read from the theme, so it can sit behind the body on either ground */
+    outline: getComputedStyle(document.documentElement).getPropertyValue('--mm-outline').trim() || '#D9C9B6',
     /* nothing happens on click, so don't offer a pointer that says otherwise */
     interactive: false
   };
@@ -5899,6 +5965,59 @@ function refreshAboutSections(focusKey){
   if (btn){ try{ btn.focus({preventScroll:true}); }catch(e){ btn.focus(); } }
 }
 
+/* ---- Appearance --------------------------------------------------------
+   Light, Dark, or System - follow the phone, which is the default and moves
+   live when the phone switches at dusk. Nothing about the colours lives in
+   here: every surface reads CSS tokens, and dark mode is a second set of
+   values for them. This only decides which set is switched on. */
+var THEME_KEY = 'athleticism_theme';
+
+function themePreference(){
+  var t = data.settings && data.settings.theme;
+  return (t === 'light' || t === 'dark') ? t : 'system';
+}
+function systemPrefersDark(){
+  try { return !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches); }
+  catch(e){ return false; }
+}
+function resolvedTheme(){
+  var p = themePreference();
+  return p === 'system' ? (systemPrefersDark() ? 'dark' : 'light') : p;
+}
+/* Returns true when the theme actually changed, so callers know to repaint. */
+function applyTheme(){
+  var root = document.documentElement;
+  var next = resolvedTheme();
+  var changed = root.getAttribute('data-theme') !== next;
+  root.setAttribute('data-theme', next);
+  try { localStorage.setItem(THEME_KEY, themePreference()); } catch(e){}
+  var meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', getComputedStyle(root).getPropertyValue('--surface').trim());
+  /* the muscle maps bake their body outline in when they are built */
+  if (changed) resetMuscleMaps();
+  return changed;
+}
+function watchSystemTheme(){
+  if (!window.matchMedia) return;
+  var mq = window.matchMedia('(prefers-color-scheme: dark)');
+  var onChange = function(){
+    if (themePreference() === 'system' && applyTheme()) renderMain();
+  };
+  if (mq.addEventListener) mq.addEventListener('change', onChange);
+  else if (mq.addListener) mq.addListener(onChange);   /* older Android WebViews */
+}
+
+function appearanceRowHTML(){
+  var p = themePreference();
+  function btn(v, label){
+    return '<button class="'+(p===v?'active':'')+'" data-action="theme" data-theme-choice="'+v+'">'+label+'</button>';
+  }
+  return '<div class="settings-row"><div class="settings-row-text"><span>Appearance</span>'+
+      '<span class="settings-row-sub">'+(p==='system' ? 'Follows your phone' : (p==='dark' ? 'Always dark' : 'Always light'))+'</span></div>'+
+      '<div class="segmented">'+btn('light','Light')+btn('dark','Dark')+btn('system','System')+'</div>'+
+    '</div>';
+}
+
 /* One switch for people who think in a system, and a drawer underneath for
    people who do not. Plenty of us lift in kilos and run in miles. */
 function unitSystem(){
@@ -5944,6 +6063,7 @@ function renderSettingsModal(){
 
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>Settings</h2><button class="icon-btn" data-action="settings-close">'+icon('x')+'</button></div>'+
+    appearanceRowHTML()+
     unitsSectionHTML()+
 
     '<div class="settings-row"><div class="settings-row-text"><span>Body Diagram</span>'+
@@ -6516,6 +6636,15 @@ function handleAction(action, el){
       refreshAboutSections(aKey);
       break;
     }
+    case 'theme': {
+      var choice = el.dataset.themeChoice;
+      data.settings.theme = (choice === 'light' || choice === 'dark') ? choice : 'system';
+      save();
+      applyTheme();
+      renderSettingsModal();
+      renderMain();
+      break;
+    }
     case 'unit-system': {
       var sys = el.dataset.sys === 'imperial' ? 'imperial' : 'metric';
       data.settings.weightUnit = sys === 'imperial' ? 'lb' : 'kg';
@@ -6646,6 +6775,7 @@ function handleAction(action, el){
     case 'confirm-reset-data': armOrConfirm(el, function(){
       data = defaultData(); save();
       clearMuscleSidecar();
+      applyTheme();
       reconcilePhotoStore();   /* metadata is empty now, so this empties the store */
       ui.importPreview = null; ui.settingsMessage = null; ui.aboutOpen = null; ui.unitsOpen = false;
       document.getElementById('settings-modal').hidden = true;
@@ -7161,6 +7291,8 @@ window.addEventListener('pageshow', onVisible);
 window.addEventListener('focus', onVisible);
 
 renderSettingsModal();
+applyTheme();
+watchSystemTheme();
 renderAvatarButton();
 setView('home');
 restoreTimer();
