@@ -856,6 +856,17 @@ body.photos-hidden .photo-veil{display:flex;}
 .mus-chip.s{background:var(--accent-soft);border-color:var(--accent);color:var(--accent-deep);}
 .mus-chip.p{background:var(--accent);border-color:var(--accent);color:#fff;}
 
+/* ---- a name you already have ---- */
+/* On a phone the button drops below the text rather than sitting beside it -
+   the exercise name in the heading needs that width more than the button
+   does. A wider modal has room for both on one line. */
+.dupe-note{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;background:var(--warn-soft);
+  border:2px solid var(--warn-border);border-radius:var(--radius-md);padding:11px 13px;margin:-4px 0 14px;}
+.dupe-note-text{flex:1 1 200px;display:flex;flex-direction:column;gap:2px;min-width:0;}
+.dupe-note-text strong{font-size:14px;font-weight:800;overflow-wrap:anywhere;}
+.dupe-note-text span{font-size:12.5px;font-weight:600;color:var(--text-dim);line-height:1.45;}
+.dupe-note .btn{flex-shrink:0;}
+
 /* ---- about ---- */
 /* A chip that arrived on its own says so, briefly. Deliberately local: a
    whole-modal flash is what made adding a field feel like a page reload. */
@@ -866,10 +877,13 @@ body.photos-hidden .photo-veil{display:flex;}
 .combo-pop{position:fixed;z-index:80;overflow-y:auto;background:var(--surface);
   border:2px solid var(--border);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);
   -webkit-overflow-scrolling:touch;}
-.combo-item{display:block;width:100%;text-align:left;background:none;border:none;
+.combo-item{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:none;border:none;
   padding:11px 14px;font-size:14.5px;font-weight:700;color:var(--text);}
 .combo-item + .combo-item{border-top:2px solid var(--border);}
 .combo-item:hover,.combo-item.on{background:var(--accent-soft);color:var(--accent-deep);}
+.combo-label{flex:1;min-width:0;}
+.combo-tag{flex-shrink:0;background:var(--surface-2);color:var(--text-dim);border-radius:20px;padding:3px 8px;
+  font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;}
 .units-detail{border-bottom:2px solid var(--border);}
 .units-detail .settings-row:last-child{border-bottom:none;}
 .units-detail #units-panel{padding-bottom:4px;}
@@ -1948,12 +1962,40 @@ function exerciseNameSuggestions(query, excludeId){
   return out;
 }
 
+/* ---- A name you already have ---------------------------------------------
+   Workouts, charts and plans hold on to an exercise by its id, never by its
+   name. A second "Pull Up" is therefore not a copy of the first: it starts
+   with no history, and from then on every list shows two. Nothing stops you
+   making one on purpose - the editor only makes sure it is on purpose.
+
+   Names match the way the suggestions match them - case, spaces and
+   punctuation ignored - plus the plural of one of yours ("Pull Ups"). Only
+   that direction: taking an "s" off instead would flag "Bench Pres" as your
+   Bench Press while it is still being typed. */
+function exerciseNameKey(name){ return normaliseExerciseName(name).replace(/ /g,''); }
+function existingExerciseNamed(name, exceptId){
+  var k = exerciseNameKey(name);
+  if (!k) return null;
+  return data.exercises.find(function(ex){
+    if (ex.id === exceptId) return false;
+    var h = exerciseNameKey(ex.name);
+    return !!h && (k === h || k === h+'s' || k === h+'es');
+  }) || null;
+}
+
 /* The <datalist> is refilled as you type rather than carrying all 144 names,
    so tapping an empty field never drops a wall of options over the keyboard. */
 function openNameSuggestions(input){
   var d = ui.exerciseDraft;
   if (!d) return comboClose();
-  comboOpen(input, exerciseNameSuggestions(input.value, d.editingId), function(picked){
+  var names = exerciseNameSuggestions(input.value, d.editingId);
+  /* yours are listed first; say which they are, because picking one of them
+     here starts a second one rather than reusing it */
+  var tags = names.map(function(n){
+    var k = exerciseNameKey(n);
+    return data.exercises.some(function(ex){ return ex.id !== d.editingId && exerciseNameKey(ex.name) === k; }) ? 'Yours' : '';
+  });
+  comboOpen(input, names, function(picked){
     input.value = picked;
     d.name = picked;
     /* the half-typed name matched nothing, so the muscles were cleared as you
@@ -1961,7 +2003,7 @@ function openNameSuggestions(input){
     autofillMuscles(d);
     applyPreset(d, picked);
     renderExerciseModal();
-  });
+  }, tags);
 }
 
 /* Tags are comma separated, so only the fragment after the last comma is
@@ -4742,16 +4784,65 @@ function refreshFieldsSection(){
   ui.exerciseDraft.flashFields = false;
 }
 
+/* Under the name while it is one you already have. New exercises get a way
+   to the one you have - added straight in when you came from a plan or a
+   workout, opened when you came from your exercises - and Save still works,
+   saying what it is about to do. An edit only gets told. */
+function dupeNoteHTML(d, have){
+  if (!have) return '';
+  if (d.editingId){
+    return '<div class="dupe-note"><div class="dupe-note-text">'+
+      '<strong>You Have Another '+esc(have.name)+'</strong>'+
+      '<span>Two with the same name are easy to mix up.</span>'+
+    '</div></div>';
+  }
+  return '<div class="dupe-note"><div class="dupe-note-text">'+
+      '<strong>You Already Have '+esc(have.name)+'</strong>'+
+      '<span>A second one starts from zero and shows up next to it everywhere.</span>'+
+    '</div>'+
+    '<button class="btn btn-primary small" data-action="ex-use-existing" data-id="'+esc(have.id)+'">'+
+      (ui.pickerContextForModal ? 'Add It' : 'Open It')+'</button>'+
+  '</div>';
+}
+function saveExerciseLabel(d, have){
+  return (have && !d.editingId) ? 'Save Duplicate' : 'Save Exercise';
+}
+
+/* Save follows the fields as well as the name, so this runs after the
+   autofill has had its turn - before it, typing "Pull Up" left Save greyed
+   out beside the Reps it had just filled in, and a name that emptied the
+   fields left it live. */
+function refreshNameDependents(){
+  var d = ui.exerciseDraft;
+  if (!d) return;
+  var have = existingExerciseNamed(d.name, d.editingId);
+  var btn = document.getElementById('ex-save-btn');
+  if (btn){
+    btn.disabled = !(d.name.trim() && d.fields.length);
+    btn.textContent = saveExerciseLabel(d, have);
+  }
+  /* repainted only when the match changes, so the live region announces a
+     new match once rather than on every keystroke */
+  var note = document.getElementById('ex-dupe');
+  var key = have ? have.id : '';
+  if (note && note.getAttribute('data-for') !== key){
+    note.setAttribute('data-for', key);
+    note.innerHTML = dupeNoteHTML(d, have);
+  }
+}
+
 function renderExerciseModal(){
   var wrap = document.getElementById('exercise-modal');
   var d = ui.exerciseDraft;
   if (!d) { wrap.innerHTML=''; return; }
   function hasType(t){ return d.fields.some(function(f){return f.type===t;}); }
+  var have = existingExerciseNamed(d.name, d.editingId);
 
   var html = '<div class="modal">'+
     '<div class="modal-head"><h2>'+(d.editingId?'Edit Exercise':'New Exercise')+'</h2><button class="icon-btn" data-action="ex-modal-close">'+icon('x')+'</button></div>'+
     '<label class="field-label">Name</label>'+
     '<input id="ex-name-input" class="input" aria-label="Exercise name" role="combobox" aria-autocomplete="list" aria-expanded="false" autocomplete="off" placeholder="e.g. Incline Dumbbell Press" value="'+esc(d.name)+'">'+
+    '<div id="ex-dupe" aria-live="polite" data-for="'+(have?esc(have.id):'')+'">'+dupeNoteHTML(d, have)+'</div>'+
     '<div id="ex-muscle-picker">'+musclePickerHTML(d)+'</div>'+
     '<label class="field-label" style="margin-top:14px;">Tags <span class="field-optional">Optional</span></label>'+
     '<div class="mus-legend">Free text, comma separated. Used for search and labels \u2014 never for the map.</div>'+
@@ -4774,7 +4865,7 @@ function renderExerciseModal(){
     '<input class="input" type="number" min="0" step="5" data-commit="ex-default-rest" placeholder="e.g. 90" value="'+(d.defaultRestSec==null?'':d.defaultRestSec)+'">'+
     '<div style="display:flex;gap:10px;margin-top:8px;">'+
       '<button class="btn btn-ghost full-width" data-action="ex-modal-close">Cancel</button>'+
-      '<button id="ex-save-btn" class="btn btn-primary full-width" data-action="ex-modal-save" '+((!d.name.trim()||d.fields.length===0)?'disabled':'')+'>Save Exercise</button>'+
+      '<button id="ex-save-btn" class="btn btn-primary full-width" data-action="ex-modal-save" '+((!d.name.trim()||d.fields.length===0)?'disabled':'')+'>'+saveExerciseLabel(d, have)+'</button>'+
     '</div>'+
   '</div>';
 
@@ -4813,7 +4904,9 @@ function safeInsets(){
 
 var combo = { input:null, items:[], el:null, index:-1, onPick:null };
 
-function comboOpen(input, items, onPick){
+/* `tags`, when given, runs alongside `items`: a short word to show at the end
+   of that row, or '' for none. */
+function comboOpen(input, items, onPick, tags){
   if (combo.input && combo.input !== input) combo.input.setAttribute('aria-expanded','false');
   if (!items.length){ comboClose(); return; }
   combo.input = input; combo.items = items; combo.index = -1; combo.onPick = onPick;
@@ -4824,7 +4917,10 @@ function comboOpen(input, items, onPick){
     document.body.appendChild(combo.el);
   }
   combo.el.innerHTML = items.map(function(s, i){
-    return '<button type="button" class="combo-item" role="option" aria-selected="false" data-combo-i="'+i+'">'+esc(s)+'</button>';
+    var tag = tags && tags[i];
+    return '<button type="button" class="combo-item" role="option" aria-selected="false" data-combo-i="'+i+'">'+
+      '<span class="combo-label">'+esc(s)+'</span>'+(tag ? '<span class="combo-tag">'+esc(tag)+'</span>' : '')+
+    '</button>';
   }).join('');
   input.setAttribute('aria-expanded','true');
   comboPosition();
@@ -6570,6 +6666,24 @@ function handleAction(action, el){
     }); break;
 
     case 'ex-modal-close': closeExerciseModal(); break;
+    case 'ex-use-existing': {
+      /* the one you already have, instead of a second: into the plan or
+         workout you were adding to, or opened in your exercises */
+      var haveEx = data.exercises.find(function(e){return e.id===el.dataset.id;});
+      if (!haveEx) break;
+      var haveCtx = ui.pickerContextForModal;
+      closeExerciseModal();
+      if (haveCtx){
+        if (haveCtx==='plan') currentPlan().items.push(newPlanItem(haveEx.id));
+        else addExerciseToActiveWorkout(haveEx.id);
+        ui.picker = null;
+        save();
+      } else {
+        ui.selectedExerciseId = haveEx.id;
+      }
+      renderMain();
+      break;
+    }
     case 'ex-add-preset': {
       var type = el.dataset.type;
       var labels = {weight:'Weight', assisted:'Assisted', reps:'Reps', distance:'Distance', timer:'Target Time', time:'Time', rir:'RIR', rpe:'RPE'};
@@ -7116,10 +7230,9 @@ function onInput(e){
   var t = e.target;
   if (t.id==='ex-name-input'){
     ui.exerciseDraft.name = t.value;
-    var btn = document.getElementById('ex-save-btn');
-    if (btn) btn.disabled = !(t.value.trim() && ui.exerciseDraft.fields.length);
     if (autofillMuscles(ui.exerciseDraft)) refreshMusclePicker();
     if (autofillFields(ui.exerciseDraft)) refreshFieldsSection();
+    refreshNameDependents();
     openNameSuggestions(t);
     return;
   }
