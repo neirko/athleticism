@@ -1407,6 +1407,12 @@ function parseDecimal(raw){
   if (s.indexOf(',') >= 0 && s.indexOf('.') < 0) s = s.replace(',', '.');
   return parseFloat(s);
 }
+/* A phone's number pad has no ":" key, so there a time goes in as seconds -
+   "90" is 1:30, "120" is 2:00 - and the empty field says so. A keyboard can
+   still type 1:30 either way. */
+function timeHint(){
+  return window.matchMedia && window.matchMedia('(pointer:coarse)').matches ? 'sec' : 'mm:ss';
+}
 function fmtRest(sec){
   if (sec===null||sec===undefined) return null;
   if (sec>=60){ var m=Math.floor(sec/60), s=sec%60; return s===0 ? (m+'m') : (m+':'+pad2(s)); }
@@ -4225,7 +4231,7 @@ function renderPlanSetRow(idx, sIdx, setNumber, item, fields, set, unit){
       /* measured time has no preset by design - you record it during the session */
       cells += '<td><input class="num-input measured-cell" disabled value="" placeholder="measured" title="Measured during the workout - no preset"></td>';
     } else if (f.type==='timer'){
-      cells += '<td><input class="num-input" data-plan-commit="set-time" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="mm:ss"></td>';
+      cells += '<td><input class="num-input" data-plan-commit="set-time" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+timeHint()+'"></td>';
     } else {
       cells += '<td><input class="num-input" data-plan-commit="set-num" data-type="'+f.type+'" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="'+(f.type==='rir'?'numeric':'decimal')+'" value="'+esc(currentDisplay)+'" placeholder="'+esc(effortPlaceholder(f.type))+'"></td>';
     }
@@ -5760,11 +5766,11 @@ function renderSetRow(wexIdx, idx, setNumber, wex, set, lastEntry, unit){
     } else if (f.type==='timer'){
       var targetSec = (currentRaw!==null && currentRaw!==undefined && currentRaw!=='') ? currentRaw : null;
       cells += '<td><div class="rest-cell">'+
-        '<input class="num-input" style="max-width:70px;min-width:56px;" data-commit="set-time" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||'mm:ss')+'">'+
+        '<input class="num-input" style="max-width:70px;min-width:56px;" data-commit="set-time" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||timeHint())+'">'+
         (targetSec!==null ? ('<button class="rest-icon-btn" data-action="start-timer" data-seconds="'+targetSec+'" title="Start countdown">'+icon('play')+'</button>') : '')+
       '</div></td>';
     } else if (f.type==='time'){
-      cells += '<td><input class="num-input" data-commit="set-time" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||'mm:ss')+'"></td>';
+      cells += '<td><input class="num-input" data-commit="set-time" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||timeHint())+'"></td>';
     } else {
       cells += '<td><input class="num-input" data-commit="set-num" data-type="'+f.type+'" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="'+(f.type==='rir'?'numeric':'decimal')+'" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay||effortPlaceholder(f.type))+'"></td>';
     }
