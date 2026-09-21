@@ -1209,8 +1209,11 @@ var DISTANCE_UNITS = {
   metric:   { small:'m',  large:'km' },
   imperial: { small:'ft', large:'mi' }
 };
-/* how many decimals are worth showing at each scale */
-var DISTANCE_DP = { m:0, ft:0, km:2, mi:2 };
+/* Decimals worth showing at each scale. Three at the large scale, not two:
+   a metre of resolution, so a 5123 m run reads back as 5.123 km rather than
+   being quietly rounded to 5.12 the next time the row is edited. Trailing
+   zeros never appear - these are numbers, not strings. */
+var DISTANCE_DP = { m:0, ft:0, km:3, mi:3 };
 
 function distanceSystem(){
   return (data.settings && data.settings.distanceSystem === 'imperial') ? 'imperial' : 'metric';
