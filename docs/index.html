@@ -723,6 +723,9 @@ body.photos-hidden .photo-veil{display:flex;}
 .mm-legend-bar{flex:1;height:7px;border-radius:4px;
   background:linear-gradient(90deg,#9ca3af,#fbbf24,#f59e0b,#ef4444);}
 .mm-row{display:flex;align-items:center;gap:10px;padding:4px 0;}
+.mm-rank{flex:0 0 18px;font-size:12.5px;font-weight:800;color:var(--text-faint);text-align:right;}
+.mm-rank.top{color:var(--accent-deep);}
+.mm-tier{display:block;font-size:11px;font-weight:700;color:var(--text-faint);line-height:1.25;}
 .mm-name{flex:0 0 84px;font-size:13px;font-weight:700;color:var(--text);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .mm-bar{flex:1;min-width:40px;height:9px;border-radius:5px;background:var(--surface-2);
@@ -1429,6 +1432,29 @@ function planRawScores(plan){
   return raw;
 }
 
+/* Where each muscle's volume came from: 'p' only as a primary, 's' only as
+   supporting, 'b' both. A single word per muscle is only honest when the plan
+   agrees with itself - chest can be primary on the bench and supporting on
+   the dips - so 'b' says so instead of picking one. Follows the same rules as
+   addMuscleVolume: no sets scores nothing, and primary wins within one
+   exercise. */
+function planMuscleTiers(plan){
+  var tiers = {};
+  if (!plan) return tiers;
+  (plan.items || []).forEach(function(item){
+    if (itemKind(item) !== 'exercise' || !(planSetCount(item) > 0)) return;
+    var m = exerciseMuscles(exerciseById(item.exerciseId));
+    m.primary.forEach(function(s){
+      tiers[s] = (tiers[s] === 's' || tiers[s] === 'b') ? 'b' : 'p';
+    });
+    m.secondary.forEach(function(s){
+      if (m.primary.indexOf(s) >= 0) return;
+      tiers[s] = (tiers[s] === 'p' || tiers[s] === 'b') ? 'b' : 's';
+    });
+  });
+  return tiers;
+}
+
 /* A logged workout only counts the sets actually ticked off. */
 function workoutSetCount(wex){
   return (wex.sets || []).filter(function(s){ return (s.kind||'set')==='set' && s.done; }).length;
@@ -1481,10 +1507,19 @@ function absoluteActivation(raw){
 /* Sorted high to low, muscles at zero left out - 21 rows of nothing is not a
    breakdown. */
 function muscleBreakdown(raw, activation){
-  return TRAINABLE_MUSCLES
+  var rows = TRAINABLE_MUSCLES
     .filter(function(s){ return (raw[s]||0) > 0; })
     .map(function(s){ return { slug:s, label:muscleLabel(s), sets:raw[s], pct:activation[s]||0 }; })
     .sort(function(a,b){ return b.sets - a.sets || a.label.localeCompare(b.label); });
+  /* Equal volume shares a rank - 1, 1, 1, 4 - rather than inventing an order
+     between muscles that were worked exactly as hard. Ranked on sets, not the
+     rounded percentage, so two muscles that both cap at 100% in the weekly
+     view still say which one got more. Sets are sums of 1 and 0.5, which are
+     exact in floating point, so a straight comparison is safe. */
+  rows.forEach(function(r, i){
+    r.rank = (i > 0 && r.sets === rows[i-1].sets) ? rows[i-1].rank : i + 1;
+  });
+  return rows;
 }
 function untrainedMuscles(raw){
   return TRAINABLE_MUSCLES.filter(function(s){ return !(raw[s] > 0); });
@@ -4328,10 +4363,21 @@ function fmtSets(n){
   return (r === Math.round(r)) ? String(Math.round(r)) : r.toFixed(1);
 }
 
-function muscleBreakdownHTML(rows, showSets){
+var MUSCLE_TIER_LABELS = { p:'Primary', s:'Supporting', b:'Both' };
+var MUSCLE_TIER_HINTS = {
+  p:'Worked as a primary muscle',
+  s:'Worked as a supporting muscle',
+  b:'Primary in one exercise, supporting in another'
+};
+
+function muscleBreakdownHTML(rows, showSets, tiers){
   return rows.map(function(r){
+    var tier = tiers && tiers[r.slug];
     return '<div class="mm-row">'+
-      '<span class="mm-name">'+esc(r.label)+'</span>'+
+      '<span class="mm-rank'+(r.rank===1?' top':'')+'">'+r.rank+'</span>'+
+      '<span class="mm-name">'+esc(r.label)+
+        (tier ? '<span class="mm-tier" title="'+esc(MUSCLE_TIER_HINTS[tier])+'">'+esc(MUSCLE_TIER_LABELS[tier])+'</span>' : '')+
+      '</span>'+
       '<span class="mm-bar"><span class="mm-bar-fill" style="width:'+Math.max(2, r.pct)+'%;background:'+
         muscleColour(r.pct)+'"></span></span>'+
       (showSets ? '<span class="mm-sets">'+fmtSets(r.sets)+'</span>' : '')+
@@ -4353,7 +4399,7 @@ function muscleMapSectionHTML(mode, raw, opts){
   if (rows.length === 0){
     body = '<div class="mm-empty">'+esc(opts.emptyText || 'Nothing scored yet.')+'</div>';
   } else {
-    body = '<div class="mm-break">'+ muscleBreakdownHTML(rows, weekly) +'</div>';
+    body = '<div class="mm-break">'+ muscleBreakdownHTML(rows, weekly, opts.tiers) +'</div>';
     if (weekly){
       var cold = untrainedMuscles(raw);
       if (cold.length){
@@ -4392,6 +4438,9 @@ function planMuscleMapHTML(plan){
   return muscleMapSectionHTML('workout', raw, {
     title: 'Muscle Coverage',
     sub: 'this plan',
+    /* the weekly view leaves this out: a week mixes so many exercises that
+       nearly every row would read "Both" */
+    tiers: planMuscleTiers(plan),
     emptyText: anyTagged
       ? 'Add sets to an exercise and it will show up here.'
       : 'None of these exercises have muscles set yet. Open one from the Exercises tab to add them.'
