@@ -723,12 +723,15 @@ body.photos-hidden .photo-veil{display:flex;}
 .mm-legend-bar{flex:1;height:7px;border-radius:4px;
   background:linear-gradient(90deg,#9ca3af,#fbbf24,#f59e0b,#ef4444);}
 .mm-row{display:flex;align-items:center;gap:10px;padding:4px 0;}
-.mm-rank{flex:0 0 18px;font-size:12.5px;font-weight:800;color:var(--text-faint);text-align:right;}
+.mm-rank{flex:0 0 1.5em;font-size:12.5px;font-weight:800;color:var(--text-faint);text-align:right;}
 .mm-rank.top{color:var(--accent-deep);}
-.mm-tier{display:block;font-size:11px;font-weight:700;color:var(--text-faint);line-height:1.25;}
+.mm-tier{display:block;font-size:11px;font-weight:700;color:var(--text-faint);line-height:1.25;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* the smallest phones, where rank + name + bar + % have no width to spare */
+@media (max-width:360px){ .mm-row{gap:7px;} }
 .mm-name{flex:0 0 84px;font-size:13px;font-weight:700;color:var(--text);
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.mm-bar{flex:1;min-width:40px;height:9px;border-radius:5px;background:var(--surface-2);
+.mm-bar{flex:1;min-width:20px;height:9px;border-radius:5px;background:var(--surface-2);
   border:1px solid var(--border);overflow:hidden;}
 .mm-bar-fill{display:block;height:100%;border-radius:5px;}
 .mm-sets{flex:0 0 auto;font-size:12px;font-weight:700;color:var(--text-faint);min-width:24px;text-align:right;}
