@@ -391,6 +391,33 @@ body::before{content:"";position:fixed;top:0;left:0;right:0;height:var(--safe-to
 .toggle-title{font-weight:800;font-size:14.5px;}
 .toggle-sub{font-size:13px;font-weight:600;color:var(--text-dim);line-height:1.45;}
 
+/* ---------------------------------------------------------- workout time */
+.workout-clock{border:none;display:inline-flex;align-items:center;justify-content:center;gap:6px;
+  font-size:14px;font-weight:800;transition:background .14s ease;}
+.workout-clock:hover{background:var(--accent-soft-border);}
+.workout-clock svg{flex-shrink:0;}
+/* On the smallest phones, under large text and past the first hour, the icon
+   was the width that pushed "Finish Workout" out of its own button. */
+@media (max-width:359px){ .workout-clock svg{display:none;} }
+.time-row{align-items:center;}
+.time-row-icon{color:var(--accent-deep);display:inline-flex;flex-shrink:0;}
+.time-row .toggle-text{flex:1;}
+.time-row-change{font-size:13.5px;font-weight:800;color:var(--accent-deep);flex-shrink:0;}
+.time-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;}
+/* the phones' own pickers: iOS centres the value and lets an empty field
+   collapse to nothing, so both are pinned here */
+.time-input{min-height:48px;-webkit-appearance:none;appearance:none;text-align:left;}
+.time-input::-webkit-date-and-time-value{text-align:left;}
+.time-note{font-size:11.5px;font-weight:800;color:var(--accent-deep);background:var(--accent-soft);
+  border-radius:20px;padding:2px 8px;margin-left:4px;white-space:nowrap;}
+.time-running{min-height:48px;display:flex;align-items:center;padding:0 13px;margin-bottom:14px;
+  border:2px dashed var(--border);border-radius:var(--radius-sm);font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.35;}
+.time-preview{font-size:13.5px;font-weight:700;color:var(--text-dim);background:var(--surface-2);
+  border-radius:var(--radius-sm);padding:11px 13px;margin-bottom:12px;}
+.time-preview b{color:var(--text);font-weight:800;}
+.time-preview.error{background:var(--danger-soft);color:var(--danger-ink);}
+.detail-actions{display:flex;gap:10px;flex-wrap:wrap;}
+
 /* ------------------------------------------------------------ categories */
 .cat-header{display:flex;align-items:center;gap:8px;padding:10px 13px;margin:18px 0 10px;
   background:var(--surface-2);border:2px solid var(--border);border-radius:var(--radius-md);}
@@ -976,6 +1003,7 @@ body.photos-hidden .photo-veil{display:flex;}
 
 <div class="modal-overlay" id="settings-modal" hidden></div>
 <div class="modal-overlay" id="finish-modal" hidden></div>
+<div class="modal-overlay" id="time-modal" hidden></div>
 <div class="modal-overlay" id="restore-modal" hidden></div>
 <div class="modal-overlay" id="cropper-modal" hidden></div>
 <input type="file" id="photo-file-input" accept="image/*" style="display:none">
@@ -1261,9 +1289,12 @@ body.photos-hidden .photo-veil{display:flex;}
                  fields:[{id,type,label,unit}], defaultRestSec,
                  tag: legacy mirror of tags.join(', ') - written, never read }]
    plans:     [{ id, name, items:[{ exerciseId, targetSets }] }]
-   workouts:  [{ id, planId, name, date, startedAt, completedAt,
+   workouts:  [{ id, planId, name, date, startedAt, completedAt, editedAt,
                  exercises:[{ exerciseId, name, fields:[snapshot], defaultRestSec,
                               sets:[{ id, values:{fieldId:val}, restSec, done }] }] }]
+              date is the local day the workout STARTED. startedAt/completedAt
+              can be set by hand; editedAt is when that last happened, so a
+              backup older than the edit still counts it as missing.
    activeWorkout: same shape as a workout entry, completedAt=null, or null
    settings:  { weightUnit: 'lb'|'kg' }
    Fields/defaultRestSec are SNAPSHOTTED onto workouts so editing a library
@@ -3842,6 +3873,7 @@ var ui = {
   editingRestBlock: null,
   editingTopRest: null,
   finishDraft: null,
+  timeDraft: null,
   importPreview: null,
   settingsMessage: null,
   profileMessage: null,
@@ -5593,6 +5625,7 @@ function openFinishModal(){
     saveValues: true,
     updateTimes: false,
     updateTemplate: false,
+    endAt: null, /* null = the moment Finish is pressed */
     planName: d ? d.plan.name : null,
     timesChanged: d ? d.timesChanged : false,
     structureChanged: d ? d.structureChanged : false
@@ -5630,9 +5663,18 @@ function renderFinishModal(){
       'Save this session&rsquo;s sets, targets and rests back into &ldquo;'+esc(f.planName)+'&rdquo;.', f.updateTemplate);
   }
 
+  var endAt = finishEndAt(w, f);
+  var timeRow = '<button class="toggle-row time-row" data-action="time-edit" data-mode="finish">'+
+    '<span class="time-row-icon">'+icon('clock')+'</span>'+
+    '<span class="toggle-text"><span class="toggle-title">'+esc(fmtClock(w.startedAt))+' &rarr; '+(endAt===f.endAt ? esc(fmtClock(endAt))+nextDayNote(w.startedAt, endAt) : 'Now')+' &middot; '+fmtElapsed(endAt-w.startedAt)+'</span>'+
+    '<span class="toggle-sub">Started late or stopped a while ago? Change the times.</span></span>'+
+    '<span class="time-row-change">Change</span>'+
+  '</button>';
+
   wrap.innerHTML = '<div class="modal">'+
     '<div class="modal-head"><h2>Finish Workout</h2><button class="icon-btn" data-action="finish-cancel">'+icon('x')+'</button></div>'+
-    '<div style="color:var(--text-dim);font-size:13.5px;margin-bottom:16px;">'+doneSets+' set'+(doneSets!==1?'s':'')+' completed &middot; '+fmtElapsed(Date.now()-w.startedAt)+'</div>'+
+    '<div style="color:var(--text-dim);font-size:13.5px;margin-bottom:16px;">'+doneSets+' set'+(doneSets!==1?'s':'')+' completed</div>'+
+    timeRow+
     rows+
     '<div style="display:flex;gap:10px;margin-top:18px;">'+
       '<button class="btn btn-ghost full-width" data-action="finish-cancel">Back</button>'+
@@ -5650,7 +5692,10 @@ function finishWorkout(){
     if (f.updateTemplate) applyPlanFullUpdate(w, d.plan);
     else if (f.updateTimes) applyPlanTimesUpdate(w, d.plan);
   }
-  w.completedAt = Date.now();
+  w.completedAt = finishEndAt(w, f);
+  /* an end set back by hand can fall before the last backup, which then
+     would not count this workout as missing from it */
+  if (f.endAt && w.completedAt===f.endAt) w.editedAt = Date.now();
   if (!f.saveValues) w.excludeFromReference = true;
   data.workouts.push(w);
   data.activeWorkout = null;
@@ -5662,6 +5707,201 @@ function discardWorkout(){
   data.activeWorkout = null;
   clearRestTimer();
   save(); setView('home');
+}
+
+/* ---- Workout time ------------------------------------------------------
+   Both ends of a workout can be set by hand, for when the clock was not
+   right: started late, or finished on the way home. The running clock at the
+   top of a workout changes the start (the end has not happened yet), the
+   Finish sheet changes both, and so does a saved session in Progress.
+   The editor asks for one day and two clock times rather than two dates. An
+   end earlier than the start is the next morning, the only way a session
+   crosses midnight. The day a workout is filed under (w.date) always
+   follows its start. ---- */
+
+/* "00:40" on a 24-hour clock, the way the picker shows it, and "12:40 AM"
+   rather than "00:40 AM" on a 12-hour one */
+var CLOCK_OPTS = (function(){
+  var hc = null;
+  try { hc = new Intl.DateTimeFormat(undefined,{hour:'numeric'}).resolvedOptions().hourCycle; } catch(e){}
+  return { hour: (hc==='h23' || hc==='h24') ? '2-digit' : 'numeric', minute:'2-digit' };
+})();
+function fmtClock(ts){ return new Date(ts).toLocaleTimeString(undefined, CLOCK_OPTS); }
+function toHHMM(ts){ var d = new Date(ts); return pad2(d.getHours())+':'+pad2(d.getMinutes()); }
+/* A day and a clock time as a timestamp. Date carries day+1 across a month
+   or a year end by itself. */
+function localTs(iso, hm, addDays){
+  var dm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||''), tm = /^(\d{1,2}):(\d{2})/.exec(hm||'');
+  if (!dm || !tm) return null;
+  var t = new Date(+dm[1], +dm[2]-1, +dm[3]+(addDays||0), +tm[1], +tm[2], 0, 0).getTime();
+  return isNaN(t) ? null : t;
+}
+function daysApart(a, b){
+  var da = new Date(a), db = new Date(b);
+  return Math.round((new Date(db.getFullYear(),db.getMonth(),db.getDate()) - new Date(da.getFullYear(),da.getMonth(),da.getDate())) / 86400000);
+}
+function nextDayNote(start, end){
+  var n = (start && end) ? daysApart(start, end) : 0;
+  return n > 0 ? ' <span class="time-note">+'+n+' day'+(n!==1?'s':'')+'</span>' : '';
+}
+/* " · 18:05–19:12 · 1:07:00" for a subtitle, or nothing without both times */
+function workoutSpanHTML(start, end){
+  if (!start || !end) return '';
+  return ' &middot; '+esc(fmtClock(start))+'&ndash;'+esc(fmtClock(end))+nextDayNote(start, end)+' &middot; '+fmtElapsed(end-start);
+}
+/* When the workout ends if Finish is pressed now: the time set by hand while
+   it still fits, otherwise this moment. */
+function finishEndAt(w, f){
+  var e = f && f.endAt;
+  return (e && e > w.startedAt && e <= Date.now()) ? e : Date.now();
+}
+
+function openTimeEditor(mode, id){
+  var w = mode==='saved' ? data.workouts.find(function(x){ return x.id===id; }) : data.activeWorkout;
+  if (!w || (mode==='finish' && !ui.finishDraft)) return;
+  var start = w.startedAt || w.completedAt || localTs(w.date, '12:00') || Date.now();
+  var end = null, endIsNow = false;
+  if (mode==='saved') end = w.completedAt || start;
+  if (mode==='finish'){
+    end = finishEndAt(w, ui.finishDraft);
+    endIsNow = end !== ui.finishDraft.endAt;
+  }
+  var t = { mode:mode, id:w.id, origStart:start, origEnd:end, endIsNow:endIsNow,
+            date:toLocalISO(new Date(start)), start:toHHMM(start), end: end===null ? '' : toHHMM(end) };
+  t.init = { date:t.date, start:t.start, end:t.end };
+  ui.timeDraft = t;
+  /* the Finish sheet steps aside while its times are edited */
+  if (mode==='finish') document.getElementById('finish-modal').hidden = true;
+  document.getElementById('time-modal').hidden = false;
+  renderTimeModal();
+}
+function closeTimeEditor(){
+  var t = ui.timeDraft;
+  ui.timeDraft = null;
+  var wrap = document.getElementById('time-modal');
+  wrap.hidden = true;
+  wrap.innerHTML = '';
+  if (t && t.mode==='finish' && ui.finishDraft && data.activeWorkout){
+    document.getElementById('finish-modal').hidden = false;
+    renderFinishModal();
+  }
+}
+
+/* The draft as timestamps, or what is wrong with it. The fields alone decide
+   the day the end falls on: an end earlier than the start is the next day,
+   otherwise the same one. The pickers only show minutes, so a time still on
+   its original minute keeps its original seconds, and a draft nobody changed
+   keeps both timestamps exactly (a session left running past a whole day
+   included). */
+function sameMinute(a, b){ return a!=null && b!=null && Math.floor(a/60000)===Math.floor(b/60000); }
+function resolveTimeDraft(t){
+  var now = Date.now();
+  var untouched = t.date===t.init.date && t.start===t.init.start && t.end===t.init.end;
+  var start = localTs(t.date, t.start);
+  if (start===null) return { error: t.date ? 'Pick a start time.' : 'Pick a day.' };
+  if (sameMinute(start, t.origStart)) start = t.origStart;
+  if (start > now) return { error:'The start can’t be in the future.' };
+  if (t.mode==='active') return { start:start };
+
+  if (t.mode==='finish' && t.endIsNow) return { start:start, end:now, endIsNow:true };
+  if (untouched && t.origEnd > t.origStart) return { start:t.origStart, end:t.origEnd, endIsNow:false };
+  if (!/^\d{2}:\d{2}/.test(t.end||'')) return { error:'Pick an end time.' };
+  if (t.end===t.start) return { error:'The start and end are the same time.' };
+  /* both are zero-padded "HH:MM", so the strings compare as times do */
+  var rolled = t.end < t.start;
+  var end = localTs(t.date, t.end, rolled ? 1 : 0);
+  if (end===null) return { error:'Pick an end time.' };
+  if (sameMinute(end, t.origEnd)) end = t.origEnd;
+  /* only a clock change can still put it first: 02:30 on the night the
+     clocks go forward is 03:30 */
+  if (end <= start) return { error:'The end has to come after the start.' };
+  if (end > now) return { error: rolled
+    ? 'An end earlier than the start means the next day, and that hasn’t come yet.'
+    : 'The end can’t be in the future.' };
+  return { start:start, end:end, endIsNow:false };
+}
+
+function renderTimeModal(){
+  var wrap = document.getElementById('time-modal');
+  var t = ui.timeDraft;
+  if (!t){ wrap.innerHTML = ''; return; }
+  var active = t.mode==='active';
+  var endCell = active
+    ? '<div class="time-running">Set when you tap Finish</div>'
+    : '<input id="time-end" class="input time-input" type="time" value="'+esc(t.end)+'" aria-describedby="time-preview" data-action-enter="time-save">';
+  wrap.innerHTML = '<div class="modal">'+
+    '<div class="modal-head"><h2>Workout Time</h2><button class="icon-btn" data-action="time-cancel" aria-label="Close">'+icon('x')+'</button></div>'+
+    '<label class="field-label" for="time-date">Day</label>'+
+    '<input id="time-date" class="input time-input" type="date" value="'+esc(t.date)+'" max="'+todayISO()+'" aria-describedby="time-preview" data-action-enter="time-save">'+
+    '<div class="time-grid">'+
+      '<div><label class="field-label" for="time-start">Start</label>'+
+        '<input id="time-start" class="input time-input" type="time" value="'+esc(t.start)+'" aria-describedby="time-preview" data-action-enter="time-save"></div>'+
+      '<div><label class="field-label"'+(active ? '' : ' for="time-end"')+'>End<span id="time-end-note"></span></label>'+endCell+'</div>'+
+    '</div>'+
+    '<div id="time-preview" class="time-preview"></div>'+
+    '<div style="display:flex;gap:10px;margin-top:6px;">'+
+      '<button class="btn btn-ghost full-width" data-action="time-cancel">Cancel</button>'+
+      '<button class="btn btn-primary full-width" id="time-save" data-action="time-save">Save</button>'+
+    '</div>'+
+  '</div>';
+  updateTimePreview();
+}
+/* Only the preview, the note and the button change as the times do, so a
+   picker that is open stays open. */
+function updateTimePreview(){
+  var t = ui.timeDraft;
+  var box = document.getElementById('time-preview');
+  if (!t || !box) return;
+  var r = resolveTimeDraft(t);
+  box.classList.toggle('error', !!r.error);
+  var html = r.error ? esc(r.error)
+    : t.mode==='active' ? 'Running for <b>'+fmtElapsed(Date.now()-r.start)+'</b> so far'
+    : 'Duration <b>'+fmtElapsed(r.end-r.start)+'</b>';
+  /* tick() calls this every second; most seconds nothing changes */
+  if (box.innerHTML !== html) box.innerHTML = html;
+  var note = document.getElementById('time-end-note');
+  var noteHtml = r.endIsNow ? ' <span class="time-note">now</span>' : (r.end ? nextDayNote(r.start, r.end) : '');
+  if (note && note.innerHTML !== noteHtml) note.innerHTML = noteHtml;
+  var btn = document.getElementById('time-save');
+  if (btn) btn.disabled = !!r.error;
+}
+function timeDraftInput(el){
+  var t = ui.timeDraft;
+  if (!t) return;
+  if (el.id==='time-date') t.date = el.value;
+  else if (el.id==='time-start') t.start = el.value;
+  else { t.end = el.value; t.endIsNow = false; }
+  updateTimePreview();
+}
+function saveTimeDraft(){
+  var t = ui.timeDraft;
+  if (!t) return;
+  var r = resolveTimeDraft(t);
+  if (r.error){ updateTimePreview(); return; }
+  if (t.mode==='saved'){
+    var w = data.workouts.find(function(x){ return x.id===t.id; });
+    if (w && (r.start!==w.startedAt || r.end!==w.completedAt)){
+      w.startedAt = r.start;
+      w.completedAt = r.end;
+      w.date = toLocalISO(new Date(r.start));
+      /* an edit is not in any backup yet, whatever its end now says */
+      w.editedAt = Date.now();
+      /* finishing order, as finishing and merging leave them */
+      data.workouts.sort(function(a,b){ return (a.completedAt||0) - (b.completedAt||0); });
+      save();
+    }
+    closeTimeEditor();
+    renderMain();
+    return;
+  }
+  var aw = data.activeWorkout;
+  if (aw && aw.id===t.id){
+    if (r.start!==aw.startedAt){ aw.startedAt = r.start; aw.date = toLocalISO(new Date(r.start)); }
+    if (t.mode==='finish' && ui.finishDraft) ui.finishDraft.endAt = r.endIsNow ? null : r.end;
+    save();
+  }
+  closeTimeEditor();
+  tick();
 }
 
 function renderWorkout(){
@@ -5677,7 +5917,7 @@ function renderWorkout(){
       '<input class="title-input" data-commit="workout-name" value="'+esc(w.name)+'">'+
     '</div>'+
     '<div class="workout-head-right">'+
-      '<span class="workout-meta" id="workout-elapsed">'+fmtElapsed(Date.now()-w.startedAt)+'</span>'+
+      '<button class="workout-meta workout-clock" data-action="time-edit" data-mode="active" title="Change when this workout started">'+icon('clock')+'<span id="workout-elapsed">'+fmtElapsed(Date.now()-w.startedAt)+'</span></button>'+
       '<button class="btn btn-ghost" data-action="confirm-discard-workout">Discard</button>'+
       '<button class="btn btn-primary" data-action="finish-workout">Finish Workout</button>'+
     '</div>'+
@@ -6058,8 +6298,11 @@ function renderWorkoutDetailHTML(w){
   var unit = data.settings.weightUnit;
   var html = '<button class="btn btn-ghost" data-action="back-to-history">'+icon('chevronLeft')+' Back</button>'+
     '<div style="display:flex;justify-content:space-between;align-items:center;margin:16px 0;flex-wrap:wrap;gap:12px;">'+
-      '<div><div style="font-size:20px;font-weight:600;">'+esc(w.name)+'</div><div style="font-size:13px;color:var(--text-dim);margin-top:4px;">'+fmtHeaderDate(w.date)+' &middot; '+fmtElapsed(w.completedAt-w.startedAt)+'</div></div>'+
-      '<button class="btn btn-ghost" data-action="confirm-delete-workout" data-id="'+w.id+'">'+icon('trash')+' Delete</button>'+
+      '<div><div style="font-size:20px;font-weight:600;">'+esc(w.name)+'</div><div style="font-size:13px;color:var(--text-dim);margin-top:4px;">'+fmtHeaderDate(w.date)+workoutSpanHTML(w.startedAt, w.completedAt)+'</div></div>'+
+      '<div class="detail-actions">'+
+        '<button class="btn btn-ghost" data-action="time-edit" data-mode="saved" data-id="'+w.id+'">'+icon('clock')+' Edit Time</button>'+
+        '<button class="btn btn-ghost" data-action="confirm-delete-workout" data-id="'+w.id+'">'+icon('trash')+' Delete</button>'+
+      '</div>'+
     '</div>';
 
   w.exercises.forEach(function(wex){
@@ -6274,7 +6517,7 @@ function renderTimerBar(){
 function daysSince(ts){ return ts ? Math.floor((Date.now()-ts)/86400000) : null; }
 function workoutsSinceExport(){
   var since = data.lastExportAt || 0;
-  return data.workouts.filter(function(w){ return w.completedAt && w.completedAt > since; }).length;
+  return data.workouts.filter(function(w){ return w.completedAt && (w.completedAt > since || (w.editedAt||0) > since); }).length;
 }
 /* A photo only counts as exported once a file carried the image itself:
    the zip, or a backup with photos switched on. */
@@ -7005,6 +7248,9 @@ function handleAction(action, el){
       break;
     }
     case 'finish-confirm': finishWorkout(); break;
+    case 'time-edit': openTimeEditor(el.dataset.mode, el.dataset.id); break;
+    case 'time-cancel': closeTimeEditor(); break;
+    case 'time-save': saveTimeDraft(); break;
     case 'minimize-workout': setView('home'); break;
 
     case 'new-exercise': openExerciseModal(null, null); break;
@@ -7607,6 +7853,7 @@ function onFocusOut(e){
 
 function onInput(e){
   var t = e.target;
+  if (t.id==='time-date' || t.id==='time-start' || t.id==='time-end'){ timeDraftInput(t); return; }
   if (t.id==='ex-name-input'){
     ui.exerciseDraft.name = t.value;
     if (autofillMuscles(ui.exerciseDraft)) refreshMusclePicker();
@@ -7625,6 +7872,8 @@ function onInput(e){
 }
 
 function onChange(e){
+  /* some pickers report only on change, not on every turn of the wheel */
+  if (e.target.id==='time-date' || e.target.id==='time-start' || e.target.id==='time-end'){ timeDraftInput(e.target); return; }
   if (e.target.id==='ex-custom-type'){
     var unitInput = document.getElementById('ex-custom-unit');
     if (unitInput) unitInput.style.display = e.target.value==='number' ? '' : 'none';
@@ -7698,6 +7947,7 @@ function onKeyDown(e){
     if (!cropModal.hidden){ closeCropper(); return; }
     if (!document.getElementById('photo-source-modal').hidden){ closePhotoSource(); return; }
     if (!exModal.hidden){ closeExerciseModal(); return; }
+    if (!document.getElementById('time-modal').hidden){ closeTimeEditor(); return; }
     if (!finModal.hidden){ closeFinishModal(); return; }
     if (!settingsModal.hidden){ closeSettings(); return; }
     if (ui.editingRest || ui.editingDefaultRest!==null){ ui.editingRest=null; ui.editingDefaultRest=null; renderMain(); return; }
@@ -7715,6 +7965,7 @@ function handleBack(){
   if (!document.getElementById('cropper-modal').hidden){ closeCropper(); return true; }
   if (!document.getElementById('photo-source-modal').hidden){ closePhotoSource(); return true; }
   if (!document.getElementById('exercise-modal').hidden){ closeExerciseModal(); return true; }
+  if (!document.getElementById('time-modal').hidden){ closeTimeEditor(); return true; }
   if (!document.getElementById('finish-modal').hidden){ closeFinishModal(); return true; }
   if (!document.getElementById('settings-modal').hidden){ closeSettings(); return true; }
   if (ui.picker){ handleAction('picker-close'); return true; }
@@ -7749,6 +8000,7 @@ function onClick(e){
   if (e.target.id==='settings-modal') closeSettings();
   if (e.target.id==='exercise-modal') closeExerciseModal();
   if (e.target.id==='finish-modal') closeFinishModal();
+  if (e.target.id==='time-modal') closeTimeEditor();
   if (e.target.id==='cropper-modal') closeCropper();
   if (e.target.id==='photo-source-modal') closePhotoSource();
 }
@@ -7892,6 +8144,8 @@ function tick(){
       if (elapsedEl) elapsedEl.textContent = fmtElapsed(Date.now()-data.activeWorkout.startedAt);
     }
   }
+  /* "so far", "now" and what counts as the future all move with the clock */
+  if (ui.timeDraft) updateTimePreview();
 }
 setInterval(tick, 1000);
 
