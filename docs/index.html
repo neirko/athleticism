@@ -567,6 +567,15 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .link-btn{background:none;border:none;padding:0;color:inherit;font-weight:800;font-size:inherit;text-decoration:underline;}
 .circuit-add-row{margin:0 0 14px 14px;}
 @media (max-width:640px){ .circuit-add-row{margin-left:8px;} }
+/* while an exercise is dragged, the row turns into the circuit's landing spot */
+.circuit-drop-label{display:none;}
+body.dragging-exercise .circuit-add-row{border:2px dashed var(--border);border-radius:var(--radius-md);padding:12px 14px;}
+body.dragging-exercise .circuit-add-row .btn{display:none;}
+body.dragging-exercise .circuit-add-row .circuit-drop-label{display:block;text-align:center;font-size:13.5px;font-weight:800;color:var(--text-dim);}
+body.dragging-exercise .circuit-add-row.into-active{border-style:solid;border-color:var(--accent);background:var(--accent-soft);}
+body.dragging-exercise .circuit-add-row.into-active .circuit-drop-label{color:var(--accent-deep);}
+/* the rule between a plan's muscle coverage and the plan itself */
+.section-title.plan-items-title{border-top:2px solid var(--border);padding-top:22px;margin-top:30px;}
 /* the workout card: ready, edit, the score sheet and the scored card */
 .ex-card.circuit-card{border-color:var(--accent-soft-border);}
 .circuit-line{font-size:14px;font-weight:800;color:var(--text);line-height:1.45;overflow-wrap:anywhere;}
@@ -5364,7 +5373,7 @@ function renderPlans(){
           if (isCircuitHeading(entry)){
             rowsHtml += renderPlanCircuitHeader(idx, entry, plan);
             /* a circuit with no movements yet still offers the way to add one */
-            if (!entry.collapsed && planBlockLength(plan.items, idx)===1) rowsHtml += planCircuitAddRowHTML(entry);
+            if (!entry.collapsed && planBlockLength(plan.items, idx)===1) rowsHtml += planCircuitAddRowHTML(entry, idx+1);
           } else {
             rowsHtml += renderPlanCategoryHeader(idx, entry, plan);
           }
@@ -5381,7 +5390,7 @@ function renderPlans(){
         /* a landing strip just past the last member, for pulling an
            exercise out of the category downwards */
         if (isLastInCategory(plan.items, idx)){
-          if (headingIdx !== -1) rowsHtml += planCircuitAddRowHTML(plan.items[headingIdx]);
+          if (headingIdx !== -1) rowsHtml += planCircuitAddRowHTML(plan.items[headingIdx], idx+1);
           rowsHtml += '<div class="cat-exit-zone" data-drop-exit="'+(idx+1)+'"></div>';
         }
       });
@@ -5397,7 +5406,7 @@ function renderPlans(){
             '<input class="title-input" style="font-size:19px;font-weight:600;flex:1" data-commit="plan-name" data-id="'+plan.id+'" value="'+esc(plan.name)+'">'+
             '<button class="btn btn-ghost" data-action="confirm-delete-plan" data-id="'+plan.id+'">'+icon('trash')+' Delete</button>'+
           '</div>'+
-          planMuscleMapHTML(plan)+
+          planMapAndDividerHTML(plan)+
           '<div id="plan-items">'+rowsHtml+'</div>'+
           '<div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">'+
             '<button class="btn btn-ghost" data-action="open-plan-picker">'+icon('plus')+' Add Exercise</button>'+
@@ -5446,9 +5455,26 @@ function movePlanItem(idx, dir){
   var plan = currentPlan();
   var j = idx+dir;
   if (j<0 || j>=plan.items.length) return;
+  var moved = plan.items[idx];
   var tmp = plan.items[idx]; plan.items[idx]=plan.items[j]; plan.items[j]=tmp;
+  /* Right under a group, the entry above is the invisible break that closes
+     it, so ▲ steps an exercise back in as the group's last member. Tidy the
+     break it may leave with nothing below, and open a collapsed group it
+     joined - otherwise the exercise would vanish into it. */
+  plan.items = normalizePlanItems(plan.items);
+  var at = plan.items.indexOf(moved);
+  var group = at > 0 && itemKind(moved)!=='category' ? owningCategoryIdx(plan.items, at) : -1;
+  if (group !== -1 && plan.items[group].collapsed) plan.items[group].collapsed = false;
   closePlanEntryEditors();
   save(); renderMain();
+}
+/* What ▲ will do, said on hover: step into the group above, or just move up. */
+function planMoveUpTitle(items, idx){
+  if (idx > 0 && itemKind(items[idx-1])==='break'){
+    var h = owningCategoryIdx(items, idx-1);
+    if (h !== -1) return 'Move into '+(items[h].name || (isCircuitHeading(items[h]) ? 'Circuit' : 'Category'));
+  }
+  return 'Move up';
 }
 
 /* ---- plan exercise card: mirrors the active-workout card, but edits
@@ -5573,7 +5599,7 @@ function renderPlanExerciseCard(idx){
       '<div class="plan-ex-head-left">'+
         '<button class="drag-handle" title="Drag to reorder or move into a category">'+icon('grip')+'</button>'+
         '<div class="plan-ex-order">'+
-          '<button class="icon-btn tiny" data-action="plan-move-up" data-idx="'+idx+'" '+(idx===0?'disabled':'')+'>'+icon('chevronUp')+'</button>'+
+          '<button class="icon-btn tiny" data-action="plan-move-up" data-idx="'+idx+'" title="'+esc(planMoveUpTitle(plan.items, idx))+'" '+(idx===0?'disabled':'')+'>'+icon('chevronUp')+'</button>'+
           '<button class="icon-btn tiny" data-action="plan-move-down" data-idx="'+idx+'" '+(idx===plan.items.length-1?'disabled':'')+'>'+icon('chevronDown')+'</button>'+
         '</div>'+
         '<div class="plan-ex-title"><div class="ex-card-name">'+esc(ex.name)+'</div>'+
@@ -5846,10 +5872,20 @@ function refreshPlanCircuitInfo(idx){
 /* The plan's Muscle Coverage follows a circuit's Time and a ladder's rungs.
    Only its card is swapped - it holds no inputs, so the field being moved
    into is never taken out from under the keyboard. */
+/* The map says what the plan works; everything below the line is the plan
+   itself. Without the rule and a heading of its own, the first exercise
+   read as part of the coverage card above it. An empty plan has no map,
+   so there is nothing to divide. */
+function planMapAndDividerHTML(plan){
+  var map = planMuscleMapHTML(plan);
+  if (!map) return '';
+  return map + '<div class="section-title plan-items-title"><span>Exercises</span></div>';
+}
 function refreshPlanMuscleMap(){
-  var plan = currentPlan(), list = document.getElementById('plan-items');
-  var old = list ? list.previousElementSibling : null;
-  if (!plan || !old || !old.classList.contains('mm-card')) return;
+  var plan = currentPlan();
+  /* the plan page has one coverage card; the divider sits between it and the list */
+  var old = document.querySelector('#main .split-detail .mm-card');
+  if (!plan || !old) return;
   var tmp = document.createElement('div');
   tmp.innerHTML = planMuscleMapHTML(plan);
   var card = tmp.querySelector('.mm-card');
@@ -5879,10 +5915,18 @@ function renderPlanCircuitHeader(idx, entry, plan){
     '<div class="circuit-chart" data-circuit-chart="'+idx+'">'+circuitChartHTML(circuitFromHeading(plan.items, idx), null)+'</div>'+
   '</div>';
 }
-/* it carries no data-drag-idx: it is not an entry, and nothing drops on it */
-function planCircuitAddRowHTML(heading){
-  return '<div class="circuit-add-row"><button class="btn btn-ghost small" data-action="plan-circuit-add" data-id="'+esc(heading.id)+'">'+
-    icon('plus')+' Add Exercise to Circuit</button></div>';
+/* The circuit's own end. It is not an entry, so no data-drag-idx - but
+   while an exercise is dragged it is the landing spot for "into this
+   circuit, last". The strip just under a group's last member means "take
+   it out", so an exercise pulled out below had nowhere to aim on the way
+   back in; this row is that place. dropIdx is the position just past the
+   last movement. */
+function planCircuitAddRowHTML(heading, dropIdx){
+  return '<div class="circuit-add-row" data-drop-into="'+dropIdx+'">'+
+    '<button class="btn btn-ghost small" data-action="plan-circuit-add" data-id="'+esc(heading.id)+'">'+
+      icon('plus')+' Add Exercise to Circuit</button>'+
+    '<span class="circuit-drop-label">Drop to Add to '+esc(heading.name || 'Circuit')+'</span>'+
+  '</div>';
 }
 /* A movement: its name, and one row of inputs for the first set - the amount
    for one round. Nothing about rest here, and no Downs: the circuit's clock
@@ -11677,8 +11721,28 @@ function planDragTargets(){
   return list;
 }
 function clearDropMarkers(){
-  var m = document.querySelectorAll('.drop-before, .drop-after, .exit-active');
-  for (var i=0;i<m.length;i++) m[i].classList.remove('drop-before','drop-after','exit-active');
+  var m = document.querySelectorAll('.drop-before, .drop-after, .exit-active, .into-active');
+  for (var i=0;i<m.length;i++) m[i].classList.remove('drop-before','drop-after','exit-active','into-active');
+}
+/* a circuit's end row: "into this circuit, as its last movement" */
+function intoZoneAt(clientY){
+  var zones = document.querySelectorAll('#plan-items [data-drop-into]');
+  for (var i=0;i<zones.length;i++){
+    var r = zones[i].getBoundingClientRect();
+    if (clientY >= r.top && clientY <= r.bottom) return { el: zones[i], idx: zones[i].dataset.dropInto*1 };
+  }
+  return null;
+}
+/* A rename only saves - it does not redraw - so the drop rows' "Drop to Add
+   to Cindy" is brought up to date as the drag starts. */
+function refreshIntoLabels(){
+  var items = currentPlan().items;
+  var zones = document.querySelectorAll('#plan-items [data-drop-into]');
+  for (var i=0;i<zones.length;i++){
+    var h = owningCategoryIdx(items, zones[i].dataset.dropInto*1);
+    var label = zones[i].querySelector('.circuit-drop-label');
+    if (label && h !== -1) label.textContent = 'Drop to Add to ' + (items[h].name || 'Circuit');
+  }
 }
 /* exit zones sit just past a category's last member; hitting one means
    "below the heading, but outside it" */
@@ -11730,12 +11794,20 @@ function onPointerMove(e){
     drag.active = true;
     drag.host.classList.add('dragging');
     document.body.classList.add('is-dragging');
-    if (!drag.isCategory) document.body.classList.add('dragging-exercise');
+    if (!drag.isCategory){ refreshIntoLabels(); document.body.classList.add('dragging-exercise'); }
   }
   e.preventDefault();
   clearDropMarkers();
 
-  /* an exit zone wins over the normal midpoint calculation when hovered */
+  /* a circuit's end row, then an exit zone, win over the normal midpoint
+     calculation when hovered */
+  var into = drag.isCategory ? null : intoZoneAt(e.clientY);
+  if (into){
+    drag.dropIdx = into.idx;
+    drag.exit = false;
+    into.el.classList.add('into-active');
+    return;
+  }
   var exit = drag.isCategory ? null : exitZoneAt(e.clientY);
   if (exit){
     drag.dropIdx = exit.idx;
