@@ -514,6 +514,120 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .ladder-editor-note{font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:10px;}
 .ladder-editor .ladder-actions{margin-top:0;}
 
+/* -------------------------------------------------------------- circuits */
+/* The plan heading is a card rather than a thin category bar: it carries the
+   clock. Its members are compact cards under it. */
+.circuit-head{background:var(--surface);border:2px solid var(--accent-soft-border);border-radius:var(--radius-md);
+  padding:10px 13px 12px;margin:18px 0 10px;box-shadow:var(--ledge);}
+.circuit-head:first-child{margin-top:0;}
+.circuit-head-row{display:flex;align-items:center;gap:8px;min-width:0;}
+.circuit-badge{font-size:11.5px;font-weight:800;letter-spacing:.3px;color:var(--accent-deep);background:var(--accent-soft);
+  border-radius:20px;padding:3px 9px;flex-shrink:0;}
+.circuit-timing{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;margin:10px 0 2px;}
+.circuit-field{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--text-dim);}
+.circuit-field .num-input{width:64px;min-width:0;max-width:none;padding:7px 4px;}
+.circuit-field .stepper{padding:2px 6px;gap:6px;}
+.circuit-field .stepper button{width:30px;height:30px;font-size:18px;font-weight:800;border-radius:10px;}
+.circuit-field .stepper span{color:var(--text);}
+.circuit-info{font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.5;margin-top:8px;overflow-wrap:anywhere;}
+.circuit-info > div + div{margin-top:3px;}
+.circuit-round b{color:var(--text);font-weight:800;}
+.circuit-last{color:var(--text-faint);}
+.circuit-count{color:var(--accent-deep);font-weight:800;}
+/* one line where it fits - name, the round's inputs, Remove - and on a
+   phone the inputs drop below the name */
+.ex-card.circuit-member{padding:10px 13px;margin-bottom:10px;border-left:4px solid var(--accent-soft-border);
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;column-gap:14px;}
+.circuit-member-head{display:flex;align-items:center;gap:6px;min-width:0;}
+.circuit-member .circuit-trim{grid-column:1 / -1;}
+@media (max-width:640px){
+  .ex-card.circuit-member{grid-template-columns:minmax(0,1fr) auto;}
+  .circuit-member-body{grid-column:1 / -1;grid-row:2;margin-top:6px;}
+}
+.circuit-member-head .ex-card-name{font-size:16.5px;flex:1;min-width:0;margin:0;overflow-wrap:anywhere;}
+.set-table.circuit-mini{min-width:0;width:auto;}
+.set-table.circuit-mini th:first-child{text-align:center;width:auto;}
+.set-table.circuit-mini td:first-child{color:inherit;font-weight:inherit;font-size:inherit;}
+.set-table.circuit-mini .num-input{width:88px;}
+.circuit-trim{font-size:12.5px;font-weight:700;color:var(--warn-ink);background:var(--warn-soft);border:2px solid var(--warn-border);
+  border-radius:var(--radius-sm);padding:7px 10px;margin-top:8px;line-height:1.45;}
+.link-btn{background:none;border:none;padding:0;color:inherit;font-weight:800;font-size:inherit;text-decoration:underline;}
+.circuit-add-row{margin:0 0 14px 14px;}
+@media (max-width:640px){ .circuit-add-row{margin-left:8px;} }
+/* the workout card: ready, edit, the score sheet and the scored card */
+.ex-card.circuit-card{border-color:var(--accent-soft-border);}
+.circuit-line{font-size:14px;font-weight:800;color:var(--text);line-height:1.45;overflow-wrap:anywhere;}
+.circuit-sub{font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.45;margin-top:4px;overflow-wrap:anywhere;}
+.circuit-sub.faint{color:var(--text-faint);}
+.circuit-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;}
+.circuit-enter{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;
+  border-top:2px dashed var(--border);font-size:13px;font-weight:700;color:var(--text-dim);}
+.circuit-format{font-size:13px;font-weight:700;color:var(--text-dim);}
+.circuit-score-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:6px 0 2px;}
+.circuit-score{font-family:var(--font-display);font-size:38px;font-weight:800;line-height:1.05;color:var(--text);}
+.best-chip{font-size:12px;font-weight:800;color:var(--good-deep);background:var(--good-soft);border-radius:20px;
+  padding:3px 10px;white-space:nowrap;}
+.best-chip[hidden]{display:none;}
+.circuit-edit-name{font-family:var(--font-display);font-size:18px;font-weight:700;width:100%;margin-bottom:4px;}
+.cedit-row{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-top:2px solid var(--border);}
+.cedit-row:first-of-type{margin-top:10px;}
+.cedit-main{flex:1;min-width:0;}
+.cedit-name{font-weight:800;font-size:14.5px;overflow-wrap:anywhere;}
+.cedit-fields{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
+.cedit-field{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:800;color:var(--text-dim);min-width:0;}
+.cedit-field .num-input{width:84px;max-width:none;}
+.circuit-empty{font-size:13px;font-weight:700;color:var(--text-faint);padding:10px 0 4px;}
+.score-sheet{margin-top:4px;}
+.score-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.score-label{font-size:13px;font-weight:800;color:var(--text-dim);min-width:52px;}
+.score-top .circuit-score{flex:0 1 auto;}
+.score-rounds{display:flex;align-items:center;gap:10px;margin:12px 0 16px;}
+.score-rounds .num-input{width:76px;max-width:none;font-size:20px;padding:8px 4px;}
+.score-step-btn{width:46px;height:46px;border-radius:14px;border:2px solid var(--border);background:var(--surface);
+  color:var(--text);font-size:22px;font-weight:800;line-height:1;box-shadow:var(--ledge);flex-shrink:0;
+  display:inline-flex;align-items:center;justify-content:center;}
+.score-step-btn:active{transform:translateY(3px);box-shadow:none;}
+.score-q{font-family:var(--font-display);font-size:17px;font-weight:700;}
+.score-hint{font-size:13px;font-weight:600;color:var(--text-dim);margin:2px 0 10px;}
+.score-row{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:var(--surface);
+  border:2px solid var(--border);border-radius:var(--radius-md);padding:10px 12px;margin-bottom:8px;min-height:54px;}
+button.score-row{box-shadow:var(--ledge);}
+button.score-row:active{transform:translateY(2px);box-shadow:none;}
+.score-row.full{border-color:var(--good);background:var(--good-soft);}
+.score-row.sel{border-color:var(--accent);background:var(--accent-soft);flex-wrap:wrap;}
+.score-row-name{flex:1 1 90px;min-width:0;font-size:14.5px;font-weight:800;overflow-wrap:anywhere;}
+button.score-row-name{background:none;border:none;padding:6px 0;text-align:left;color:inherit;}
+.score-amt{font-size:13.5px;font-weight:800;color:var(--text-dim);white-space:nowrap;flex-shrink:0;}
+.score-row.full .score-amt{color:var(--good-deep);}
+.score-step{display:flex;align-items:center;gap:8px;flex-shrink:0;margin-left:auto;}
+.score-step .score-val{font-family:var(--font-display);font-size:24px;font-weight:800;min-width:34px;text-align:center;}
+.score-step .num-input{width:84px;max-width:none;}
+.score-of{font-size:13px;font-weight:800;color:var(--text-dim);white-space:nowrap;}
+.score-rolled{flex-basis:100%;font-size:12.5px;font-weight:800;color:var(--good-deep);}
+.score-actions{display:flex;align-items:center;gap:10px;margin-top:6px;}
+.score-actions .btn-primary{margin-left:auto;min-width:110px;justify-content:center;}
+.score-reset{margin-top:12px;}
+/* fixed columns, so a long movement name wraps in its own cell instead of
+   squeezing the name column down to a hyphen */
+.set-table.circuit-table{table-layout:fixed;}
+.set-table.circuit-table th:first-child{width:46%;}
+.circuit-table th{text-align:left !important;white-space:normal !important;}
+.circuit-table td{text-align:left;font-family:var(--font-mono);overflow-wrap:anywhere;}
+.set-table.circuit-table td:first-child{color:var(--text);font-weight:700;font-size:14px;}
+.circuit-table td.cir-tot{color:var(--good);font-weight:800;}
+.circuit-notes{font-size:12.5px;font-weight:700;color:var(--text-faint);margin-top:10px;}
+.chooser-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.chooser-title{font-family:var(--font-display);font-size:17px;font-weight:700;}
+.chooser-label{font-size:12px;font-weight:800;letter-spacing:.3px;color:var(--text-faint);margin:10px 4px 2px;}
+.picker-target{font-size:13px;font-weight:700;color:var(--text-dim);margin:0 2px 10px;}
+.picker-target b{color:var(--accent-deep);}
+/* a phone keeps the stepper on the movement's own line */
+@media (max-width:400px){
+  .score-step{gap:6px;}
+  .score-step-btn{width:42px;height:42px;}
+  .score-row-name{flex-basis:64px;}
+}
+
 /* -------------------------------------------------------------- rest bar */
 .timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--inverse);color:var(--on-inverse);z-index:40;
   display:flex;justify-content:center;box-shadow:0 -10px 30px rgba(42,34,51,.22);
@@ -1639,6 +1753,7 @@ var FIELD_INFO = {
   'muscle-volume': {
     title: 'Muscle Coverage',
     body: 'Shows training volume \u2014 how much you worked each muscle, not how strong it is. '+
+      'A circuit counts one set per movement for every 3 rounds, at most one per 5 minutes of work. '+
       'A Downs ladder counts as many sets as its reps would make at its top rung.'
   }
 };
@@ -1791,12 +1906,22 @@ function planSetCount(item){
                    would have done anyway, and the short rests keep the
                    smaller rungs below it hard. A failed rung or a
                    number-field ladder is measured the same way.
-   A circuit's members will slot in here too, by their own rule. */
+     circuit       one set per movement for every CIRCUIT_ROUNDS_PER_SET
+                   rounds, never more than one per CIRCUIT_SEC_PER_SET of
+                   work, and at least one for any movement reached. Cindy's
+                   18 rounds in 20:00 is min(6, 4) = 4 each, not 18: circuit
+                   reps are spread out and far from failure, and the cap
+                   keeps a long circuit of tiny rounds from flooding the
+                   week. A plan assumes the rounds come, so it counts the
+                   time alone. */
 function entryVolume(list, idx, mode){
   var e = list[idx];
+  if (e && itemKind(e) === 'circuit') return circuitLogVolume(e);
   if (!e || itemKind(e) !== 'exercise') return [];
   var fields = mode==='plan' ? ((exerciseById(e.exerciseId) || {}).fields || []) : (e.fields || []);
   var sets = (e.sets || []).filter(function(s){ return (s.kind||'set')==='set'; });
+  var heading = mode==='plan' ? circuitHeadingIdx(list, idx) : -1;
+  if (heading !== -1) return [{ exerciseId:e.exerciseId, sets:circuitPlanSets(list[heading]) }];
   if (circuitHeadingIdx(list, idx) === -1 && ladderUsable(e, fields)){
     return [{ exerciseId:e.exerciseId, sets:ladderHardSets(e.ladder, sets, mode) }];
   }
@@ -3101,6 +3226,7 @@ function applyImportedData(payload){
      and the entries it pointed at are gone */
   closeLadderEditor(); closePlanLadderEdits();
   ui.rungsOpen = null; ui.ladderNext = null;
+  ui.circuitEditing = null; ui.circuitScoreOpen = null; ui.circuitStop = null; ui.circuitChooser = null;
   keepPhotosThroughReplace(ownPhotos, ownPoses);
   data.restTimer = null;
   if (!data.settings || !data.settings.weightUnit) data.settings = { weightUnit:'lb' };
@@ -4012,6 +4138,13 @@ function newPlanItem(exerciseId){
 function newPlanCategory(){
   return { kind:'category', id: uid('cat'), name: 'New Category', collapsed: false };
 }
+/* sets:[] is read by nothing; it only keeps migratePlanItems, in every
+   build, from giving the heading a blank set */
+function newPlanCircuit(){
+  return { kind:'category', id: uid('cat'), name: 'Circuit', collapsed: false,
+           circuit: { workSec: CIRCUIT_DEFAULT.workSec, blocks: CIRCUIT_DEFAULT.blocks, breakSec: CIRCUIT_DEFAULT.breakSec },
+           sets: [] };
+}
 function itemKind(it){ return it.kind || 'exercise'; }
 /* A circuit, in a plan, is a category heading that also carries a clock
    (circuit:{workSec, blocks, breakSec}); the exercises under it are its
@@ -4289,6 +4422,352 @@ function closePlanLadderEdits(){
   ui.planRungsOpen = null;
 }
 
+/* ---- Circuits -------------------------------------------------------------
+   A circuit is an AMRAP: as many rounds of its movements as fit on the clock.
+   In a PLAN it is flat - a category heading carrying circuit:{workSec,
+   blocks, breakSec}, its movements the exercises under it, each one's first
+   set the amount for one round - so a build without circuits sees a working
+   category. In a WORKOUT it is one self-contained kind:'circuit' entry with
+   its movements nested in it. Every counter, chart and greyed hint already
+   skips anything that isn't kind:'exercise', so a 5-rep round can never pass
+   for a pull-up Best Set. The entry also carries a Score / Per Round / Total
+   table (writeCircuitMirror) that nothing here reads: it is what a build that
+   draws every entry as an exercise card shows instead of crashing. */
+
+/* the settings with any gap filled, so broken data still has a clock */
+function circuitCfg(c){
+  var k = (c && c.circuit) || {};
+  function whole(v, dflt, min){
+    if (v===null || v===undefined || v==='' || isNaN(v*1)) return dflt;
+    return Math.max(min, Math.round(v*1));
+  }
+  return { workSec: whole(k.workSec, CIRCUIT_DEFAULT.workSec, 1), blocks: whole(k.blocks, 1, 1),
+           breakSec: whole(k.breakSec, CIRCUIT_DEFAULT.breakSec, 0) };
+}
+/* a break only exists between blocks, so one block has none */
+function circuitBreakSec(k){ return k.blocks > 1 ? k.breakSec : 0; }
+function circuitTotalMs(c){
+  var k = circuitCfg(c);
+  return (k.blocks*k.workSec + (k.blocks-1)*circuitBreakSec(k)) * 1000;
+}
+/* Where the clock is, worked out from the saved timestamps alone - nothing
+   counts ticks, so a reload or a locked phone loses nothing. Splits, the time
+   left, work time for volume and history all read it from here. */
+function circuitPhase(c, now){
+  var k = circuitCfg(c), clk = c && c.clock;
+  var W = k.workSec*1000, R = circuitBreakSec(k)*1000, total = circuitTotalMs(c);
+  function worked(x){
+    var b = Math.floor(x/(W+R)), inB = x - b*(W+R);
+    return inB < W ? b*W + inB : (b+1)*W;
+  }
+  if (!clk || !clk.startedAt) return { phase:'ready', block:1, remainingMs:total, workedMs:0, paused:false };
+  var t = (clk.endedAt || clk.pausedAt || now || Date.now()) - clk.startedAt - (clk.pausedMs||0);
+  var paused = !!clk.pausedAt && !clk.endedAt;
+  if (t < 0) return { phase:'lead', block:1, remainingMs:-t, workedMs:0, paused:paused };
+  if (clk.endedAt || t >= total){
+    var x = Math.min(t, total);
+    return { phase:'done', block:Math.min(k.blocks, Math.floor(x/(W+R))+1), remainingMs:0, workedMs:worked(x), paused:false };
+  }
+  var b = Math.floor(t/(W+R)), inB = t - b*(W+R);
+  if (inB < W) return { phase:'work', block:b+1, remainingMs:W-inB, workedMs:b*W+inB, paused:paused };
+  return { phase:'break', block:b+1, remainingMs:W+R-inB, workedMs:(b+1)*W, paused:paused };
+}
+/* Work time for volume: the clock's own, breaks and pauses left out. A score
+   entered without the clock takes the planned work. */
+function circuitWorkedSec(c){
+  if (!c.clock || !c.clock.startedAt){ var k = circuitCfg(c); return k.blocks*k.workSec; }
+  return circuitPhase(c, c.clock.endedAt || Date.now()).workedMs / 1000;
+}
+/* What one round asks of a movement, in its count field (reps, metres,
+   seconds ...). A movement with nothing to count is simply done or not: 1.
+   null when the count is missing. */
+function circuitMemberTarget(m){
+  var f = countFieldOf(m.fields);
+  if (!f) return 1;
+  var v = m.values ? m.values[f.id] : null;
+  if (v===null || v===undefined || v==='' || isNaN(v*1) || !(v*1 > 0)) return null;
+  return v*1;
+}
+/* how much of the unfinished round this movement got, kept within
+   0...target - and none for a movement with no target, which has nothing to
+   count towards, so the score, its long line and the table always agree */
+function circuitPartialOf(c, m){
+  var p = (c.result && c.result.partial) ? c.result.partial[m.id] : null;
+  p = (p===null || p===undefined || p==='' || isNaN(p*1)) ? 0 : Math.max(0, p*1);
+  var t = circuitMemberTarget(m);
+  return t===null ? 0 : Math.min(p, t);
+}
+/* '5', '200 m', '0:30' - an amount in a movement's count field */
+function circuitAmountValue(f, n){
+  if (n===null || n===undefined || n==='') return '—';
+  /* 3 rounds of 1.1 cal is 3.3, not 3.3000000000000003 */
+  if (f.type==='number' && !isNaN(n*1)) n = Math.round(n*1000)/1000;
+  var s = fieldDisplayValue(f, n, data.settings.weightUnit);
+  if (f.type==='distance') return s+' '+distanceUnit(f);
+  if (f.type==='number' && f.unit) return s+' '+f.unit;
+  return s;
+}
+/* '5 Pull-ups', '200 m Run', '0:30 Plank', or just the name */
+function circuitAmountText(m, n){
+  var f = countFieldOf(m.fields);
+  if (!f || n===null || n===undefined || n==='') return m.name;
+  return circuitAmountValue(f, n)+' '+m.name;
+}
+/* 'Per Round' in the table: the count, and the load when there is one */
+function circuitPerRoundText(m){
+  var f = countFieldOf(m.fields), bits = [], unit = data.settings.weightUnit;
+  if (f) bits.push(circuitAmountValue(f, m.values ? m.values[f.id] : null));
+  (m.fields||[]).forEach(function(g){
+    if (g===f || (g.type!=='weight' && g.type!=='assisted')) return;
+    var v = m.values ? m.values[g.id] : null;
+    if (v===null || v===undefined || v==='') return;
+    bits.push(fieldDisplayValue(g, v, unit)+' '+unit);
+  });
+  return bits.length ? bits.join(' @ ') : '—';
+}
+/* all of one movement done across the session, in its count field - or,
+   for a movement with nothing to count, the times it was done */
+function circuitMemberTotal(c, m){
+  var t = circuitMemberTarget(m), sc = circuitScore(c);
+  if (!sc.scored || t===null) return null;
+  return sc.rounds*t + circuitPartialOf(c, m);
+}
+/* the Total cell: '95', '4.3 cal', or '3' for a carry done in 3 rounds;
+   null while unscored or without a target */
+function circuitTotalText(c, m){
+  var tot = circuitMemberTotal(c, m), f = countFieldOf(m.fields);
+  if (tot===null) return null;
+  return f ? circuitAmountValue(f, tot) : String(tot);
+}
+/* One score however it was taken: whole rounds plus what the unfinished
+   round got. short is '18 + 7' (reps only - the partial's reps added up) or
+   '18 + part' (mixed units); long spells the partial out. value ranks and
+   charts it and always stays below rounds + 1: with reps it is the CrossFit
+   tie-break, rounds + partial reps / reps in a round (18 + 7 of Cindy is
+   18.23); otherwise the average share of each movement done. */
+function circuitScore(c){
+  var R = c.result ? c.result.rounds : null;
+  if (R===null || R===undefined || R==='' || isNaN(R*1)){
+    return { scored:false, rounds:null, short:'Not scored', long:'Not scored', extra:'', value:null };
+  }
+  R = Math.max(0, Math.floor(R*1));
+  var members = c.members || [], allReps = members.length > 0, parts = [], sumP = 0, sumT = 0, fracs = [];
+  members.forEach(function(m){
+    var f = countFieldOf(m.fields), t = circuitMemberTarget(m), p = circuitPartialOf(c, m);
+    if (!f || f.type!=='reps') allReps = false;
+    if (p > 0) parts.push(circuitAmountText(m, p));
+    if (t!==null){ sumP += p; sumT += t; fracs.push(Math.min(p/t, 1)); }
+  });
+  var roundsTxt = R+(R===1 ? ' round' : ' rounds');
+  if (!parts.length) return { scored:true, rounds:R, short:roundsTxt, long:roundsTxt, extra:'', value:R };
+  var frac = allReps ? (sumT ? sumP/sumT : 0)
+    : (fracs.length ? fracs.reduce(function(a,b){ return a+b; }, 0)/fracs.length : 0);
+  return { scored:true, rounds:R, short: allReps ? R+' + '+sumP : R+' + part',
+           long: roundsTxt+' + '+parts.join(', '), extra: parts.join(', '), value: R + Math.min(frac, 0.999) };
+}
+/* 'Cindy 18 + 7', or 'Cindy — not scored' */
+function circuitResultLabel(c){
+  var sc = circuitScore(c);
+  return c.name+(sc.scored ? ' '+sc.short : ' — not scored');
+}
+/* The recipe, for comparing scores like for like: the timing and every
+   movement's targets in order. The name is left out, so a rename keeps the
+   series; a changed target, load, movement, order or time starts a new one,
+   because the scores no longer compare. */
+var CIRCUIT_SIG_TYPES = ['reps','weight','assisted','distance','timer','time','number'];
+function circuitSig(c){
+  var k = circuitCfg(c);
+  var mem = (c.members||[]).map(function(m){
+    var vals = (m.fields||[]).filter(function(f){ return CIRCUIT_SIG_TYPES.indexOf(f.type) >= 0; })
+      .map(function(f){ return normVal(m.values ? m.values[f.id] : null); });
+    return [m.exerciseId, vals];
+  });
+  return JSON.stringify([k.workSec, k.blocks, circuitBreakSec(k), mem]);
+}
+/* 'AMRAP 20:00', or '2 × 10:00 · 1:00 break' */
+function fmtCircuitFormat(c){
+  var k = circuitCfg(c);
+  if (k.blocks===1) return 'AMRAP '+secToMMSS(k.workSec);
+  return k.blocks+' × '+secToMMSS(k.workSec)+' · '+secToMMSS(k.breakSec)+' break';
+}
+/* '2 × 10:00 · 1:00 break · rounds carry over · 21:00 on the clock' */
+function circuitBlocksLine(c){
+  return fmtCircuitFormat(c)+' · rounds carry over · '+secToMMSS(circuitTotalMs(c)/1000)+' on the clock';
+}
+/* Time is typed in minutes, so it is shown in minutes: '20', or '7:30' */
+function fmtCircuitMinutes(sec){
+  return sec % 60 === 0 ? String(sec/60) : secToMMSS(sec);
+}
+/* '5 Pull-ups · 10 Push-ups · 15 Air Squats' */
+function circuitRoundText(c){
+  return (c.members||[]).map(function(m){
+    var f = countFieldOf(m.fields);
+    return circuitAmountText(m, f && m.values ? m.values[f.id] : null);
+  }).join(' · ');
+}
+/* A plan assumes the rounds come: one set per 5 minutes of work. */
+function circuitPlanSets(heading){
+  var k = circuitCfg(heading);
+  return Math.max(1, Math.floor(k.blocks*k.workSec / CIRCUIT_SEC_PER_SET));
+}
+/* What a session's circuit did, per movement: nothing while unscored, and
+   nothing for a movement never reached (no whole round and no part of the
+   last one). */
+function circuitLogVolume(c){
+  var sc = circuitScore(c);
+  var n = sc.scored ? Math.max(1, Math.min(Math.floor(sc.rounds / CIRCUIT_ROUNDS_PER_SET),
+                                          Math.floor(circuitWorkedSec(c) / CIRCUIT_SEC_PER_SET))) : 0;
+  return (c.members||[]).map(function(m){
+    var reached = sc.scored && (sc.rounds > 0 || circuitPartialOf(c, m) > 0);
+    return { exerciseId:m.exerciseId, sets: reached ? n : 0 };
+  });
+}
+/* The heading at idx and the plan entries under it, as a circuit - with its
+   movements' first sets as their rounds - for its Last / Best line and the
+   Recent list. Deleted exercises are left out. */
+function circuitFromHeading(items, idx){
+  var h = items[idx], members = [];
+  for (var i=idx+1; i<items.length; i++){
+    var k = itemKind(items[i]);
+    if (k==='category' || k==='break') break;
+    if (k!=='exercise') continue;
+    var ex = exerciseById(items[i].exerciseId);
+    if (!ex) continue;
+    var first = firstSetOf(items[i]);
+    members.push({ id:'pm'+i, exerciseId:ex.id, name:ex.name, fields:ex.fields, values:(first && first.values) || {} });
+  }
+  return { kind:'circuit', name:h.name, circuit:circuitCfg(h), members:members, clock:null,
+           result:{ rounds:null, partial:{}, splits:[] } };
+}
+/* Finished, scored sessions of exactly this recipe, oldest first. */
+function circuitSessions(sig){
+  var out = [];
+  data.workouts.forEach(function(w){
+    if (!w.completedAt) return;
+    (w.exercises||[]).forEach(function(e){
+      if (itemKind(e)!=='circuit') return;
+      var sc = circuitScore(e);
+      if (sc.scored && circuitSig(e)===sig) out.push({ circuit:e, workout:w, score:sc });
+    });
+  });
+  out.sort(function(a,b){ return a.workout.completedAt - b.workout.completedAt; });
+  return out;
+}
+/* Last skips sessions kept out of the reference, as the greyed hints do */
+function lastCircuitFor(sig, excludeWorkoutId){
+  var list = circuitSessions(sig).filter(function(s){ return s.workout.id!==excludeWorkoutId && !s.workout.excludeFromReference; });
+  return list.length ? list[list.length-1] : null;
+}
+/* Best counts everything, as the charts do; `before` keeps it to the
+   sessions finished earlier than a given one */
+function bestCircuitFor(sig, excludeWorkoutId, before){
+  var best = null;
+  circuitSessions(sig).forEach(function(s){
+    if (s.workout.id===excludeWorkoutId) return;
+    if (before && s.workout.completedAt >= before) return;
+    if (!best || s.score.value > best.score.value) best = s;
+  });
+  return best;
+}
+/* a score that beats every earlier session of the same recipe - and there
+   has to be one to beat */
+function circuitIsNewBest(c, workoutId, before){
+  var sc = circuitScore(c);
+  if (!sc.scored) return false;
+  var best = bestCircuitFor(circuitSig(c), workoutId, before);
+  return !!best && sc.value > best.score.value;
+}
+/* 'Last 18 + 7 · Sep 12 · Best 19 + 2', or 'First time at this recipe'. The
+   series is strict, so it says when the same name has history at another
+   recipe - a changed target starts over, and that should not look like a
+   lost past. */
+function circuitProgressText(c, excludeWorkoutId){
+  var sig = circuitSig(c);
+  var last = lastCircuitFor(sig, excludeWorkoutId), best = bestCircuitFor(sig, excludeWorkoutId);
+  var parts = [];
+  if (last) parts.push('Last '+last.score.short+' · '+fmtShortDate(last.workout.date));
+  if (best) parts.push('Best '+best.score.short);
+  if (parts.length) return parts.join(' · ');
+  var name = String(c.name||'').trim().toLowerCase(), other = 0;
+  data.workouts.forEach(function(w){
+    if (!w.completedAt || w.id===excludeWorkoutId) return;
+    (w.exercises||[]).forEach(function(e){
+      if (itemKind(e)==='circuit' && String(e.name||'').trim().toLowerCase()===name &&
+          circuitScore(e).scored && circuitSig(e)!==sig) other++;
+    });
+  });
+  return 'First time at this recipe'+(other ? ' ('+other+' earlier at a different recipe)' : '');
+}
+/* Up to n distinct recipes for a blank workout's Add Circuit: finished
+   sessions newest first, then the plans' circuits. */
+function recentCircuitRecipes(n){
+  var seen = {}, out = [];
+  function add(c){
+    if (out.length >= n) return;
+    var alive = (c.members||[]).some(function(m){ return !!exerciseById(m.exerciseId); });
+    if (!alive) return;
+    var sig = circuitSig(c);
+    if (seen[sig]) return;
+    seen[sig] = true;
+    out.push(c);
+  }
+  data.workouts.filter(function(w){ return w.completedAt; })
+    .sort(function(a,b){ return b.completedAt - a.completedAt; })
+    .forEach(function(w){ (w.exercises||[]).forEach(function(e){ if (itemKind(e)==='circuit') add(e); }); });
+  data.plans.forEach(function(p){
+    (p.items||[]).forEach(function(it, idx){ if (isCircuitHeading(it)) add(circuitFromHeading(p.items, idx)); });
+  });
+  return out;
+}
+/* The LEGACY MIRROR: a Score / Per Round / Total table in the shape of an
+   exercise card, rewritten on every change of recipe or result and never
+   read here. A build that draws every entry as an exercise shows it as the
+   score. exerciseId must be null, never missing: such a build's
+   lastEntryFor(undefined) would match a category, which has no sets. */
+var CIRCUIT_MIRROR_FIELDS = [
+  { id:'mv', type:'text', label:'Movement', unit:'' },
+  { id:'per', type:'text', label:'Per Round', unit:'' },
+  { id:'tot', type:'text', label:'Total', unit:'' }
+];
+function writeCircuitMirror(c){
+  var sc = circuitScore(c);
+  c.exerciseId = null;
+  c.defaultRestSec = null;
+  c.fields = CIRCUIT_MIRROR_FIELDS.map(function(f){ return Object.assign({}, f); });
+  var rows = [{ kind:'set', id:'mir0', values:{ mv:'Score', per:fmtCircuitFormat(c), tot:sc.short }, restSec:null, done:true }];
+  (c.members||[]).forEach(function(m){
+    var tot = circuitTotalText(c, m);
+    rows.push({ kind:'set', id:'mir_'+m.id, restSec:null, done:true,
+                values:{ mv:m.name, per:circuitPerRoundText(m), tot: tot===null ? '' : tot } });
+  });
+  c.sets = rows;
+}
+/* a movement for a session's circuit, with the library's fields snapshotted
+   and the given values kept for the fields it still has */
+function circuitMemberFor(ex, values){
+  var fields = snapshotFields(ex), v = blankSetValues(fields);
+  fields.forEach(function(f){ if (values && values[f.id]!==undefined) v[f.id] = values[f.id]; });
+  return { id:uid('cm'), exerciseId:ex.id, name:ex.name, fields:fields, values:v };
+}
+function newWorkoutCircuit(name, cfg, members){
+  var c = { kind:'circuit', id:uid('cir'), name:name,
+            circuit:{ workSec:cfg.workSec, blocks:cfg.blocks, breakSec:cfg.breakSec },
+            members:members, clock:null, result:{ rounds:null, partial:{}, splits:[] } };
+  writeCircuitMirror(c);
+  return c;
+}
+function circuitById(id){
+  var w = data.activeWorkout;
+  if (!w || !id) return null;
+  var c = w.exercises.filter(function(e){ return itemKind(e)==='circuit' && e.id===id; })[0] || null;
+  if (c && !Array.isArray(c.members)) c.members = [];
+  return c;
+}
+/* the recipe is fixed once the clock has run or a score is in */
+function circuitEditable(c){
+  return !c.clock && !circuitScore(c).scored;
+}
+
 /* ------------------------------------------------------------ ui state */
 
 var ui = {
@@ -4335,7 +4814,16 @@ var ui = {
   ladderEditing: null,
   rungsOpen: null,
   ladderDraft: null,
-  ladderNext: null
+  ladderNext: null,
+  /* Circuits, found by the entry's id rather than its place: the circuit in
+     edit mode, the one whose score sheet is open, the movement on it that
+     holds the stepper ({cir, member}), the Add Circuit chooser, and where an
+     exercise made from the picker's New goes ({headerId} or {circuitId}) */
+  circuitEditing: null,
+  circuitScoreOpen: null,
+  circuitStop: null,
+  circuitChooser: null,
+  pickerTargetForModal: null
 };
 var runtime = { timer: null, timerHandle: null, audioCtx: null, pendingBeep: false, ladderLastDoneAt: 0, ladderStartTapAt: 0 };
 var originalTitle = document.title;
@@ -4391,6 +4879,10 @@ function setView(view){
   ui.rungsOpen = null;
   ui.ladderDraft = null;
   ui.ladderNext = null;
+  ui.circuitEditing = null;
+  ui.circuitScoreOpen = null;
+  ui.circuitStop = null;
+  ui.circuitChooser = null;
   if (view!=='progress'){ ui.viewingPhotoId = null; ui.compareOpen = false; ui.addingPose = false; }
   if (view!=='profile' && view!=='workout') ui.lastTab = view;
   if (view!=='profile') ui.profileMessage = null;
@@ -4620,7 +5112,13 @@ function renderPlans(){
         var k = itemKind(entry);
         if (k==='category'){
           hiddenUntilNextCategory = !!entry.collapsed;
-          rowsHtml += renderPlanCategoryHeader(idx, entry, plan);
+          if (isCircuitHeading(entry)){
+            rowsHtml += renderPlanCircuitHeader(idx, entry, plan);
+            /* a circuit with no movements yet still offers the way to add one */
+            if (!entry.collapsed && planBlockLength(plan.items, idx)===1) rowsHtml += planCircuitAddRowHTML(entry);
+          } else {
+            rowsHtml += renderPlanCategoryHeader(idx, entry, plan);
+          }
           return;
         }
         if (k==='break'){
@@ -4629,10 +5127,12 @@ function renderPlans(){
           return;
         }
         if (hiddenUntilNextCategory) return;
-        rowsHtml += renderPlanExerciseCard(idx);
+        var headingIdx = circuitHeadingIdx(plan.items, idx);
+        rowsHtml += headingIdx !== -1 ? renderPlanCircuitMember(idx, headingIdx) : renderPlanExerciseCard(idx);
         /* a landing strip just past the last member, for pulling an
            exercise out of the category downwards */
         if (isLastInCategory(plan.items, idx)){
+          if (headingIdx !== -1) rowsHtml += planCircuitAddRowHTML(plan.items[headingIdx]);
           rowsHtml += '<div class="cat-exit-zone" data-drop-exit="'+(idx+1)+'"></div>';
         }
       });
@@ -4653,6 +5153,7 @@ function renderPlans(){
           '<div style="display:flex;gap:10px;margin-top:6px;flex-wrap:wrap;">'+
             '<button class="btn btn-ghost" data-action="open-plan-picker">'+icon('plus')+' Add Exercise</button>'+
             '<button class="btn btn-ghost" data-action="plan-add-category">'+icon('plus')+' Add Category</button>'+
+            '<button class="btn btn-ghost" data-action="plan-add-circuit">'+icon('plus')+' Add Circuit</button>'+
             '<div style="flex:1"></div>'+
             '<button class="btn btn-primary" data-action="start-plan" data-id="'+plan.id+'" '+(planExerciseCount(plan)===0?'disabled':'')+'>'+icon('play')+' Start Workout</button>'+
           '</div>'+
@@ -4750,23 +5251,30 @@ function renderPlanRestBlockRow(idx, sIdx, block, fieldCount){
   return '<tr class="rest-block-row"><td colspan="'+colspan+'" style="text-align:center;">'+body+'</td>'+
     '<td><button class="rest-icon-btn" data-action="plan-remove-set" data-idx="'+idx+'" data-set="'+sIdx+'">'+icon('trash')+'</button></td></tr>';
 }
-function renderPlanSetRow(idx, sIdx, setNumber, item, fields, set, unit){
-  var cells = '<td>'+(setNumber+1)+'</td>';
+/* The target inputs of one plan set, shared by the set table and a circuit
+   movement's one-row table. In a circuit a measured time is the amount for
+   one round (a 0:30 plank), so there it gets a real input. */
+function planFieldCells(idx, sIdx, fields, set, unit, inCircuit){
+  var cells = '', values = set.values || {};
   fields.forEach(function(f){
-    var currentRaw = set.values[f.id];
+    var currentRaw = values[f.id];
     var hasCurrent = currentRaw!==null && currentRaw!==undefined && currentRaw!=='';
     var currentDisplay = hasCurrent ? fieldDisplayValue(f, currentRaw, unit) : '';
     if (f.type==='text'){
       cells += '<td><input class="num-input" data-plan-commit="set-text" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" value="'+esc(currentDisplay)+'" placeholder="target"></td>';
-    } else if (f.type==='time'){
+    } else if (f.type==='time' && !inCircuit){
       /* measured time has no preset by design - you record it during the session */
       cells += '<td><input class="num-input measured-cell" disabled value="" placeholder="measured" title="Measured during the workout - no preset"></td>';
-    } else if (f.type==='timer'){
+    } else if (isTimeType(f.type)){
       cells += '<td><input class="num-input" data-plan-commit="set-time" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="numeric" value="'+esc(currentDisplay)+'" placeholder="'+timeHint()+'"></td>';
     } else {
       cells += '<td><input class="num-input" data-plan-commit="set-num" data-type="'+f.type+'" data-idx="'+idx+'" data-set="'+sIdx+'" data-field="'+f.id+'" inputmode="'+(f.type==='rir'?'numeric':'decimal')+'" value="'+esc(currentDisplay)+'" placeholder="'+esc(effortPlaceholder(f.type))+'"></td>';
     }
   });
+  return cells;
+}
+function renderPlanSetRow(idx, sIdx, setNumber, item, fields, set, unit){
+  var cells = '<td>'+(setNumber+1)+'</td>' + planFieldCells(idx, sIdx, fields, set, unit, false);
   cells += '<td>'+renderPlanRestCell(idx, sIdx, item, set)+'</td>';
   cells += '<td><button class="rest-icon-btn" data-action="plan-remove-set" data-idx="'+idx+'" data-set="'+sIdx+'">'+icon('trash')+'</button></td>';
   return '<tr>'+cells+'</tr>';
@@ -5028,6 +5536,127 @@ function buildLadderFromDraft(){
   }
   closeLadderEditor();
   save(); renderMain();
+}
+
+/* ---- Circuits in a plan -----------------------------------------------------
+   The heading is a card with the clock settings and what one round is; the
+   movements under it are compact cards with one row of targets, since only
+   the first set counts in a circuit. Membership is by position, exactly as a
+   category's, so dragging works unchanged. */
+
+/* Time, Blocks and - with more than one block - Break. Shared by the plan
+   heading and a session circuit's edit mode; only the handles differ. */
+function circuitTimingHTML(c, at, plan){
+  var k = circuitCfg(c), pre = plan ? 'plan-circuit-' : 'circuit-';
+  return '<div class="circuit-timing">'+
+    '<label class="circuit-field"><span>Time</span>'+
+      '<input class="num-input" data-commit="'+pre+'minutes" '+at+' inputmode="decimal" placeholder="min" value="'+esc(fmtCircuitMinutes(k.workSec))+'" aria-label="Time in minutes">'+
+      '<span>min</span></label>'+
+    '<div class="circuit-field"><span>Blocks</span>'+
+      '<div class="stepper">'+
+        '<button data-action="'+pre+'blocks" '+at+' data-delta="-1" aria-label="One block less"'+(k.blocks<=1?' disabled':'')+'>&minus;</button>'+
+        '<span>'+k.blocks+'</span>'+
+        '<button data-action="'+pre+'blocks" '+at+' data-delta="1" aria-label="One block more"'+(k.blocks>=10?' disabled':'')+'>+</button>'+
+      '</div></div>'+
+    (k.blocks > 1 ?
+      '<label class="circuit-field"><span>Break</span>'+
+        '<input class="num-input" data-commit="'+pre+'break" '+at+' type="number" min="0" step="5" inputmode="numeric" placeholder="sec" value="'+k.breakSec+'">'+
+        '<span>sec</span></label>' : '')+
+  '</div>';
+}
+/* Everything the heading says about the circuit, below its controls. It is
+   rewritten in place when a time or a target is typed, so a field being
+   moved into is never swapped out from under the keyboard. */
+function planCircuitInfoHTML(items, idx){
+  var c = circuitFromHeading(items, idx), k = circuitCfg(c), n = circuitPlanSets(items[idx]);
+  return (k.blocks > 1 ? '<div>'+esc(circuitBlocksLine(c))+'</div>' : '')+
+    '<div class="circuit-round">One Round: '+(c.members.length ? '<b>'+esc(circuitRoundText(c))+'</b>' : 'no movements yet')+'</div>'+
+    (c.members.length ? '<div class="circuit-last">'+esc(circuitProgressText(c, null))+'</div>' : '')+
+    '<div class="circuit-count">Counts as '+n+' set'+(n!==1?'s':'')+' per movement</div>';
+}
+function refreshPlanCircuitInfo(idx){
+  var plan = currentPlan();
+  if (!plan || idx < 0 || !isCircuitHeading(plan.items[idx])) return;
+  var el = document.querySelector('[data-circuit-info="'+idx+'"]');
+  if (el) el.innerHTML = planCircuitInfoHTML(plan.items, idx);
+}
+/* The plan's Muscle Coverage follows a circuit's Time and a ladder's rungs.
+   Only its card is swapped - it holds no inputs, so the field being moved
+   into is never taken out from under the keyboard. */
+function refreshPlanMuscleMap(){
+  var plan = currentPlan(), list = document.getElementById('plan-items');
+  var old = list ? list.previousElementSibling : null;
+  if (!plan || !old || !old.classList.contains('mm-card')) return;
+  var tmp = document.createElement('div');
+  tmp.innerHTML = planMuscleMapHTML(plan);
+  var card = tmp.querySelector('.mm-card');
+  if (!card) return;
+  old.parentNode.replaceChild(card, old);
+  paintMuscleMaps();
+}
+function renderPlanCircuitHeader(idx, entry, plan){
+  /* '+ Add Exercise to Circuit' finds its circuit by id; a heading from
+     before ids were given gets one here, saved with the next change */
+  if (!entry.id) entry.id = uid('cat');
+  return '<div class="circuit-head" data-drag-idx="'+idx+'">'+
+    '<div class="circuit-head-row">'+
+      '<button class="drag-handle" title="Drag to reorder">'+icon('grip')+'</button>'+
+      '<button class="cat-caret '+(entry.collapsed?'collapsed':'')+'" data-action="plan-toggle-category" data-idx="'+idx+'" title="'+(entry.collapsed?'Expand':'Collapse')+'">'+icon('chevronDown')+'</button>'+
+      '<input class="cat-name" data-commit="plan-category-name" data-idx="'+idx+'" value="'+esc(entry.name)+'" aria-label="Circuit name">'+
+      '<span class="circuit-badge">AMRAP</span>'+
+      '<button class="icon-btn" data-action="plan-remove-category" data-idx="'+idx+'" title="Remove circuit (keeps exercises)">'+icon('x')+'</button>'+
+    '</div>'+
+    circuitTimingHTML(entry, 'data-idx="'+idx+'"', true)+
+    '<div class="circuit-info" data-circuit-info="'+idx+'">'+planCircuitInfoHTML(plan.items, idx)+'</div>'+
+  '</div>';
+}
+/* it carries no data-drag-idx: it is not an entry, and nothing drops on it */
+function planCircuitAddRowHTML(heading){
+  return '<div class="circuit-add-row"><button class="btn btn-ghost small" data-action="plan-circuit-add" data-id="'+esc(heading.id)+'">'+
+    icon('plus')+' Add Exercise to Circuit</button></div>';
+}
+/* A movement: its name, and one row of inputs for the first set - the amount
+   for one round. Nothing about rest here, and no Downs: the circuit's clock
+   is the only timing. Anything else the entry holds is shown, never hidden,
+   with a way to clear it. */
+function renderPlanCircuitMember(idx, headingIdx){
+  var plan = currentPlan(), item = plan.items[idx];
+  var ex = exerciseById(item.exerciseId), unit = data.settings.weightUnit;
+  var order = '<div class="plan-ex-order">'+
+      '<button class="icon-btn tiny" data-action="plan-move-up" data-idx="'+idx+'" '+(idx===0?'disabled':'')+'>'+icon('chevronUp')+'</button>'+
+      '<button class="icon-btn tiny" data-action="plan-move-down" data-idx="'+idx+'" '+(idx===plan.items.length-1?'disabled':'')+'>'+icon('chevronDown')+'</button>'+
+    '</div>';
+  var remove = '<button class="btn btn-ghost small plan-ex-remove" data-action="plan-remove-exercise" data-idx="'+idx+'" aria-label="Remove exercise">'+icon('trash')+'<span class="plan-ex-remove-label"> Remove</span></button>';
+  var head = function(name){
+    return '<div class="circuit-member-head">'+
+      '<button class="drag-handle" title="Drag to reorder or move out of the circuit">'+icon('grip')+'</button>'+
+      order+'<div class="ex-card-name">'+esc(name)+'</div></div>';
+  };
+  if (!ex) return '<div class="ex-card in-category circuit-member" data-drag-idx="'+idx+'">'+head('Deleted Exercise')+remove+'</div>';
+  /* RIR and RPE say how a set felt; a round of a circuit is not that */
+  var fields = ex.fields.filter(function(f){ return !isEffortType(f.type); });
+  var sets = item.sets || [], firstIdx = -1, setCount = 0, rests = 0;
+  sets.forEach(function(s, i){
+    if ((s.kind||'set')==='set'){ setCount++; if (firstIdx < 0) firstIdx = i; }
+    else rests++;
+  });
+  var body;
+  if (firstIdx < 0){
+    body = '<button class="btn btn-ghost small" data-action="plan-add-set" data-idx="'+idx+'">'+icon('plus')+' Add Target</button>';
+  } else {
+    body = '<table class="set-table circuit-mini"><thead><tr>'+
+      fields.map(function(f){ return fieldHeaderCell(f, unit); }).join('')+'</tr></thead>'+
+      '<tbody><tr>'+planFieldCells(idx, firstIdx, fields, sets[firstIdx], unit, true)+'</tr></tbody></table>';
+  }
+  var extra = Math.max(0, setCount-1), note = '';
+  if (extra || rests){
+    var what = extra ? extra+' more set'+(extra!==1?'s':'')+(rests ? ' and rests' : '') : (rests!==1 ? 'Rests' : 'A rest');
+    var verb = (extra===1 && !rests) || (!extra && rests===1) ? 'isn’t' : 'aren’t';
+    note = '<div class="circuit-trim">'+what+' '+verb+' used in a circuit &middot; '+
+      '<button class="link-btn" data-action="plan-circuit-trim" data-idx="'+idx+'">Remove '+(extra+rests!==1?'Them':'It')+'</button></div>';
+  }
+  return '<div class="ex-card in-category circuit-member" data-drag-idx="'+idx+'">'+head(ex.name)+
+    '<div class="circuit-member-body">'+body+'</div>'+remove+note+'</div>';
 }
 
 /* ------------------------------------------------------------ exercises */
@@ -5748,6 +6377,7 @@ function closeExerciseModal(){
   comboClose();
   ui.exerciseDraft = null;
   ui.pickerContextForModal = null;
+  ui.pickerTargetForModal = null;
   var exWrap = document.getElementById('exercise-modal');
   exWrap.hidden = true;
   exWrap.innerHTML = '';
@@ -6094,17 +6724,37 @@ function focusIfPointer(el){
   return true;
 }
 
-function openPicker(context){
-  ui.picker = { context: context, query: '' };
+/* target, when given, aims the pick at a circuit: {headerId} in a plan,
+   {circuitId} in a workout. The panel sits at the bottom, so it is brought
+   into view and says where the exercise will go. */
+function openPicker(context, target){
+  ui.picker = { context: context, query: '', target: target || null };
+  ui.circuitChooser = null;
   renderPickerPanel();
+  if (target){
+    var el = document.getElementById(context==='plan' ? 'plan-picker' : 'workout-picker');
+    if (el && el.scrollIntoView) el.scrollIntoView({ block:'nearest' });
+  }
+}
+function pickerTargetName(context, target){
+  if (!target) return null;
+  if (context==='plan' && target.headerId){
+    var plan = currentPlan();
+    var h = plan ? plan.items.filter(function(it){ return isCircuitHeading(it) && it.id===target.headerId; })[0] : null;
+    return h ? h.name : null;
+  }
+  var c = target.circuitId ? circuitById(target.circuitId) : null;
+  return c ? c.name : null;
 }
 function renderPickerPanel(){
   var containerId = ui.picker.context==='plan' ? 'plan-picker' : 'workout-picker';
   var el = document.getElementById(containerId);
   if (!el) return;
   el.hidden = false;
+  var into = pickerTargetName(ui.picker.context, ui.picker.target);
   el.innerHTML =
     '<div class="card" style="margin-top:14px;background:var(--surface-2)">'+
+      (into ? '<div class="picker-target">Adding to <b>'+esc(into)+'</b></div>' : '')+
       '<div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">'+
         '<div style="flex:1;min-width:160px;display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 12px;">'+
           icon('search')+'<input id="picker-search" style="border:none;background:none;flex:1;font-size:14px;min-width:0;" placeholder="Search exercises" value="'+esc(ui.picker.query)+'">'+
@@ -6181,40 +6831,79 @@ function startBlankWorkout(){
 function startFromPlan(planId){
   var plan = data.plans.find(function(p){return p.id===planId;});
   if (!plan) return;
-  var wExercises = plan.items.map(function(entry, idx){
-    if (itemKind(entry)==='category'){
-      return { kind:'category', id:uid('cat'), name:entry.name };
+  var wExercises = [];
+  /* A circuit heading and the entries under it become ONE self-contained
+     circuit entry. Walked with an index, since the entries it takes in are
+     then skipped. */
+  for (var i=0; i<plan.items.length; i++){
+    if (!isCircuitHeading(plan.items[i])){
+      var plain = planEntryToWorkout(plan, i);
+      if (plain) wExercises.push(plain);
+      continue;
     }
-    if (itemKind(entry)==='break'){
-      return { kind:'break', id:uid('brk') };
+    /* In a plan the heading closed any category above it. The circuit
+       entry is not a heading, so after a category's members a break does
+       that job, or the circuit would read as one of them. */
+    if (wExercises.length && owningCategoryIdx(wExercises, wExercises.length) !== -1){
+      wExercises.push({ kind:'break', id:uid('brk') });
     }
-    var ex = data.exercises.find(function(e){return e.id===entry.exerciseId;});
-    if (!ex) return null;
-    var fields = snapshotFields(ex);
-    /* A Downs ladder's rungs arrive with their number as the target and
-       the count still to be logged; everything else (the weight) is
-       copied as for any set. */
-    var ladder = planEntryIsLadder(plan.items, idx) ? entry.ladder : null;
-    var sets = (entry.sets||[]).map(function(s){
-      if ((s.kind||'set')==='rest'){ return { kind:'rest', id:uid('r'), seconds:s.seconds }; }
-      if (ladder){
-        var rung = workoutRung(s.values || {}, ladder.fieldId, normVal(s.values ? s.values[ladder.fieldId] : null));
-        rung.restSec = s.restSec;
-        return rung;
-      }
-      return { kind:'set', id:uid('s'), values:Object.assign({}, s.values), restSec:s.restSec, done:false };
-    });
-    if (sets.length===0){ sets.push({ kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false }); }
-    var effRest = (entry.defaultRestSec!==null && entry.defaultRestSec!==undefined) ? entry.defaultRestSec : (ex.defaultRestSec===undefined?null:ex.defaultRestSec);
-    var wex = { kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:effRest, sets:sets };
-    if (ladder){
-      wex.ladder = { from:ladder.from, to:ladder.to, step:ladder.step, back:!!ladder.back, fieldId:ladder.fieldId,
-                     climbed:false, startedAt:null, endedAt:null };
+    var heading = plan.items[i], members = [], j = i+1;
+    for (; j<plan.items.length; j++){
+      var mk = itemKind(plan.items[j]);
+      if (mk==='category' || mk==='break') break;
+      var mex = exerciseById(plan.items[j].exerciseId);
+      if (!mex) continue;
+      var first = firstSetOf(plan.items[j]);
+      /* the first set is the round, copied whole - a time in it is the
+         per-round target, not a measurement */
+      members.push(circuitMemberFor(mex, first ? first.values : null));
     }
-    return wex;
-  }).filter(Boolean);
+    wExercises.push(newWorkoutCircuit(heading.name, circuitCfg(heading), members));
+    /* past the members, and past a break straight after them: it only
+       closed the circuit, which the entry now does by itself */
+    i = (j < plan.items.length && itemKind(plan.items[j])==='break') ? j : j-1;
+  }
   data.activeWorkout = { id:uid('w'), planId:plan.id, name:plan.name, date:todayISO(), startedAt:Date.now(), completedAt:null, exercises:wExercises };
   save(); setView('workout');
+}
+/* One plan entry as it starts in a workout: a category, a break, or an
+   exercise with its sets prefilled (null once its exercise is gone). */
+function planEntryToWorkout(plan, idx){
+  var entry = plan.items[idx];
+  if (itemKind(entry)==='category'){
+    return { kind:'category', id:uid('cat'), name:entry.name };
+  }
+  if (itemKind(entry)==='break'){
+    return { kind:'break', id:uid('brk') };
+  }
+  var ex = data.exercises.find(function(e){return e.id===entry.exerciseId;});
+  if (!ex) return null;
+  var fields = snapshotFields(ex);
+  /* A Downs ladder's rungs arrive with their number as the target and
+     the count still to be logged; everything else (the weight) is
+     copied as for any set. */
+  var ladder = planEntryIsLadder(plan.items, idx) ? entry.ladder : null;
+  var sets = (entry.sets||[]).map(function(s){
+    if ((s.kind||'set')==='rest'){ return { kind:'rest', id:uid('r'), seconds:s.seconds }; }
+    if (ladder){
+      var rung = workoutRung(s.values || {}, ladder.fieldId, normVal(s.values ? s.values[ladder.fieldId] : null));
+      rung.restSec = s.restSec;
+      return rung;
+    }
+    /* measured time has no preset: a per-round target left from a circuit
+       the movement has since left is not carried in */
+    var vals = Object.assign({}, s.values);
+    fields.forEach(function(f){ if (f.type==='time') vals[f.id] = null; });
+    return { kind:'set', id:uid('s'), values:vals, restSec:s.restSec, done:false };
+  });
+  if (sets.length===0){ sets.push({ kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false }); }
+  var effRest = (entry.defaultRestSec!==null && entry.defaultRestSec!==undefined) ? entry.defaultRestSec : (ex.defaultRestSec===undefined?null:ex.defaultRestSec);
+  var wex = { kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:effRest, sets:sets };
+  if (ladder){
+    wex.ladder = { from:ladder.from, to:ladder.to, step:ladder.step, back:!!ladder.back, fieldId:ladder.fieldId,
+                   climbed:false, startedAt:null, endedAt:null };
+  }
+  return wex;
 }
 function addExerciseToActiveWorkout(exId){
   var ex = data.exercises.find(function(e){return e.id===exId;});
@@ -6222,6 +6911,75 @@ function addExerciseToActiveWorkout(exId){
   var fields = snapshotFields(ex);
   data.activeWorkout.exercises.push({ kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:(ex.defaultRestSec===undefined?null:ex.defaultRestSec), sets:[{kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false}] });
   save();
+}
+/* A circuit added in a session: a new one, or a recent recipe copied exactly
+   - its timing, and each movement's exercise and targets, with the fields
+   snapshotted afresh - so a blank-workout Cindy stays on Cindy's progress
+   line. A movement whose exercise has since been deleted is left out. */
+function addCircuitToActiveWorkout(recipe){
+  var w = data.activeWorkout;
+  if (!w) return null;
+  var c;
+  if (recipe){
+    var members = [];
+    (recipe.members||[]).forEach(function(m){
+      var ex = exerciseById(m.exerciseId);
+      if (ex) members.push(circuitMemberFor(ex, m.values));
+    });
+    c = newWorkoutCircuit(recipe.name, circuitCfg(recipe), members);
+  } else {
+    c = newWorkoutCircuit('Circuit', CIRCUIT_DEFAULT, []);
+  }
+  /* As in startFromPlan: in a plan a circuit is a heading, which closes the
+     category above it. The entry is not one, so after a category's members
+     a break does that job - or the circuit, and anything added after it,
+     would sit in that category until Update the Whole Template moved them
+     out. */
+  if (w.exercises.length && owningCategoryIdx(w.exercises, w.exercises.length) !== -1){
+    w.exercises.push({ kind:'break', id:uid('brk') });
+  }
+  w.exercises.push(c);
+  save();
+  return c;
+}
+function addCircuitMember(circuitId, exId){
+  var c = circuitById(circuitId), ex = exerciseById(exId);
+  if (!c || !ex) return false;
+  c.members.push(circuitMemberFor(ex, null));
+  writeCircuitMirror(c);
+  save();
+  return true;
+}
+/* Where a picked exercise goes - the one place for the picker's own list,
+   Use Existing and a new exercise saved from the picker. Aimed at a plan
+   circuit it joins as its last movement with one blank round; aimed at a
+   session's circuit it becomes a movement. Otherwise it goes to the end -
+   and in a plan that ends inside a circuit a break comes first, or position
+   alone would make it another movement. */
+function addPickedExercise(exId, context, target){
+  if (context==='plan'){
+    var plan = currentPlan();
+    if (!plan) return;
+    var items = plan.items, h = -1;
+    if (target && target.headerId){
+      for (var i=0;i<items.length;i++){ if (isCircuitHeading(items[i]) && items[i].id===target.headerId){ h = i; break; } }
+    }
+    if (h !== -1){
+      var ex = exerciseById(exId);
+      items.splice(h + planBlockLength(items, h), 0, { kind:'exercise', exerciseId:exId, defaultRestSec:null,
+        sets:[{ kind:'set', id:uid('s'), values:blankSetValues(ex ? ex.fields : []), restSec:null }] });
+      /* the entries below moved down one, and editors point by position */
+      closePlanLadderEdits(); closeLadderEditor();
+      ui.editingPlanRest = ui.editingPlanSetRest = ui.editingPlanRestBlock = null;
+    } else {
+      if (items.length && circuitHeadingIdx(items, items.length) !== -1) items.push(newPlanBreak());
+      items.push(newPlanItem(exId));
+    }
+    save();
+    return;
+  }
+  if (target && target.circuitId && addCircuitMember(target.circuitId, exId)) return;
+  addExerciseToActiveWorkout(exId);
 }
 /* ---- Finish flow -------------------------------------------------------
    Finishing opens a confirmation sheet with up to three choices:
@@ -6233,35 +6991,74 @@ function addExerciseToActiveWorkout(exId){
 
 function normVal(v){ return (v===null||v===undefined||v==='') ? null : v; }
 
+/* The session laid out flat, the way a plan is: each circuit entry becomes
+   its heading and one entry per movement (marked _member, its one set the
+   round), then a break when an exercise or rest follows, which was outside
+   it. The inverse of the circuit half of startFromPlan, shared by the
+   comparison at Finish and by Update the Whole Template. */
+function flattenForTemplate(list){
+  var out = [];
+  (list||[]).forEach(function(e, i){
+    if ((e.kind||'exercise')!=='circuit'){ out.push(e); return; }
+    var k = circuitCfg(e);
+    out.push({ kind:'category', name:e.name, circuit:{ workSec:k.workSec, blocks:k.blocks, breakSec:k.breakSec } });
+    (e.members||[]).forEach(function(m){
+      out.push({ kind:'exercise', exerciseId:m.exerciseId, fields:m.fields||[], defaultRestSec:null, _member:true,
+                 sets:[{ kind:'set', values:m.values||{}, restSec:null }] });
+    });
+    var nk = list[i+1] ? (list[i+1].kind||'exercise') : null;
+    if (nk==='exercise' || nk==='rest') out.push({ kind:'break' });
+  });
+  return out;
+}
+
 function diffWorkoutVsPlan(w){
   if (!w.planId) return null;
   var plan = data.plans.find(function(p){return p.id===w.planId;});
   if (!plan) return null;
   var timesChanged = false, structureChanged = false;
-  var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
-  var pItems = [], pLadder = [];
-  (plan.items||[]).forEach(function(it, idx){
+  /* Both sides flat, as a plan is, with the breaks that separate nothing
+     dropped from both, so a circuit compares heading by heading and
+     movement by movement. */
+  var wList = normalizePlanItems(flattenForTemplate(w.exercises));
+  var pList = normalizePlanItems(plan.items||[]);
+  var wEx = wList.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
+  var pItems = [], pLadder = [], pMember = [];
+  pList.forEach(function(it, idx){
     if (itemKind(it)!=='exercise') return;
     pItems.push(it);
-    pLadder.push(planEntryIsLadder(plan.items, idx));
+    pLadder.push(planEntryIsLadder(pList, idx));
+    pMember.push(circuitHeadingIdx(pList, idx) !== -1);
   });
-  /* category headings and their order are part of the template too */
+  /* category headings and their order are part of the template too; a
+     circuit's timing is part of its heading, so a changed clock is a changed
+     template, and a circuit never matches a plain category */
   function groupSig(list, nameOf, kindOf){
     return list.map(function(x){
       var k = kindOf(x);
-      if (k==='category') return 'C:'+nameOf(x);
+      if (k==='category'){
+        var ck = isCircuitHeading(x) ? circuitCfg(x) : null;
+        return 'C:'+nameOf(x)+(ck ? '|'+ck.workSec+'|'+ck.blocks+'|'+circuitBreakSec(ck) : '');
+      }
       if (k==='break') return 'B';
       return 'E';
     }).join('\u0000');
   }
-  var wCats = groupSig(w.exercises, function(e){return e.name;}, function(e){return e.kind||'exercise';});
-  var pCats = groupSig(plan.items||[], function(it){return it.name;}, itemKind);
+  var wCats = groupSig(wList, function(e){return e.name;}, function(e){return e.kind||'exercise';});
+  var pCats = groupSig(pList, function(it){return it.name;}, itemKind);
   if (wCats !== pCats) structureChanged = true;
   if (wEx.length !== pItems.length) structureChanged = true;
   var n = Math.min(wEx.length, pItems.length);
   for (var i=0;i<n;i++){
     var we = wEx[i], pi = pItems[i];
     if (we.exerciseId !== pi.exerciseId){ structureChanged = true; continue; }
+    /* A circuit's movement is only its exercise and its round. Any change
+       there is the template's, never a times-only update, which leaves
+       circuits alone. */
+    if (we._member || pMember[i]){
+      if (!we._member || !pMember[i] || !sameCircuitRound(we, pi)) structureChanged = true;
+      continue;
+    }
     if (normVal(we.defaultRestSec) !== normVal(pi.defaultRestSec)) structureChanged = true;
     /* A ladder is compared by what the plan would get back from it - see
        sameLadderTemplate - never by how it went. */
@@ -6294,6 +7091,13 @@ function diffWorkoutVsPlan(w){
     }
   }
   return { plan: plan, timesChanged: timesChanged, structureChanged: structureChanged };
+}
+/* a session movement against the plan's: the round in every field, a time
+   included, since in a circuit it is the per-round target */
+function sameCircuitRound(we, pi){
+  var wv = (we.sets && we.sets[0] && we.sets[0].values) || {};
+  var first = firstSetOf(pi), pv = (first && first.values) || {};
+  return (we.fields||[]).every(function(f){ return normVal(wv[f.id]) === normVal(pv[f.id]); });
 }
 /* The same template when the marker and every rung the plan would be
    given back (applyPlanFullUpdate) match: each rung's planned number, its
@@ -6336,11 +7140,13 @@ function planSetsFromWorkoutExercise(we){
 function applyPlanTimesUpdate(w, plan){
   /* Paired by position, exactly as diffWorkoutVsPlan pairs them. A ladder on
      either side sits this out (it has no timer targets to carry), but it
-     keeps its place, so the pairs after it stay lined up. */
+     keeps its place, so the pairs after it stay lined up. Circuits are left
+     out altogether: the session's are nested entries, never kind:'exercise',
+     so the plan's movements are skipped to match. */
   var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
   var pEx = [], pLadder = [];
   (plan.items||[]).forEach(function(it, idx){
-    if (itemKind(it)!=='exercise') return;
+    if (itemKind(it)!=='exercise' || circuitHeadingIdx(plan.items, idx) !== -1) return;
     pEx.push(it);
     pLadder.push(planEntryIsLadder(plan.items, idx));
   });
@@ -6365,11 +7171,29 @@ function applyPlanTimesUpdate(w, plan){
 
 function applyPlanFullUpdate(w, plan){
   var items = [];
-  w.exercises.forEach(function(we){
+  flattenForTemplate(w.exercises).forEach(function(we){
     var k = we.kind || 'exercise';
-    if (k==='category'){ items.push({ kind:'category', id:uid('cat'), name:we.name, collapsed:false }); return; }
+    if (k==='category'){
+      var cat = { kind:'category', id:uid('cat'), name:we.name, collapsed:false };
+      /* a circuit goes back as its timing only - never its clock or score -
+         with the sets:[] that keeps migratePlanItems off it */
+      if (isCircuitHeading(we)){
+        var ck = circuitCfg(we);
+        cat.circuit = { workSec:ck.workSec, blocks:ck.blocks, breakSec:ck.breakSec };
+        cat.sets = [];
+      }
+      items.push(cat);
+      return;
+    }
     if (k==='break'){ items.push(newPlanBreak()); return; }
     if (k!=='exercise') return; /* top-level rest blocks live inside the session, not the preset */
+    if (we._member){
+      /* a movement's round, copied as it is: planSetsFromWorkoutExercise
+         would blank a time, which in a circuit is the per-round target */
+      items.push({ kind:'exercise', exerciseId: we.exerciseId, defaultRestSec: null,
+                   sets: [{ kind:'set', id:uid('s'), values:Object.assign({}, we.sets[0].values), restSec:null }] });
+      return;
+    }
     if (isLadderEntry(we)){
       /* Written back from the session's own rungs - the exact inverse of
          startFromPlan - so per-rung edits (a vest on the top rungs, a longer
@@ -6418,8 +7242,6 @@ function renderFinishModal(){
   var f = ui.finishDraft;
   var w = data.activeWorkout;
   if (!f || !w){ wrap.innerHTML=''; return; }
-  var doneSets = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set' && s.done;}).length : 0); },0);
-
   function toggleRow(key, title, sub, checked){
     return '<button class="toggle-row" data-action="finish-toggle" data-key="'+key+'">'+
       '<span class="toggle-box '+(checked?'on':'')+'">'+(checked?icon('check'):'')+'</span>'+
@@ -6449,7 +7271,7 @@ function renderFinishModal(){
 
   wrap.innerHTML = '<div class="modal">'+
     '<div class="modal-head"><h2>Finish Workout</h2><button class="icon-btn" data-action="finish-cancel">'+icon('x')+'</button></div>'+
-    '<div style="color:var(--text-dim);font-size:13.5px;margin-bottom:16px;">'+doneSets+' set'+(doneSets!==1?'s':'')+' completed</div>'+
+    '<div style="color:var(--text-dim);font-size:13.5px;margin-bottom:16px;">'+workoutSummaryHTML(w, false)+'</div>'+
     timeRow+
     rows+
     '<div style="display:flex;gap:10px;margin-top:18px;">'+
@@ -6469,6 +7291,8 @@ function finishWorkout(){
     else if (f.updateTimes) applyPlanTimesUpdate(w, d.plan);
   }
   w.completedAt = finishEndAt(w, f);
+  /* the score table an older build shows, as the circuit stands at the end */
+  w.exercises.forEach(function(e){ if (itemKind(e)==='circuit') writeCircuitMirror(e); });
   /* an end set back by hand can fall before the last backup, which then
      would not count this workout as missing from it */
   if (f.endAt && w.completedAt===f.endAt) w.editedAt = Date.now();
@@ -6487,6 +7311,28 @@ function finishWorkout(){
   closeFinishModal();
   clearRestTimer();
   save(); setView('home');
+}
+/* '12 sets completed · Cindy 18 + 7'. Ticked Downs rungs are sets and count;
+   a circuit is its score, and a workout of circuits alone leaves the sets
+   part out. withId marks the count the header keeps up to date. */
+function workoutSummaryHTML(w, withId){
+  var totalSets = 0, doneSets = 0, circuits = [];
+  w.exercises.forEach(function(e){
+    var k = e.kind || 'exercise';
+    if (k==='circuit'){ circuits.push(e); return; }
+    if (k!=='exercise') return;
+    (e.sets||[]).forEach(function(s){
+      if ((s.kind||'set')!=='set') return;
+      totalSets++; if (s.done) doneSets++;
+    });
+  });
+  var parts = [];
+  if (totalSets > 0 || !circuits.length){
+    parts.push(withId ? '<span id="workout-progress-count">'+doneSets+'/'+totalSets+'</span> sets completed'
+                      : doneSets+' set'+(doneSets!==1?'s':'')+' completed');
+  }
+  circuits.forEach(function(c){ parts.push(esc(circuitResultLabel(c))); });
+  return parts.join(' &middot; ');
 }
 function discardWorkout(){
   data.activeWorkout = null;
@@ -6693,9 +7539,6 @@ function renderWorkout(){
   var main = document.getElementById('main');
   var w = data.activeWorkout;
   if (!w){ setView('home'); return; }
-  var totalSets = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set';}).length : 0); },0);
-  var doneSets = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set' && s.done;}).length : 0); },0);
-
   var html = '<div class="workout-head">'+
     '<div class="workout-head-left">'+
       '<button class="icon-btn" data-action="minimize-workout" title="Back to Home">'+icon('chevronLeft')+'</button>'+
@@ -6707,7 +7550,7 @@ function renderWorkout(){
       '<button class="btn btn-primary" data-action="finish-workout">Finish Workout</button>'+
     '</div>'+
   '</div>'+
-  '<div class="workout-progress"><span id="workout-progress-count">'+doneSets+'/'+totalSets+'</span> sets completed</div>';
+  '<div class="workout-progress">'+workoutSummaryHTML(w, true)+'</div>';
 
   if (w.exercises.length===0){
     html += '<div class="empty-state"><p>No exercises yet.</p><p class="empty-sub">Add your first exercise to start logging.</p></div>';
@@ -6726,14 +7569,16 @@ function renderWorkout(){
       }
       if (hiddenUnderCategory) return;
       if (kind==='rest') html += renderTopRestBlock(idx, block);
+      else if (kind==='circuit') html += renderCircuitCard(idx);
       else html += renderExerciseCard(idx);
     });
   }
   html += '<div style="display:flex;gap:10px;flex-wrap:wrap;">'+
     '<button class="btn btn-ghost" data-action="open-workout-picker">'+icon('plus')+' Add Exercise</button>'+
     '<button class="btn btn-ghost" data-action="add-rest-between-exercises">'+icon('plus')+' Add Rest</button>'+
+    '<button class="btn btn-ghost" data-action="workout-add-circuit">'+icon('plus')+' Add Circuit</button>'+
   '</div>'+
-  '<div id="workout-picker" hidden></div>';
+  (ui.circuitChooser ? '<div id="workout-picker">'+circuitChooserHTML()+'</div>' : '<div id="workout-picker" hidden></div>');
 
   main.innerHTML = html;
 }
@@ -6744,6 +7589,8 @@ function renderWorkoutCategoryHeader(idx, block, w){
     var e = w.exercises[i];
     var k = e.kind || 'exercise';
     if (k==='category' || k==='break') break;
+    /* a circuit is one thing to do, done once it has a score */
+    if (k==='circuit'){ total++; if (circuitScore(e).scored) done++; continue; }
     if (k!=='exercise') continue;
     e.sets.forEach(function(s){
       if ((s.kind||'set')!=='set') return;
@@ -7214,6 +8061,505 @@ function ladderAction(action, el){
   }
 }
 
+/* ---- Circuits in a workout -------------------------------------------------
+   One card per circuit, in one of four states: Ready (the recipe, Last /
+   Best, Enter Score), Edit (only while nothing is scored), the score sheet
+   ('Where Did You Stop?') and Scored. A tap here is a one-off render. What
+   is typed is saved on leaving the field, and only the numbers around it are
+   rewritten, so the field or button being moved to is never swapped out from
+   under the finger. */
+
+function renderCircuitCard(idx){
+  var w = data.activeWorkout, c = w.exercises[idx];
+  if (!Array.isArray(c.members)) c.members = [];   /* a damaged entry still draws */
+  var sc = circuitScore(c);
+  var remove = '<button class="btn btn-ghost" data-action="confirm-remove-exercise" data-wex="'+idx+'">'+icon('trash')+' Remove</button>';
+  var at = 'data-cir="'+esc(c.id)+'"';
+  var open = '<div class="ex-card circuit-card" id="ex-card-'+idx+'">';
+  if (sc.scored){
+    var head = '<div class="ex-card-head"><div class="plan-ex-title"><div class="ex-card-name">'+esc(c.name)+'</div>'+
+      '<div class="circuit-format">'+esc(fmtCircuitFormat(c))+'</div></div>'+remove+'</div>';
+    if (ui.circuitScoreOpen === c.id) return open+head+renderScoreSheet(c)+'</div>';
+    return open+head+
+      '<div class="circuit-score-row"><span class="circuit-score">'+esc(sc.short)+'</span>'+
+        (circuitIsNewBest(c, w.id) ? '<span class="best-chip">New Best</span>' : '')+'</div>'+
+      (sc.extra ? '<div class="circuit-sub">+ '+esc(sc.extra)+'</div>' : '')+
+      '<div class="circuit-actions">'+
+        '<button class="btn btn-ghost small" data-action="circuit-score-open" '+at+'>'+icon('edit')+' Edit Score</button>'+
+        '<button class="btn btn-ghost small" data-action="circuit-reset" '+at+'>Reset Circuit</button>'+
+      '</div></div>';
+  }
+  if (ui.circuitEditing === c.id && circuitEditable(c)) return open+renderCircuitEditor(c, idx, remove)+'</div>';
+  /* Ready */
+  var any = c.members.length > 0, n = circuitPlanSets(c);
+  return open+
+    '<div class="ex-card-head"><div class="plan-ex-title"><div class="ex-card-name">'+esc(c.name)+'</div></div>'+remove+'</div>'+
+    '<div class="circuit-line">'+esc(fmtCircuitFormat(c))+(any ? ' &middot; '+esc(circuitRoundText(c)) : '')+'</div>'+
+    (any ? '<div class="circuit-sub faint">'+esc(circuitProgressText(c, w.id))+'</div>'+
+           '<div class="circuit-sub">Counts as '+n+' set'+(n!==1?'s':'')+' per movement</div>'
+         : '<div class="circuit-sub">Add a movement first.</div>')+
+    (circuitEditable(c) ? '<div class="circuit-actions"><button class="btn btn-ghost small" data-action="circuit-edit" '+at+'>'+icon('edit')+' Edit</button></div>' : '')+
+    '<div class="circuit-enter"><span>Timed it on a gym clock?</span>'+
+      '<button class="btn btn-ghost small" data-action="circuit-enter-score" '+at+(any ? '' : ' disabled')+'>Enter Score</button></div>'+
+  '</div>';
+}
+/* Edit mode: the same controls as the plan heading, and one row per
+   movement with every target it takes (RIR and RPE aside). */
+function renderCircuitEditor(c, idx, remove){
+  var at = 'data-cir="'+esc(c.id)+'"', unit = data.settings.weightUnit, k = circuitCfg(c);
+  var rows = c.members.map(function(m, i){
+    var inputs = (m.fields||[]).filter(function(f){ return !isEffortType(f.type); }).map(function(f){
+      var v = m.values ? m.values[f.id] : null;
+      var disp = (v===null || v===undefined || v==='') ? '' : fieldDisplayValue(f, v, unit);
+      var kind = f.type==='text' ? ' placeholder="target"'
+        : isTimeType(f.type) ? ' inputmode="numeric" placeholder="'+timeHint()+'"'
+        : ' inputmode="decimal"';
+      return '<label class="cedit-field"><span>'+esc(f.label)+fieldUnitSuffix(f, unit)+'</span>'+
+        '<input class="num-input" data-commit="circuit-member" '+at+' data-member="'+esc(m.id)+'" data-field="'+esc(f.id)+'" value="'+esc(disp)+'"'+kind+'></label>';
+    }).join('');
+    return '<div class="cedit-row">'+
+      '<div class="plan-ex-order">'+
+        '<button class="icon-btn tiny" data-action="circuit-member-move" '+at+' data-member="'+esc(m.id)+'" data-dir="-1" aria-label="Move up"'+(i===0?' disabled':'')+'>'+icon('chevronUp')+'</button>'+
+        '<button class="icon-btn tiny" data-action="circuit-member-move" '+at+' data-member="'+esc(m.id)+'" data-dir="1" aria-label="Move down"'+(i===c.members.length-1?' disabled':'')+'>'+icon('chevronDown')+'</button>'+
+      '</div>'+
+      '<div class="cedit-main"><div class="cedit-name">'+esc(m.name)+'</div><div class="cedit-fields">'+inputs+'</div></div>'+
+      '<button class="rest-icon-btn" data-action="circuit-member-remove" '+at+' data-member="'+esc(m.id)+'" title="Remove movement" aria-label="Remove '+esc(m.name)+'">'+icon('x')+'</button>'+
+    '</div>';
+  }).join('');
+  return '<div class="ex-card-head"><div class="plan-ex-title">'+
+      '<input class="title-input circuit-edit-name" data-commit="circuit-name" '+at+' value="'+esc(c.name)+'" aria-label="Circuit name"></div>'+remove+'</div>'+
+    circuitTimingHTML(c, at, false)+
+    (k.blocks > 1 ? '<div class="circuit-sub">'+esc(circuitBlocksLine(c))+'</div>' : '')+
+    (rows || '<div class="circuit-empty">No movements yet.</div>')+
+    '<div class="circuit-actions">'+
+      '<button class="btn btn-ghost small" data-action="circuit-add-member" '+at+'>'+icon('plus')+' Add Movement</button>'+
+      '<button class="btn btn-primary small" data-action="circuit-edit-done" '+at+' style="margin-left:auto">Done</button>'+
+    '</div>';
+}
+/* '5 of 5 ✓', '2 of 10', 'Done ✓' */
+function circuitStopAmount(m, p, t){
+  var f = countFieldOf(m.fields);
+  if (!f) return p > 0 ? 'Done ✓' : 'Not Done';
+  if (t===null) return 'No target';
+  var full = p >= t;
+  return fieldDisplayValue(f, p, data.settings.weightUnit)+' of '+circuitAmountValue(f, t)+(full ? ' ✓' : '');
+}
+/* the movement holding the stepper: the one last tapped, else the last one
+   with part of a round in it */
+function circuitStopMember(c){
+  var s = ui.circuitStop;
+  if (s && s.cir===c.id && c.members.some(function(m){ return m.id===s.member; })) return s.member;
+  var pick = null;
+  c.members.forEach(function(m){ if (circuitPartialOf(c, m) > 0) pick = m.id; });
+  return pick;
+}
+/* The movement whose step just made a whole round, or null. Its row keeps
+   its place and shows the round full, so another quick tap on the same spot
+   lands on the same control - not on a row button that would fill every
+   movement before it and start the next round. */
+function circuitRolledMember(c){
+  var s = ui.circuitStop;
+  return (s && s.rolled && s.cir===c.id) ? s.member : null;
+}
+/* 'Where Did You Stop?' Rounds, then the movement you were on - tapping it
+   fills every movement before it and empties every one after, so Cindy
+   stopped at 2 push-ups takes three taps. Everything saves as it changes. */
+function renderScoreSheet(c){
+  var at = 'data-cir="'+esc(c.id)+'"', sc = circuitScore(c), sel = circuitStopMember(c), unit = data.settings.weightUnit;
+  var rows = c.members.map(function(m){
+    var f = countFieldOf(m.fields), t = circuitMemberTarget(m), p = circuitPartialOf(c, m);
+    var mat = at+' data-member="'+esc(m.id)+'"';
+    if (m.id !== sel){
+      return '<button class="score-row'+(t!==null && p>=t ? ' full' : '')+'" data-action="circuit-stop-at" '+mat+'>'+
+        '<span class="score-row-name">'+esc(m.name)+'</span><span class="score-amt" data-cs-amt="'+esc(m.id)+'">'+esc(circuitStopAmount(m, p, t))+'</span></button>';
+    }
+    /* the row that just made a round shows it full, as it was the moment
+       the round was made */
+    var rolled = circuitRolledMember(c)===m.id, shown = rolled ? t : p;
+    var control;
+    if (f && t===null){
+      /* nothing to count towards: the row only marks where it stopped */
+      control = '<span class="score-of">No target set</span>';
+    } else if (!f){
+      control = '<div class="segmented">'+
+        '<button class="'+(shown>0?'':'active')+'" data-action="circuit-partial-step" '+mat+' data-set="0">Not Done</button>'+
+        '<button class="'+(shown>0?'active':'')+'" data-action="circuit-partial-step" '+mat+' data-set="1">Done</button></div>';
+    } else if (f.type==='reps' || f.type==='number'){
+      control = '<button class="score-step-btn" data-action="circuit-partial-step" '+mat+' data-delta="-1" aria-label="One less">&minus;</button>'+
+        '<span class="score-val" data-cs-val="'+esc(m.id)+'">'+esc(String(shown))+'</span>'+
+        '<button class="score-step-btn" data-action="circuit-partial-step" '+mat+' data-delta="1" aria-label="One more">+</button>';
+    } else {
+      /* metres or seconds are typed: a stepper of ones is no use for 400 m.
+         Nothing yet is left empty, so the caret can't land before a 0. */
+      control = '<input class="num-input" data-commit="circuit-partial" '+mat+' inputmode="'+(isTimeType(f.type)?'numeric':'decimal')+'" '+
+        'value="'+(shown>0 ? esc(fieldDisplayValue(f, shown, unit)) : '')+'" placeholder="'+(isTimeType(f.type) ? timeHint() : '0')+'" aria-label="How much of '+esc(m.name)+'">';
+    }
+    return '<div class="score-row sel">'+
+      '<button class="score-row-name" data-action="circuit-stop-at" '+mat+'>'+esc(m.name)+'</button>'+
+      '<div class="score-step">'+control+(f && t!==null ? '<span class="score-of">of '+esc(circuitAmountValue(f, t))+(rolled ? ' ✓' : '')+'</span>' : '')+'</div>'+
+      (rolled ? '<div class="score-rolled">Round '+sc.rounds+' added</div>' : '')+
+    '</div>';
+  }).join('');
+  return '<div class="score-sheet" data-score-sheet="'+esc(c.id)+'">'+
+    '<div class="score-top"><span class="score-label">Score</span>'+
+      '<span class="circuit-score" data-cs-score>'+esc(sc.short)+'</span>'+
+      '<span class="best-chip" data-cs-best'+(circuitIsNewBest(c, data.activeWorkout.id) ? '' : ' hidden')+'>New Best</span></div>'+
+    '<div class="score-rounds"><span class="score-label">Rounds</span>'+
+      '<button class="score-step-btn" data-action="circuit-rounds-step" '+at+' data-delta="-1" aria-label="One round less">&minus;</button>'+
+      '<input class="num-input" data-commit="circuit-rounds" '+at+' type="number" min="0" step="1" inputmode="numeric" value="'+(sc.rounds || '')+'" placeholder="0" aria-label="Rounds">'+
+      '<button class="score-step-btn" data-action="circuit-rounds-step" '+at+' data-delta="1" aria-label="One round more">+</button>'+
+    '</div>'+
+    '<div class="score-q">Where Did You Stop?</div>'+
+    '<div class="score-hint">Tap the movement you were on when time ran out.</div>'+
+    rows+
+    '<div class="score-actions">'+
+      '<button class="btn btn-ghost" data-action="circuit-partial-clear" '+at+'>No Extra</button>'+
+      '<button class="btn btn-primary" data-action="circuit-score-close" '+at+'>Done</button>'+
+    '</div>'+
+    '<div class="score-reset"><button class="btn btn-ghost small" data-action="circuit-reset" '+at+'>Reset Circuit</button></div>'+
+  '</div>';
+}
+/* Rewrites the sheet's numbers after a typed change, and nothing else. */
+function paintScoreSheet(c){
+  var prog = document.querySelector('.workout-progress');
+  if (prog && data.activeWorkout) prog.innerHTML = workoutSummaryHTML(data.activeWorkout, true);
+  var sheet = document.querySelector('[data-score-sheet="'+c.id+'"]');
+  if (!sheet) return;
+  var sc = circuitScore(c);
+  var score = sheet.querySelector('[data-cs-score]');
+  if (score) score.textContent = sc.short;
+  var best = sheet.querySelector('[data-cs-best]');
+  if (best) best.hidden = !circuitIsNewBest(c, data.activeWorkout.id);
+  var rounds = sheet.querySelector('[data-commit="circuit-rounds"]');
+  if (rounds && rounds !== document.activeElement) rounds.value = sc.rounds || '';
+  c.members.forEach(function(m){
+    var p = circuitPartialOf(c, m), t = circuitMemberTarget(m);
+    var amt = sheet.querySelector('[data-cs-amt="'+m.id+'"]');
+    if (amt){
+      amt.textContent = circuitStopAmount(m, p, t);
+      amt.parentNode.classList.toggle('full', t!==null && p >= t);
+    }
+    var val = sheet.querySelector('[data-cs-val="'+m.id+'"]');
+    if (val) val.textContent = circuitRolledMember(c)===m.id ? t : p;
+  });
+}
+/* A partial that fills EVERY movement is a whole round. A movement with no
+   target can never be full, so it holds the round back: the athlete adds it
+   with Rounds instead of a tap adding one nobody finished. */
+function settleCircuitPartial(c){
+  if (!c.members.length) return false;
+  var full = c.members.every(function(m){
+    var t = circuitMemberTarget(m);
+    return t!==null && circuitPartialOf(c, m) >= t;
+  });
+  if (!full) return false;
+  c.result.rounds = (circuitScore(c).rounds || 0) + 1;
+  c.result.partial = {};
+  ui.circuitStop = null;
+  return true;
+}
+/* After a movement's amount changed: settle it, and keep that movement's
+   row where it is - marked when its step made the round. */
+function settleCircuitStop(c, member){
+  var rolled = settleCircuitPartial(c);
+  ui.circuitStop = { cir:c.id, member:member.id, rolled:rolled };
+  return rolled;
+}
+/* Takes back the round a movement's step just made: every other movement
+   full again, as it was the moment before, and this one at v. */
+function unrollCircuit(c, member, v){
+  setCircuitRounds(c, Math.max(0, (circuitScore(c).rounds || 0) - 1));
+  c.members.forEach(function(m){
+    var t = circuitMemberTarget(m);
+    if (m!==member && t!==null) c.result.partial[m.id] = t;
+  });
+  c.result.partial[member.id] = v;
+  ui.circuitStop = { cir:c.id, member:member.id };
+}
+/* Rounds written by hand. Fewer than were tapped drops the latest taps'
+   times, so the splits never claim more rounds than the score. */
+function setCircuitRounds(c, n){
+  n = Math.max(0, Math.floor(n));
+  c.result.rounds = n;
+  if (!Array.isArray(c.result.splits)) c.result.splits = [];
+  if (c.result.splits.length > n) c.result.splits.length = n;
+}
+/* For a second after the clock runs out every tap on the sheet is
+   ignored, so a late sweaty tap meant for the round can't land on a row. */
+function circuitSheetLocked(c){
+  return !!(c.clock && c.clock.endedAt && Date.now() < c.clock.endedAt + 1000);
+}
+function circuitSettings(c){
+  if (!c.circuit || typeof c.circuit!=='object') c.circuit = circuitCfg(c);
+  return c.circuit;
+}
+/* Time in minutes, clamped to 30 s ... 3 h; Break in seconds, an emptied box
+   being none. The field is shown back as it is stored. */
+function applyCircuitTiming(cfg, which, t){
+  if (which==='minutes'){
+    var sec = parseMinutes(t.value);
+    if (sec!==null && !isNaN(sec)) cfg.workSec = Math.max(30, Math.min(10800, sec));
+    t.value = fmtCircuitMinutes(circuitCfg({ circuit:cfg }).workSec);
+  } else {
+    var raw = String(t.value).trim(), n = raw==='' ? 0 : Math.round(parseDecimal(raw));
+    if (!isNaN(n)) cfg.breakSec = Math.max(0, n);
+    t.value = circuitCfg({ circuit:cfg }).breakSec;
+  }
+}
+/* Add Circuit in a session: straight to a new one when there is no recipe
+   to reuse, else the small chooser. */
+function startNewCircuit(){
+  var c = addCircuitToActiveWorkout(null);
+  ui.circuitChooser = null;
+  if (!c) return;
+  ui.circuitEditing = c.id;
+  renderMain();
+  openPicker('workout', { circuitId: c.id });
+}
+function circuitChooserHTML(){
+  var rows = ui.circuitChooser.recipes.map(function(r, i){
+    var k = circuitCfg(r);
+    var names = r.members.filter(function(m){ return !!exerciseById(m.exerciseId); }).map(function(m){ return m.name; }).join(', ');
+    var best = bestCircuitFor(circuitSig(r));
+    var bits = [k.blocks > 1 ? k.blocks+' × '+secToMMSS(k.workSec) : secToMMSS(k.workSec), names];
+    if (best) bits.push('Best '+best.score.short);
+    return '<button class="result-row" data-action="circuit-pick-recent" data-idx="'+i+'">'+
+      '<div><div class="result-row-name">'+esc(r.name)+'</div><div class="result-row-sub">'+esc(bits.join(' · '))+'</div></div>'+icon('plus')+'</button>';
+  }).join('');
+  return '<div class="card" style="margin-top:14px;background:var(--surface-2)">'+
+    '<div class="chooser-head"><span class="chooser-title">Add Circuit</span>'+
+      '<button class="icon-btn" data-action="circuit-chooser-close" aria-label="Close">'+icon('x')+'</button></div>'+
+    '<button class="result-row" data-action="circuit-new"><div><div class="result-row-name">New Circuit</div>'+
+      '<div class="result-row-sub">Set the time, then pick the movements</div></div>'+icon('plus')+'</button>'+
+    '<div class="chooser-label">Recent</div>'+rows+
+  '</div>';
+}
+/* Every circuit tap, in a plan and in a session. */
+function circuitAction(action, el){
+  var plan = currentPlan(), idx = el.dataset.idx*1;
+  switch(action){
+    case 'plan-add-circuit': {
+      /* a heading closes the category above it, so no break is needed */
+      var h = newPlanCircuit();
+      plan.items.push(h);
+      save(); renderMain();
+      openPicker('plan', { headerId: h.id });
+      return;
+    }
+    case 'plan-circuit-add': openPicker('plan', { headerId: el.dataset.id }); return;
+    case 'plan-circuit-blocks': {
+      var ph = plan.items[idx];
+      if (!isCircuitHeading(ph)) return;
+      ph.circuit.blocks = Math.max(1, Math.min(10, circuitCfg(ph).blocks + el.dataset.delta*1));
+      save(); renderMain();
+      return;
+    }
+    case 'plan-circuit-trim': {
+      /* only the round is kept; a Downs marker means nothing here either */
+      var pm = plan.items[idx];
+      if (!pm) return;
+      var first = firstSetOf(pm);
+      pm.sets = first ? [first] : [];
+      delete pm.ladder;
+      closePlanLadderEdits();
+      save(); renderMain();
+      return;
+    }
+    case 'workout-add-circuit': {
+      if (!data.activeWorkout) return;
+      var recipes = recentCircuitRecipes(5);
+      if (!recipes.length){ startNewCircuit(); return; }
+      ui.picker = null;
+      ui.circuitChooser = { recipes: recipes };
+      renderMain();
+      var wp = document.getElementById('workout-picker');
+      if (wp && wp.scrollIntoView) wp.scrollIntoView({ block:'nearest' });
+      return;
+    }
+    case 'circuit-new': startNewCircuit(); return;
+    case 'circuit-pick-recent': {
+      var r = ui.circuitChooser ? ui.circuitChooser.recipes[idx] : null;
+      ui.circuitChooser = null;
+      if (r) addCircuitToActiveWorkout(r);
+      renderMain();
+      return;
+    }
+    case 'circuit-chooser-close': ui.circuitChooser = null; renderMain(); return;
+  }
+
+  var c = circuitById(el.dataset.cir);
+  if (!c) return;
+  var member = el.dataset.member ? c.members.filter(function(m){ return m.id===el.dataset.member; })[0] : null;
+  var editable = circuitEditable(c);
+  switch(action){
+    case 'circuit-edit':
+      if (!editable) return;
+      ui.circuitEditing = c.id; ui.circuitScoreOpen = null;
+      renderMain();
+      return;
+    case 'circuit-edit-done': ui.circuitEditing = null; ui.picker = null; renderMain(); return;
+    case 'circuit-blocks': {
+      if (!editable) return;
+      var cs = circuitSettings(c);
+      cs.blocks = Math.max(1, Math.min(10, circuitCfg(c).blocks + el.dataset.delta*1));
+      writeCircuitMirror(c); save(); renderMain();
+      return;
+    }
+    case 'circuit-member-move': {
+      if (!editable || !member) return;
+      var i = c.members.indexOf(member), j = i + el.dataset.dir*1;
+      if (j < 0 || j >= c.members.length) return;
+      c.members[i] = c.members[j]; c.members[j] = member;
+      writeCircuitMirror(c); save(); renderMain();
+      return;
+    }
+    case 'circuit-member-remove':
+      if (!editable || !member) return;
+      c.members.splice(c.members.indexOf(member), 1);
+      writeCircuitMirror(c); save(); renderMain();
+      return;
+    case 'circuit-add-member': if (editable) openPicker('workout', { circuitId: c.id }); return;
+    case 'circuit-enter-score': {
+      /* no clock: the score is typed, and the work counts as planned */
+      if (!c.members.length) return;
+      if (!c.result || typeof c.result!=='object') c.result = { rounds:null, partial:{}, splits:[] };
+      if (!circuitScore(c).scored) c.result.rounds = 0;
+      ui.circuitScoreOpen = c.id; ui.circuitEditing = null; ui.circuitStop = null; ui.picker = null;
+      writeCircuitMirror(c); save(); renderMain();
+      return;
+    }
+    case 'circuit-score-open':
+      if (!circuitScore(c).scored) return;
+      ui.circuitScoreOpen = c.id; ui.circuitStop = null;
+      renderMain();
+      return;
+    case 'circuit-score-close': ui.circuitScoreOpen = null; ui.circuitStop = null; renderMain(); return;
+    case 'circuit-reset': armOrConfirm(el, function(){
+      c.clock = null;
+      c.result = { rounds:null, partial:{}, splits:[] };
+      ui.circuitScoreOpen = null; ui.circuitStop = null;
+      writeCircuitMirror(c); save(); renderMain();
+    }); return;
+  }
+
+  /* the score sheet */
+  if (!circuitScore(c).scored || circuitSheetLocked(c)) return;
+  var res = c.result, rolledOn = circuitRolledMember(c);
+  if (!res.partial || typeof res.partial!=='object') res.partial = {};
+  switch(action){
+    case 'circuit-rounds-step':
+      setCircuitRounds(c, circuitScore(c).rounds + el.dataset.delta*1);
+      if (ui.circuitStop) ui.circuitStop.rolled = false;
+      break;
+    case 'circuit-stop-at': {
+      if (!member) return;
+      /* the row that just made a round is already where it stopped */
+      if (member.id===rolledOn) return;
+      var k = c.members.indexOf(member);
+      c.members.forEach(function(m, mi){
+        if (mi < k){ var t = circuitMemberTarget(m); if (t!==null) res.partial[m.id] = t; }
+        else if (mi > k) delete res.partial[m.id];
+        else res.partial[m.id] = circuitPartialOf(c, m);
+      });
+      settleCircuitStop(c, member);
+      break;
+    }
+    case 'circuit-partial-step': {
+      var tt = member ? circuitMemberTarget(member) : null;
+      if (tt===null) return;   /* no target, nothing to step towards */
+      var from = member.id===rolledOn ? tt : circuitPartialOf(c, member);
+      var v = el.dataset.set!==undefined ? el.dataset.set*1 : from + el.dataset.delta*1;
+      /* rounded, so stepping a decimal amount leaves no float noise */
+      v = Math.max(0, Math.min(tt, Math.round(v*1000)/1000));
+      if (member.id===rolledOn){
+        /* the round it made shows full: more does nothing, less takes it back */
+        if (v >= tt) return;
+        unrollCircuit(c, member, v);
+        break;
+      }
+      res.partial[member.id] = v;
+      settleCircuitStop(c, member);
+      break;
+    }
+    case 'circuit-partial-clear': res.partial = {}; ui.circuitStop = null; break;
+    default: return;
+  }
+  writeCircuitMirror(c); save(); renderMain();
+}
+/* What is typed into a circuit, saved as the field is left. */
+function circuitCommit(kind, t){
+  if (kind==='plan-circuit-minutes' || kind==='plan-circuit-break'){
+    var plan = currentPlan(), idx = t.dataset.idx*1, h = plan ? plan.items[idx] : null;
+    if (!isCircuitHeading(h)) return;
+    applyCircuitTiming(h.circuit, kind==='plan-circuit-minutes' ? 'minutes' : 'break', t);
+    save();
+    refreshPlanCircuitInfo(idx);
+    refreshPlanMuscleMap();
+    return;
+  }
+  var c = circuitById(t.dataset.cir);
+  if (!c) return;
+  var member = t.dataset.member ? c.members.filter(function(m){ return m.id===t.dataset.member; })[0] : null;
+  var unit = data.settings.weightUnit, redraw = false;
+  switch(kind){
+    case 'circuit-name': c.name = t.value.trim() || 'Circuit'; t.value = c.name; break;
+    case 'circuit-minutes':
+    case 'circuit-break':
+      if (!circuitEditable(c)) return;
+      applyCircuitTiming(circuitSettings(c), kind==='circuit-minutes' ? 'minutes' : 'break', t);
+      break;
+    case 'circuit-member': {
+      if (!circuitEditable(c) || !member) return;
+      var f = (member.fields||[]).filter(function(x){ return x.id===t.dataset.field; })[0];
+      if (!f) return;
+      var v = parseFieldInput(f, t.value);
+      member.values[f.id] = v;
+      if (f.type!=='text') t.value = v===null ? '' : fieldDisplayValue(f, v, unit);
+      break;
+    }
+    case 'circuit-rounds': {
+      if (!circuitScore(c).scored || circuitSheetLocked(c)) return;
+      var raw = String(t.value).trim(), n = Math.floor(parseDecimal(raw)), was = circuitScore(c).rounds;
+      if (raw!=='' && !isNaN(n)) setCircuitRounds(c, n);
+      /* 0 is left to the placeholder, so a tap can't put the caret before it */
+      t.value = circuitScore(c).rounds || '';
+      /* 'Round 19 added' is no longer true once the rounds are typed */
+      if (circuitRolledMember(c) && circuitScore(c).rounds!==was){ ui.circuitStop.rolled = false; redraw = true; }
+      break;
+    }
+    case 'circuit-partial': {
+      if (!circuitScore(c).scored || circuitSheetLocked(c) || !member) return;
+      var pf = countFieldOf(member.fields), pt = circuitMemberTarget(member);
+      if (!pf || pt===null) return;
+      var pv = parseFieldInput(pf, t.value);
+      pv = (pv===null || isNaN(pv*1)) ? 0 : Math.max(0, pv*1);
+      /* the target as it is shown, typed back, is the target: 400 m shown
+         as 1312.3 ft reads back as 399.989 m */
+      if (fieldDisplayValue(pf, pv, unit)===fieldDisplayValue(pf, pt, unit)) pv = pt;
+      pv = Math.min(pt, pv);
+      if (!c.result.partial || typeof c.result.partial!=='object') c.result.partial = {};
+      if (circuitRolledMember(c)===member.id){
+        /* the round it made shows full: the same again changes nothing */
+        if (pv >= pt){ t.value = fieldDisplayValue(pf, pt, unit); return; }
+        unrollCircuit(c, member, pv);
+        redraw = true;
+        break;
+      }
+      c.result.partial[member.id] = pv;
+      /* a partial that made a whole round changes the rows themselves */
+      redraw = settleCircuitStop(c, member);
+      var cp = circuitPartialOf(c, member);
+      t.value = cp > 0 ? fieldDisplayValue(pf, cp, unit) : '';
+      break;
+    }
+    default: return;
+  }
+  writeCircuitMirror(c);
+  save();
+  if (redraw) renderMain();
+  else if (kind==='circuit-rounds' || kind==='circuit-partial') paintScoreSheet(c);
+}
+
 /* ---- the Photos half of the Progress tab -------------------------------- */
 
 function photosBlurred(){ return !!data.settings.blurPhotos && !ui.photosRevealed; }
@@ -7433,8 +8779,11 @@ function sessionsPaneHTML(){
     html += '<div class="empty-state"><p>No workouts logged yet.</p><p class="empty-sub">Finish a workout and it will show up here.</p></div>';
   } else {
     html += shown.map(function(w){
+      /* the first circuit's score rides along: 'Cindy 18 + 7' */
+      var cir = w.exercises.filter(function(e){ return itemKind(e)==='circuit'; })[0];
       return '<button class="history-row" data-action="view-workout-detail" data-id="'+w.id+'">'+
-        '<div><div class="history-row-name">'+esc(w.name)+'</div><div class="history-row-sub">'+fmtShortDate(w.date)+' &middot; '+w.exercises.length+' exercise'+(w.exercises.length!==1?'s':'')+' &middot; '+fmtElapsed(w.completedAt-w.startedAt)+'</div></div>'+
+        '<div><div class="history-row-name">'+esc(w.name)+'</div><div class="history-row-sub">'+fmtShortDate(w.date)+' &middot; '+w.exercises.length+' exercise'+(w.exercises.length!==1?'s':'')+' &middot; '+fmtElapsed(w.completedAt-w.startedAt)+
+          (cir ? ' &middot; '+esc(circuitResultLabel(cir)) : '')+'</div></div>'+
         icon('chevronRight')+'</button>';
     }).join('');
   }
@@ -7463,6 +8812,7 @@ function renderWorkoutDetailHTML(w){
       return;
     }
     if (wexKind==='break') return;
+    if (wexKind==='circuit'){ html += circuitHistoryCardHTML(wex, w); return; }
     var headerCols = '<th></th>' + wex.fields.map(function(f){
       return fieldHeaderCell(f, unit);
     }).join('');
@@ -7502,6 +8852,31 @@ function renderWorkoutDetailHTML(w){
       '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   });
   return html;
+}
+
+/* A circuit in history: its format, the score large, what the unfinished
+   round got, and a Movement | Per Round | Total table where the total is
+   every round plus the partial. Notes only when they are true. */
+function circuitHistoryCardHTML(c, w){
+  var sc = circuitScore(c);
+  var rows = (c.members||[]).map(function(m){
+    var tot = circuitTotalText(c, m);
+    return '<tr><td>'+esc(m.name)+'</td><td>'+esc(circuitPerRoundText(m))+'</td>'+
+      '<td class="cir-tot">'+(tot===null ? '\u2014' : esc(tot))+'</td></tr>';
+  }).join('');
+  var notes = [];
+  if (!sc.scored) notes.push('Not scored');
+  else if (!c.clock || !c.clock.startedAt) notes.push('Timed elsewhere');
+  return '<div class="ex-card circuit-card">'+
+    '<div class="ex-card-name">'+esc(c.name)+'</div>'+
+    '<div class="circuit-format">'+esc(fmtCircuitFormat(c))+'</div>'+
+    (sc.scored ? '<div class="circuit-score-row"><span class="circuit-score">'+esc(sc.short)+'</span>'+
+      (circuitIsNewBest(c, w.id, w.completedAt) ? '<span class="best-chip">New Best</span>' : '')+'</div>' : '')+
+    (sc.scored && sc.extra ? '<div class="circuit-sub">'+esc(sc.long)+'</div>' : '')+
+    '<div class="ladder-rungs"><table class="set-table circuit-table"><thead><tr><th>Movement</th><th>Per Round</th><th>Total</th></tr></thead>'+
+      '<tbody>'+rows+'</tbody></table></div>'+
+    (notes.length ? '<div class="circuit-notes">'+esc(notes.join(' \u00b7 '))+'</div>' : '')+
+  '</div>';
 }
 
 /* --------------------------------------------------------------- timer */
@@ -8180,8 +9555,14 @@ function handleAction(action, el){
     }
     case 'plan-remove-category': {
       /* removing a heading un-groups its exercises rather than deleting them */
-      var rcPlan = currentPlan();
-      rcPlan.items.splice(el.dataset.idx*1, 1);
+      var rcPlan = currentPlan(), rcIdx = el.dataset.idx*1;
+      /* straight under a circuit, position alone would hand them to it as
+         movements, each cut to one round's worth - so a break keeps them
+         out as plain exercises. Under a plain category they join it, as
+         they always have. */
+      var rcAbove = circuitHeadingIdx(rcPlan.items, rcIdx) !== -1;
+      if (rcAbove && planBlockLength(rcPlan.items, rcIdx) > 1) rcPlan.items.splice(rcIdx, 1, newPlanBreak());
+      else rcPlan.items.splice(rcIdx, 1);
       rcPlan.items = normalizePlanItems(rcPlan.items);
       closePlanLadderEdits(); closeLadderEditor();   /* they point by position */
       save(); renderMain();
@@ -8284,11 +9665,15 @@ function handleAction(action, el){
     case 'open-plan-picker': openPicker('plan'); break;
     case 'open-workout-picker': openPicker('workout'); break;
     case 'picker-close': ui.picker = null; renderMain(); break;
-    case 'picker-create-new': openExerciseModal(null, ui.picker.context); break;
+    case 'picker-create-new': {
+      /* the new exercise goes where the picker was aimed */
+      var pickTarget = ui.picker.target || null;
+      openExerciseModal(null, ui.picker.context);
+      ui.pickerTargetForModal = pickTarget;
+      break;
+    }
     case 'picker-pick': {
-      var exId = el.dataset.id;
-      if (ui.picker.context==='plan'){ currentPlan().items.push(newPlanItem(exId)); }
-      else { addExerciseToActiveWorkout(exId); }
+      addPickedExercise(el.dataset.id, ui.picker.context, ui.picker.target);
       ui.picker = null; save(); renderMain();
       break;
     }
@@ -8389,8 +9774,18 @@ function handleAction(action, el){
     }
 
     case 'confirm-remove-exercise': armOrConfirm(el, function(){
-      data.activeWorkout.exercises.splice(el.dataset.wex*1, 1);
+      var rwList = data.activeWorkout.exercises, rwIdx = el.dataset.wex*1;
+      var gone = rwList.splice(rwIdx, 1)[0];
+      /* the break that kept a circuit out of the category above goes with
+         it once it separates nothing, or the next exercise added would land
+         outside that category */
+      if (gone && itemKind(gone)==='circuit' && rwIdx > 0 && itemKind(rwList[rwIdx-1])==='break'){
+        var rwNext = rwList[rwIdx] ? itemKind(rwList[rwIdx]) : null;
+        if (rwNext===null || rwNext==='category' || rwNext==='break') rwList.splice(rwIdx-1, 1);
+      }
       ui.ladderEditing = null; ui.rungsOpen = null; ui.ladderDraft = null;   /* they point by position */
+      if (gone && gone.id && gone.id===ui.circuitEditing) ui.circuitEditing = null;
+      if (gone && gone.id && gone.id===ui.circuitScoreOpen) ui.circuitScoreOpen = null;
       save(); renderMain();
     }); break;
 
@@ -8401,6 +9796,16 @@ function handleAction(action, el){
     case 'ladder-step': case 'ladder-done': case 'ladder-undo': case 'ladder-end':
     case 'ladder-climb': case 'rungs-toggle':
       ladderAction(action, el);
+      break;
+
+    /* Circuits, in plans and in workouts */
+    case 'plan-add-circuit': case 'plan-circuit-add': case 'plan-circuit-blocks': case 'plan-circuit-trim':
+    case 'workout-add-circuit': case 'circuit-new': case 'circuit-pick-recent': case 'circuit-chooser-close':
+    case 'circuit-edit': case 'circuit-edit-done': case 'circuit-blocks': case 'circuit-member-move':
+    case 'circuit-member-remove': case 'circuit-add-member': case 'circuit-enter-score': case 'circuit-score-open':
+    case 'circuit-score-close': case 'circuit-reset': case 'circuit-rounds-step': case 'circuit-stop-at':
+    case 'circuit-partial-step': case 'circuit-partial-clear':
+      circuitAction(action, el);
       break;
 
     case 'add-rest-between-exercises': {
@@ -8468,11 +9873,10 @@ function handleAction(action, el){
          workout you were adding to, or opened in your exercises */
       var haveEx = data.exercises.find(function(e){return e.id===el.dataset.id;});
       if (!haveEx) break;
-      var haveCtx = ui.pickerContextForModal;
+      var haveCtx = ui.pickerContextForModal, haveTarget = ui.pickerTargetForModal;
       closeExerciseModal();
       if (haveCtx){
-        if (haveCtx==='plan') currentPlan().items.push(newPlanItem(haveEx.id));
-        else addExerciseToActiveWorkout(haveEx.id);
+        addPickedExercise(haveEx.id, haveCtx, haveTarget);
         ui.picker = null;
         save();
       } else {
@@ -8547,8 +9951,7 @@ function handleAction(action, el){
       }
       save();
       if (ui.pickerContextForModal){
-        if (ui.pickerContextForModal==='plan') currentPlan().items.push(newPlanItem(ex.id));
-        else addExerciseToActiveWorkout(ex.id);
+        addPickedExercise(ex.id, ui.pickerContextForModal, ui.pickerTargetForModal);
         save();
         ui.picker = null;
       }
@@ -8932,6 +10335,10 @@ function handlePlanSetCommit(kind, t){
     set.values[field.id] = t.value;
   }
   save();
+  /* a circuit movement's round: its heading's One Round line says it too */
+  refreshPlanCircuitInfo(circuitHeadingIdx(currentPlan().items, t.dataset.idx*1));
+  /* a ladder's volume is its reps over its top rung, so a rung counts */
+  if (planEntryIsLadder(currentPlan().items, t.dataset.idx*1)) refreshPlanMuscleMap();
 }
 
 function onFocusOut(e){
@@ -9011,6 +10418,10 @@ function onFocusOut(e){
       save();
       break;
     }
+    case 'plan-circuit-minutes': case 'plan-circuit-break': case 'circuit-name': case 'circuit-minutes':
+    case 'circuit-break': case 'circuit-member': case 'circuit-rounds': case 'circuit-partial':
+      circuitCommit(commit, t);
+      break;
   }
 }
 
@@ -9118,6 +10529,10 @@ function onKeyDown(e){
     if (ui.planLadderEditing!=null || ui.ladderEditing!=null || ui.planRungsOpen!=null || ui.rungsOpen!=null){
       closeLadderEditor(); ui.planRungsOpen = null; ui.rungsOpen = null; renderMain(); return;
     }
+    if (ui.circuitEditing!=null || ui.circuitScoreOpen!=null || ui.circuitChooser!=null){
+      ui.circuitEditing = null; ui.circuitScoreOpen = null; ui.circuitChooser = null; ui.circuitStop = null;
+      renderMain(); return;
+    }
   }
 }
 
@@ -9126,7 +10541,7 @@ function onKeyDown(e){
    does, then steps out of a detail screen, then back to Home. False means
    there was nothing left to close, and the app may go to the background. */
 var REST_EDITS = ['editingRest','editingDefaultRest','editingPlanRest','editingPlanSetRest','editingPlanRestBlock','editingRestBlock','editingTopRest',
-  'planLadderEditing','planRungsOpen','ladderEditing','rungsOpen'];
+  'planLadderEditing','planRungsOpen','ladderEditing','rungsOpen','circuitEditing','circuitScoreOpen','circuitChooser'];
 function handleBack(){
   if (combo.el){ comboClose(); return true; }
   if (infoPop.el){ hideFieldInfo(); return true; }
