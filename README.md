@@ -21,6 +21,26 @@ muscle, so the ones you keep skipping stay grey instead of being normalised up
 into colour. It shows volume, not strength; the load and 1RM charts are still
 their own thing.
 
+**Downs** turn any reps exercise into a ladder: 15, 14, 13 … 1, with a short
+rest between rungs and, if you like, the climb back up. In a session each rung
+is one tap that logs it and starts the rest; a rung you fall short on logs as
+7/9, and End Here keeps the rest as Skipped instead of pretending they
+happened. A ladder counts as its reps at its top rung — 15 → 1 is 8 sets, not
+15 — so one hard session doesn't fill the whole week's muscle map.
+
+**Circuits** are AMRAPs like Cindy: a clock, and one round's worth of each
+movement (5 pull-ups, 10 push-ups, 15 squats). Tap Round Done after each
+round; at Time! the rounds are already counted, and you tap the movement you
+stopped on to add the extra, so the score reads 18 + 7. Blocks split the clock
+with a break between them, and the rounds carry over. Scores are compared only
+with sessions of the same recipe, so a scaled Cindy never shares a line with
+the real one. The clock is kept as saved times, not a counter, so a locked
+phone or a reload picks it up where it was.
+
+In a plan a circuit is a category that carries a clock, and a ladder is an
+exercise whose sets are the rungs, so a build without these features still
+opens both as ordinary plans.
+
 **Live:** https://neirko.github.io/athleticism/
 
 ---

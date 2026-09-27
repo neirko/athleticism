@@ -463,9 +463,12 @@ body.dragging-exercise .cat-exit-zone{height:26px;opacity:1;margin:4px 0 12px;bo
 body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);border-style:solid;background:var(--accent-soft);}
 
 /* ---------------------------------------------------------- Downs ladders */
-.ladder-tag{display:inline-flex;align-items:center;margin-top:4px;font-size:12.5px;font-weight:800;color:var(--accent-deep);
+/* An inline block rather than a flex box, so a long tag on a narrow phone
+   wraps as ordinary text, and the rest keeps its number beside it. */
+.ladder-tag{display:inline-block;margin-top:4px;font-size:12.5px;font-weight:800;color:var(--accent-deep);
   background:var(--accent-soft);border:2px solid var(--accent-soft-border);border-radius:20px;padding:2px 10px;
   max-width:100%;overflow-wrap:anywhere;}
+.ladder-tag-rest{white-space:nowrap;}
 .rung-row{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 10px;}
 .rung-chip{min-width:36px;height:34px;padding:0 7px;border-radius:11px;display:inline-flex;align-items:center;
   justify-content:center;font-size:14px;font-weight:800;background:var(--surface-2);border:2px solid var(--border);
@@ -476,7 +479,9 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .rung-chip.pending{background:none;color:var(--text-faint);}
 .rung-chip.skipped{background:none;border-style:dashed;color:var(--text-faint);text-decoration:line-through;}
 .ladder-sum{font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.45;}
-.ladder-last{font-size:13px;font-weight:700;color:var(--text-faint);margin:-4px 0 8px;line-height:1.45;}
+/* Last and Best are what the athlete reads before starting, so they take the
+   info colour rather than the footnote one */
+.ladder-last{font-size:13px;font-weight:700;color:var(--text-dim);margin:-4px 0 8px;line-height:1.45;}
 .ladder-strip{font-size:13.5px;font-weight:800;color:var(--text-dim);background:var(--surface-2);
   border-radius:var(--radius-sm);padding:9px 12px;line-height:1.45;}
 .ladder-strip.done{background:var(--good-soft);color:var(--good-deep);}
@@ -506,11 +511,16 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .ladder-editor-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:10px;}
 .ladder-editor-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px;}
 .ladder-num{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:800;color:var(--text-dim);min-width:0;}
-.ladder-num .num-input{max-width:none;min-width:0;}
+/* the labels around these boxes are dim and an input takes its colour; what
+   is typed in them is a set value, not a hint, so it reads like every other */
+.ladder-num .num-input{max-width:none;min-width:0;color:var(--text);}
 .ladder-editor-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
 .ladder-editor-label{font-size:13.5px;font-weight:800;}
 .ladder-editor-hint{font-size:12.5px;font-weight:600;color:var(--text-dim);}
 .num-input.ladder-rest-input{width:84px;flex:0 0 84px;min-width:0;}
+/* the Rest box and its unit wrap as one, so a narrow phone never leaves
+   'sec' alone on a line under the label */
+.ladder-rest-box{display:inline-flex;align-items:center;gap:10px;}
 .ladder-preview{background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius-sm);
   padding:10px 12px;margin-bottom:10px;}
 .ladder-preview-rungs{font-size:14px;font-weight:800;color:var(--text);line-height:1.5;overflow-wrap:anywhere;margin-bottom:4px;}
@@ -529,14 +539,13 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
   border-radius:20px;padding:3px 9px;flex-shrink:0;}
 .circuit-timing{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;margin:10px 0 2px;}
 .circuit-field{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--text-dim);}
-.circuit-field .num-input{width:64px;min-width:0;max-width:none;padding:7px 4px;}
+.circuit-field .num-input{width:64px;min-width:0;max-width:none;padding:7px 4px;color:var(--text);}
 .circuit-field .stepper{padding:2px 6px;gap:6px;}
 .circuit-field .stepper button{width:30px;height:30px;font-size:18px;font-weight:800;border-radius:10px;}
 .circuit-field .stepper span{color:var(--text);}
 .circuit-info{font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.5;margin-top:8px;overflow-wrap:anywhere;}
 .circuit-info > div + div{margin-top:3px;}
 .circuit-round b{color:var(--text);font-weight:800;}
-.circuit-last{color:var(--text-faint);}
 .circuit-count{color:var(--accent-deep);font-weight:800;}
 /* one line where it fits - name, the round's inputs, Remove - and on a
    phone the inputs drop below the name */
@@ -562,7 +571,6 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .ex-card.circuit-card{border-color:var(--accent-soft-border);}
 .circuit-line{font-size:14px;font-weight:800;color:var(--text);line-height:1.45;overflow-wrap:anywhere;}
 .circuit-sub{font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.45;margin-top:4px;overflow-wrap:anywhere;}
-.circuit-sub.faint{color:var(--text-faint);}
 .circuit-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:12px;}
 .circuit-enter{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;margin-top:14px;padding-top:12px;
   border-top:2px dashed var(--border);font-size:13px;font-weight:700;color:var(--text-dim);}
@@ -574,12 +582,14 @@ body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);bor
 .best-chip[hidden]{display:none;}
 .circuit-edit-name{font-family:var(--font-display);font-size:18px;font-weight:700;width:100%;margin-bottom:4px;}
 .cedit-row{display:flex;align-items:flex-start;gap:8px;padding:10px 0;border-top:2px solid var(--border);}
-.cedit-row:first-of-type{margin-top:10px;}
+/* the first row: whatever sits above it is not another row (:first-of-type
+   would count every div in the card, and the head and timing come first) */
+:not(.cedit-row) + .cedit-row{margin-top:10px;}
 .cedit-main{flex:1;min-width:0;}
 .cedit-name{font-weight:800;font-size:14.5px;overflow-wrap:anywhere;}
 .cedit-fields{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;}
 .cedit-field{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:800;color:var(--text-dim);min-width:0;}
-.cedit-field .num-input{width:84px;max-width:none;}
+.cedit-field .num-input{width:84px;max-width:none;color:var(--text);}
 .circuit-empty{font-size:13px;font-weight:700;color:var(--text-faint);padding:10px 0 4px;}
 .score-sheet{margin-top:4px;}
 .score-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
@@ -923,6 +933,10 @@ button.heatmap-cell:hover{outline:2px solid var(--text-dim);outline-offset:1px;}
   .save-alert-wrap{padding-left:calc(14px + var(--safe-left));padding-right:calc(14px + var(--safe-right));}
   #save-alert{margin-top:14px;}
   .timerbar{bottom:calc(var(--navh) + env(safe-area-inset-bottom));padding-bottom:0;border-radius:24px 24px 0 0;}
+  /* scrollIntoView knows nothing of the dock, so a chooser or picker brought
+     up from below would stop behind it. The extra 26px is how far the round
+     centre button rises above the dock, so the last row clears it too. */
+  #workout-picker,#plan-picker{scroll-margin-bottom:calc(var(--navh) + var(--safe-bottom) + 26px);}
   /* the workout name is on the workout screen anyway, so the pill can be
      trimmed here rather than shoving the settings and profile icons off */
   .inprogress-pill{padding:7px 11px;font-size:12px;}
@@ -1592,7 +1606,8 @@ body.photos-hidden .photo-veil{display:flex;}
                             | category or break, as in a plan
                             | { kind:'circuit', id, name, circuit,
                                 members:[{ id, exerciseId, name, fields:[snapshot], values }],
-                                clock, result:{ rounds, partial, splits },
+                                clock: null | { startedAt, pausedAt, pausedMs, endedAt, scoreDue? },
+                                result:{ rounds, partial:{memberId:amount}, splits:[work-clock ms] },
                                 exerciseId:null, defaultRestSec:null, fields, sets }
                             | { kind:'rest', id, seconds }] }]
               A circuit is one self-contained entry. Its exerciseId,
@@ -1602,6 +1617,13 @@ body.photos-hidden .photo-veil{display:flex;}
               the score instead of crashing. exerciseId stays null so no
               counter, chart or hint ever takes the circuit for a real
               exercise.
+              clock.startedAt is the GO moment (Start writes it 10 s ahead);
+              an open pause is folded into pausedMs before endedAt is
+              written. scoreDue says the sheet Time! opened still waits for
+              its Done; it only lives on the active workout, and Finish
+              strips it (see 'The circuit clock'). rounds is null while
+              unscored; partial is keyed by member id, never by place; splits
+              are the work-clock ms at each Round Done tap.
               date is the local day the workout STARTED. startedAt/completedAt
               can be set by hand; editedAt is when that last happened, so a
               backup older than the edit still counts it as missing.
@@ -1694,7 +1716,16 @@ function toLocalISO(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2
 function todayISO(){ return toLocalISO(new Date()); }
 function parseISO(iso){ var p=iso.split('-').map(Number); return new Date(p[0],p[1]-1,p[2]); }
 function fmtHeaderDate(iso){ return parseISO(iso).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'}); }
-function fmtShortDate(iso){ return parseISO(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'}); }
+/* Building a date formatter is slow, and the Sessions list formats one date
+   per workout, so it is made once and kept. */
+var SHORT_DATE_FMT = null;
+function fmtShortDate(iso){
+  if (SHORT_DATE_FMT === null){
+    try { SHORT_DATE_FMT = new Intl.DateTimeFormat(undefined,{month:'short',day:'numeric'}); }
+    catch(e){ SHORT_DATE_FMT = false; }
+  }
+  return SHORT_DATE_FMT ? SHORT_DATE_FMT.format(parseISO(iso)) : parseISO(iso).toLocaleDateString(undefined,{month:'short',day:'numeric'});
+}
 function fmtElapsed(ms){
   var totalSec = Math.max(0, Math.floor(ms/1000));
   var h = Math.floor(totalSec/3600), m = Math.floor((totalSec%3600)/60), s = totalSec%60;
@@ -2020,7 +2051,9 @@ function entryVolume(list, idx, mode){
   var sets = (e.sets || []).filter(function(s){ return (s.kind||'set')==='set'; });
   var heading = mode==='plan' ? circuitHeadingIdx(list, idx) : -1;
   if (heading !== -1) return [{ exerciseId:e.exerciseId, sets:circuitPlanSets(list[heading]) }];
-  if (circuitHeadingIdx(list, idx) === -1 && ladderUsable(e, fields)){
+  /* past a circuit's movements: a workout keeps its circuits as circuit
+     entries, so only a plan ever has a heading here */
+  if (ladderUsable(e, fields)){
     return [{ exerciseId:e.exerciseId, sets:ladderHardSets(e.ladder, sets, mode) }];
   }
   return [{ exerciseId:e.exerciseId, sets: mode==='plan' ? planSetCount(e) : workoutSetCount(e) }];
@@ -2838,7 +2871,11 @@ window.addEventListener('storage', function(e){
    it closed. Now it says so, on every screen, until a save works again - and
    the export it offers is built from memory, so it carries all of it. */
 var saveFailing = false, saveAlertExported = false;
+/* Every change to the data comes through save(), so anything worked out from
+   the history and kept (circuitIndex) knows by this count to start again. */
+var dataGen = 0;
 function save(){
+  dataGen++;
   if (staleCopy) return false;
   try{
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -3301,6 +3338,7 @@ function mergeImportedData(payload){
   }
 
   data.workouts.sort(function(a,b){ return (a.completedAt||0) - (b.completedAt||0); });
+  settleFinishedCircuits();
   save();
   migratePlanItems();
   migrateMuscleData();
@@ -3336,6 +3374,7 @@ function applyImportedData(payload){
   save();
   migratePlanItems();
   migrateMuscleData();
+  if (settleFinishedCircuits()) save();
   /* a backup keeps its activeWorkout, so a circuit on the clock in it runs
      on here, or is settled if its time ran out meanwhile */
   restoreCircuit();
@@ -4355,7 +4394,7 @@ function movePlanBlock(fromIdx, toIdx, exitCategory){
   }
   for (var i=0;i<moved.length;i++) items.splice(dest+i, 0, moved[i]);
   plan.items = normalizePlanItems(items);
-  closePlanLadderEdits();
+  closePlanEntryEditors();
   save(); renderMain();
 }
 
@@ -4380,6 +4419,9 @@ function ladderProblems(l){
   if (!(l.to >= 1)) out.push('Down To must be at least 1.');
   if (!(l.step >= 1)) out.push('Step must be at least 1.');
   if (l.from > LADDER_MAX_TOP) out.push('Start At must be '+LADDER_MAX_TOP+' or less.');
+  /* a step past Down To leaves a single rung: nothing to count down, and
+     nothing for Climb Back Up to climb */
+  if (!out.length && l.from - l.step < l.to) out.push('Step must be '+(l.from - l.to)+' or less.');
   if (!out.length && ladderRungCount(l) > LADDER_MAX_RUNGS){
     out.push('That\u2019s more than '+LADDER_MAX_RUNGS+' rungs \u2014 raise the step.');
   }
@@ -4495,7 +4537,8 @@ function ladderSummary(wex){
   var end = l.endedAt || (complete ? lastDoneAt : 0) || null;
   return {
     label: ladderLabel(l), idxs: idxs, total: total, done: done,
-    planned: planned, logged: logged,
+    /* 2.2 cal and 1.1 cal is 3.3, not 3.3000000000000003 */
+    planned: Math.round(planned*1000)/1000, logged: Math.round(logged*1000)/1000,
     current: cur, currentIdx: cur >= 0 ? idxs[cur] : -1,
     stoppedAt: lastDone + 1, complete: complete,
     started: !!l.startedAt,
@@ -4505,17 +4548,21 @@ function ladderSummary(wex){
     ms: l.startedAt ? Math.max(0, (end || Date.now()) - l.startedAt) : 0
   };
 }
-/* The last finished ladder of this exercise, for the card's 'Last' line.
+/* The newest kept session holding this exercise in the wanted shape.
+   wantLadder keeps the two shapes apart: a 3x8 card never hints 15, 14, 13
+   from last week's Downs, and a ladder's Last line never shows a 3x8 day.
    Like the greyed hints, it skips sessions kept out of the reference. */
-function lastLadderFor(exerciseId, excludeWorkoutId){
+function lastSessionEntry(exerciseId, excludeWorkoutId, wantLadder){
   var past = data.workouts.filter(function(w){ return w.completedAt && w.id!==excludeWorkoutId && !w.excludeFromReference; })
     .sort(function(a,b){ return b.completedAt-a.completedAt; });
   for (var i=0;i<past.length;i++){
-    var entry = (past[i].exercises||[]).filter(function(e){ return e.exerciseId===exerciseId && isLadderEntry(e); })[0];
+    var entry = (past[i].exercises||[]).filter(function(e){ return e.exerciseId===exerciseId && isLadderEntry(e)===!!wantLadder; })[0];
     if (entry) return { entry: entry, workout: past[i] };
   }
   return null;
 }
+/* the last finished ladder, for the ladder card's 'Last' line */
+function lastLadderFor(exerciseId, excludeWorkoutId){ return lastSessionEntry(exerciseId, excludeWorkoutId, true); }
 /* A ladder as the charts see it: only the rungs actually ticked off. */
 function ladderTickedView(wex){
   return Object.assign({}, wex, { sets: wex.sets.filter(function(s){ return (s.kind||'set')==='set' && s.done; }) });
@@ -4523,6 +4570,14 @@ function ladderTickedView(wex){
 function closePlanLadderEdits(){
   ui.planLadderEditing = null;
   ui.planRungsOpen = null;
+}
+/* Every editor open on a plan card points at it by position, so anything
+   that removes, moves or adds entries - or swaps the plan - closes them
+   all. Otherwise the one left open lands on whichever card slid into its
+   place, and its tick writes that card. */
+function closePlanEntryEditors(){
+  closePlanLadderEdits(); closeLadderEditor();
+  ui.editingPlanRest = ui.editingPlanSetRest = ui.editingPlanRestBlock = null;
 }
 
 /* ---- Circuits -------------------------------------------------------------
@@ -4540,12 +4595,15 @@ function closePlanLadderEdits(){
 /* the settings with any gap filled, so broken data still has a clock */
 function circuitCfg(c){
   var k = (c && c.circuit) || {};
-  function whole(v, dflt, min){
+  /* held to what the editors allow as well: a hand-edited 10000000 blocks
+     would otherwise freeze every place that lists the blocks. The break has
+     no top, since its editor has none. */
+  function whole(v, dflt, min, max){
     if (v===null || v===undefined || v==='' || isNaN(v*1)) return dflt;
-    return Math.max(min, Math.round(v*1));
+    return Math.min(max, Math.max(min, Math.round(v*1)));
   }
-  return { workSec: whole(k.workSec, CIRCUIT_DEFAULT.workSec, 1), blocks: whole(k.blocks, 1, 1),
-           breakSec: whole(k.breakSec, CIRCUIT_DEFAULT.breakSec, 0) };
+  return { workSec: whole(k.workSec, CIRCUIT_DEFAULT.workSec, 30, 10800), blocks: whole(k.blocks, 1, 1, 10),
+           breakSec: whole(k.breakSec, CIRCUIT_DEFAULT.breakSec, 0, Infinity) };
 }
 /* a break only exists between blocks, so one block has none */
 function circuitBreakSec(k){ return k.blocks > 1 ? k.breakSec : 0; }
@@ -4688,13 +4746,22 @@ function circuitResultLabel(c){
 /* The recipe, for comparing scores like for like: the timing and every
    movement's targets in order. The name is left out, so a rename keeps the
    series; a changed target, load, movement, order or time starts a new one,
-   because the scores no longer compare. */
+   because the scores no longer compare. Each movement's targets are its
+   filled-in values by field id, sorted: a session keeps the fields it
+   started with while a plan reads the library's today, so an empty field
+   added, removed or moved on the exercise page changes nothing that was
+   done, and must not start a new series. */
 var CIRCUIT_SIG_TYPES = ['reps','weight','assisted','distance','timer','time','number'];
 function circuitSig(c){
   var k = circuitCfg(c);
   var mem = (c.members||[]).map(function(m){
-    var vals = (m.fields||[]).filter(function(f){ return CIRCUIT_SIG_TYPES.indexOf(f.type) >= 0; })
-      .map(function(f){ return normVal(m.values ? m.values[f.id] : null); });
+    var vals = [];
+    (m.fields||[]).forEach(function(f){
+      if (CIRCUIT_SIG_TYPES.indexOf(f.type) < 0) return;
+      var v = normVal(m.values ? m.values[f.id] : null);
+      if (v!==null) vals.push([f.id, v]);
+    });
+    vals.sort(function(a,b){ return a[0] < b[0] ? -1 : (a[0] > b[0] ? 1 : 0); });
     return [m.exerciseId, vals];
   });
   return JSON.stringify([k.workSec, k.blocks, circuitBreakSec(k), mem]);
@@ -4754,19 +4821,37 @@ function circuitFromHeading(items, idx){
   return { kind:'circuit', name:h.name, circuit:circuitCfg(h), members:members, clock:null,
            result:{ rounds:null, partial:{}, splits:[] } };
 }
-/* Finished, scored sessions of exactly this recipe, oldest first. */
-function circuitSessions(sig){
-  var out = [];
+/* Every finished, scored circuit in the history, filed by recipe and by
+   name. Worked out once and kept until the next save (or a whole new set of
+   data), since a screen of three circuit cards otherwise asks for it a dozen
+   times, each a pass over every workout. */
+var circuitIndexMemo = null;
+function circuitIndex(){
+  var m = circuitIndexMemo;
+  if (m && m.gen===dataGen && m.list===data.workouts) return m;
+  var bySig = {}, byName = {};
   data.workouts.forEach(function(w){
     if (!w.completedAt) return;
     (w.exercises||[]).forEach(function(e){
       if (itemKind(e)!=='circuit') return;
       var sc = circuitScore(e);
-      if (sc.scored && circuitSig(e)===sig) out.push({ circuit:e, workout:w, score:sc });
+      if (!sc.scored) return;
+      var s = { circuit:e, workout:w, score:sc, sig:circuitSig(e) };
+      (bySig[s.sig] = bySig[s.sig] || []).push(s);
+      var nm = String(e.name||'').trim().toLowerCase();
+      (byName[nm] = byName[nm] || []).push(s);
     });
   });
-  out.sort(function(a,b){ return a.workout.completedAt - b.workout.completedAt; });
-  return out;
+  Object.keys(bySig).forEach(function(k){
+    bySig[k].sort(function(a,b){ return a.workout.completedAt - b.workout.completedAt; });
+  });
+  circuitIndexMemo = { gen:dataGen, list:data.workouts, bySig:bySig, byName:byName };
+  return circuitIndexMemo;
+}
+/* Finished, scored sessions of exactly this recipe, oldest first. A copy,
+   so a caller can filter it without touching the kept one. */
+function circuitSessions(sig){
+  return (circuitIndex().bySig[sig] || []).slice();
 }
 /* Last skips sessions kept out of the reference, as the greyed hints do */
 function lastCircuitFor(sig, excludeWorkoutId){
@@ -4812,13 +4897,10 @@ function circuitProgressText(c, excludeWorkoutId){
    session's card counts, since the words say "earlier" */
 function circuitOtherRecipeCount(c, excludeWorkoutId, before){
   var sig = circuitSig(c), name = String(c.name||'').trim().toLowerCase(), other = 0;
-  data.workouts.forEach(function(w){
-    if (!w.completedAt || w.id===excludeWorkoutId) return;
-    if (before && w.completedAt >= before) return;
-    (w.exercises||[]).forEach(function(e){
-      if (itemKind(e)==='circuit' && String(e.name||'').trim().toLowerCase()===name &&
-          circuitScore(e).scored && circuitSig(e)!==sig) other++;
-    });
+  (circuitIndex().byName[name] || []).forEach(function(s){
+    if (s.workout.id===excludeWorkoutId) return;
+    if (before && s.workout.completedAt >= before) return;
+    if (s.sig!==sig) other++;
   });
   return other;
 }
@@ -4907,6 +4989,25 @@ function circuitById(id){
 function circuitEditable(c){
   return !c.clock && !circuitScore(c).scored;
 }
+/* Enter Score opens the sheet at 0 rounds so there is something to step
+   from. Left at nothing - 0 rounds, no part of one - that was a look or a
+   slipped thumb, not a score of nothing, so the circuit goes back to
+   unscored: Ready again, Start and all, and no '0 rounds' reaches history,
+   Last / Best or the chart. A clock's 0 is what the clock saw, so it stays.
+   True when one was dropped. */
+function dropEmptyScore(c){
+  if (!c || c.clock || !c.result || circuitScore(c).rounds!==0) return false;
+  if ((c.members||[]).some(function(m){ return circuitPartialOf(c, m) > 0; })) return false;
+  c.result = { rounds:null, partial:{}, splits:[] };
+  writeCircuitMirror(c);
+  return true;
+}
+/* The score sheet closing, however it closes. */
+function closeScoreSheet(){
+  var c = circuitById(ui.circuitScoreOpen);
+  ui.circuitScoreOpen = null; ui.circuitStop = null;
+  if (dropEmptyScore(c)) save();
+}
 
 /* ------------------------------------------------------------ ui state */
 
@@ -4957,7 +5058,8 @@ var ui = {
   ladderNext: null,
   /* Circuits, found by the entry's id rather than its place: the circuit in
      edit mode, the one whose score sheet is open, the movement on it that
-     holds the stepper ({cir, member}), the Add Circuit chooser, and where an
+     holds the stepper ({cir, member, rolled}: rolled when its step just made
+     the round), the Add Circuit chooser, and where an
      exercise made from the picker's New goes ({headerId} or {circuitId}) */
   circuitEditing: null,
   circuitScoreOpen: null,
@@ -4992,16 +5094,10 @@ function computeThisMonthCount(){
     return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
   }).length;
 }
-/* wantLadder keeps the two shapes apart: a 3x8 card never hints 15, 14, 13
-   from last week's Downs, and a ladder never takes 3x8 as its rungs */
-function lastEntryFor(exerciseId, excludeWorkoutId, wantLadder){
-  var past = data.workouts.filter(function(w){ return w.completedAt && w.id!==excludeWorkoutId && !w.excludeFromReference; })
-    .sort(function(a,b){ return b.completedAt-a.completedAt; });
-  for (var i=0;i<past.length;i++){
-    var entry = past[i].exercises.find(function(e){ return e.exerciseId===exerciseId && isLadderEntry(e)===!!wantLadder; });
-    if (entry) return entry;
-  }
-  return null;
+/* the last plain entry, for a set card's greyed hints (see lastSessionEntry) */
+function lastEntryFor(exerciseId, excludeWorkoutId){
+  var hit = lastSessionEntry(exerciseId, excludeWorkoutId, false);
+  return hit ? hit.entry : null;
 }
 function currentPlan(){ return data.plans.find(function(p){ return p.id===ui.selectedPlanId; }); }
 
@@ -5024,8 +5120,7 @@ function setView(view){
   ui.ladderDraft = null;
   ui.ladderNext = null;
   ui.circuitEditing = null;
-  ui.circuitScoreOpen = null;
-  ui.circuitStop = null;
+  closeScoreSheet();
   ui.circuitChooser = null;
   /* a score sheet the clock opened waits for its Done, so coming back to
      the workout - from the pill after Time!, or at start-up - finds it open */
@@ -5282,7 +5377,7 @@ function renderPlans(){
         }
         if (hiddenUntilNextCategory) return;
         var headingIdx = circuitHeadingIdx(plan.items, idx);
-        rowsHtml += headingIdx !== -1 ? renderPlanCircuitMember(idx, headingIdx) : renderPlanExerciseCard(idx);
+        rowsHtml += headingIdx !== -1 ? renderPlanCircuitMember(idx) : renderPlanExerciseCard(idx);
         /* a landing strip just past the last member, for pulling an
            exercise out of the category downwards */
         if (isLastInCategory(plan.items, idx)){
@@ -5309,7 +5404,10 @@ function renderPlans(){
             '<button class="btn btn-ghost" data-action="plan-add-category">'+icon('plus')+' Add Category</button>'+
             '<button class="btn btn-ghost" data-action="plan-add-circuit">'+icon('plus')+' Add Circuit</button>'+
             '<div style="flex:1"></div>'+
-            '<button class="btn btn-primary" data-action="start-plan" data-id="'+plan.id+'" '+(planExerciseCount(plan)===0?'disabled':'')+'>'+icon('play')+' Start Workout</button>'+
+            /* while a session runs this button goes back to it (startFromPlan), so it says so */
+            (data.activeWorkout
+              ? '<button class="btn btn-primary" data-action="start-plan" data-id="'+plan.id+'">'+icon('play')+' Resume Workout</button>'
+              : '<button class="btn btn-primary" data-action="start-plan" data-id="'+plan.id+'" '+(planExerciseCount(plan)===0?'disabled':'')+'>'+icon('play')+' Start Workout</button>')+
           '</div>'+
           '<div id="plan-picker" hidden></div>'+
         '</div>'+
@@ -5349,7 +5447,7 @@ function movePlanItem(idx, dir){
   var j = idx+dir;
   if (j<0 || j>=plan.items.length) return;
   var tmp = plan.items[idx]; plan.items[idx]=plan.items[j]; plan.items[j]=tmp;
-  closePlanLadderEdits();
+  closePlanEntryEditors();
   save(); renderMain();
 }
 
@@ -5458,9 +5556,10 @@ function renderPlanExerciseCard(idx){
 
   var inCategory = owningCategoryIdx(plan.items, idx) !== -1;
   var table = '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table>';
-  /* Downs: a card with a reps (or number) field, outside a circuit */
+  /* Downs: a card with a reps (or number) field. Circuit movements are drawn
+     by renderPlanCircuitMember, so every card here is outside a circuit. */
   var isLadder = planEntryIsLadder(plan.items, idx);
-  var canDowns = circuitHeadingIdx(plan.items, idx) === -1 && !!ladderFieldOf(fields);
+  var canDowns = !!ladderFieldOf(fields);
   var body = (canDowns && ui.planLadderEditing === idx) ? renderLadderEditor('plan', idx) : '';
   if (!body && isLadder) body = renderPlanLadderBody(idx, item, fields, table);
   else if (!body) body = table +
@@ -5491,16 +5590,16 @@ function renderPlanExerciseCard(idx){
    fifteen-row table tucked behind Edit Rungs so a ladder doesn't bury the
    plan. The editor that builds one is shared with the workout card. */
 
-/* The rest a plan entry will start with: its own, else - as startFromPlan
-   does - the exercise's. A ladder's tag states it outright, so it must be
-   the one the session will really use. */
+/* The rest a plan entry will start with: its own, else the exercise's.
+   planEntryToWorkout starts the session with this, so a ladder's tag, which
+   states it outright, is the rest the session will really use. */
 function planEntryRest(item, ex){
   if (item.defaultRestSec!==null && item.defaultRestSec!==undefined) return item.defaultRestSec;
   return (ex && ex.defaultRestSec!==null && ex.defaultRestSec!==undefined) ? ex.defaultRestSec : null;
 }
 function ladderTagHTML(l, restSec){
   return '<div class="ladder-tag">Downs '+esc(ladderLabel(l))+
-    ' &middot; '+(restSec ? 'Rest '+fmtRest(restSec) : 'No rest')+'</div>';
+    ' &middot; <span class="ladder-tag-rest">'+(restSec ? 'Rest '+fmtRest(restSec) : 'No rest')+'</span></div>';
 }
 function renderPlanLadderBody(idx, item, fields, table){
   var fid = item.ladder.fieldId, field = ladderCountField(item, fields);
@@ -5511,6 +5610,7 @@ function renderPlanLadderBody(idx, item, fields, table){
     total += ladderNum(v);
     return '<span class="rung-chip plan">'+(ladderNum(v) || v===0 ? esc(String(v)) : '\u2014')+'</span>';
   }).join('');
+  total = Math.round(total*1000)/1000;   /* no float noise from decimal rungs */
   var hard = entryVolume(currentPlan().items, idx, 'plan')[0].sets;
   var open = ui.planRungsOpen === idx;
   return '<div class="rung-row">'+chips+'</div>'+
@@ -5633,8 +5733,10 @@ function renderLadderEditor(scope, idx){
     '</div>'+
     '<label class="ladder-editor-row">'+
       '<span class="ladder-editor-label">Rest Between Rungs</span>'+
-      '<input id="ladder-rest" class="num-input ladder-rest-input" type="number" min="0" step="5" inputmode="numeric" placeholder="sec" value="'+(d.rest===null||d.rest===undefined?'':d.rest)+'">'+
-      '<span class="ladder-editor-hint">sec</span>'+
+      '<span class="ladder-rest-box">'+
+        '<input id="ladder-rest" class="num-input ladder-rest-input" type="number" min="0" step="5" inputmode="numeric" placeholder="sec" value="'+(d.rest===null||d.rest===undefined?'':d.rest)+'">'+
+        '<span class="ladder-editor-hint">sec</span>'+
+      '</span>'+
     '</label>'+
     '<div class="ladder-preview" id="ladder-preview">'+ladderPreviewHTML(d, ctx.field)+'</div>'+
     (others ? '<div class="ladder-editor-note">Weight and other targets are copied from the first set.</div>' : '')+
@@ -5725,8 +5827,9 @@ function planCircuitInfoHTML(items, idx){
   var c = circuitFromHeading(items, idx), k = circuitCfg(c), n = circuitPlanSets(items[idx]);
   return (k.blocks > 1 ? '<div>'+esc(circuitBlocksLine(c))+'</div>' : '')+
     '<div class="circuit-round">One Round: '+(c.members.length ? '<b>'+esc(circuitRoundText(c))+'</b>' : 'no movements yet')+'</div>'+
-    (c.members.length ? '<div class="circuit-last">'+esc(circuitProgressText(c, null))+'</div>' : '')+
-    '<div class="circuit-count">Counts as '+n+' set'+(n!==1?'s':'')+' per movement</div>';
+    /* with no movements yet there is nothing to have done, nor to count */
+    (c.members.length ? '<div class="circuit-last">'+esc(circuitProgressText(c, null))+'</div>'+
+      '<div class="circuit-count">Counts as '+n+' set'+(n!==1?'s':'')+' per movement</div>' : '');
 }
 function refreshPlanCircuitInfo(idx){
   var plan = currentPlan();
@@ -5785,7 +5888,7 @@ function planCircuitAddRowHTML(heading){
    for one round. Nothing about rest here, and no Downs: the circuit's clock
    is the only timing. Anything else the entry holds is shown, never hidden,
    with a way to clear it. */
-function renderPlanCircuitMember(idx, headingIdx){
+function renderPlanCircuitMember(idx){
   var plan = currentPlan(), item = plan.items[idx];
   var ex = exerciseById(item.exerciseId), unit = data.settings.weightUnit;
   var order = '<div class="plan-ex-order">'+
@@ -6237,9 +6340,14 @@ function chartScrubEnd(el){
   if (sEl) sEl.innerHTML = '<span>'+esc(chartDate(last.t))+'</span><span class="chart-delta '+cls+'">'+esc(txt)+'</span>';
 }
 
+/* Every render registers its charts afresh under new ids, so the registry is
+   cut back here to the charts actually on the page - otherwise a workout
+   drawn again on every ticked set keeps every chart it ever drew. Each path
+   puts its markup on the page before calling this, so nothing shown is lost. */
 function paintCharts(){
-  var els = document.querySelectorAll('[data-chart]');
-  for (var i=0;i<els.length;i++) drawChart(els[i]);
+  var els = document.querySelectorAll('[data-chart]'), shown = {};
+  for (var i=0;i<els.length;i++){ shown[els[i].dataset.chart] = true; drawChart(els[i]); }
+  Object.keys(CHART_REG).forEach(function(id){ if (!shown[id]) delete CHART_REG[id]; });
 }
 var chartResizeT = null;
 window.addEventListener('resize', function(){
@@ -7074,6 +7182,15 @@ function startBlankWorkout(){
   save(); setView('workout');
 }
 function startFromPlan(planId){
+  /* One session at a time, as Home's Resume card and the round button keep
+     it: a plan tapped while one runs goes back to that one. Starting over it
+     would throw away its sets, a ladder half done and a circuit on the
+     clock; Finish or Discard there is what ends it. */
+  if (data.activeWorkout){
+    setView('workout');
+    if (circuitPanelEntry()) scrollCircuitPanel();
+    return;
+  }
   var plan = data.plans.find(function(p){return p.id===planId;});
   if (!plan) return;
   var wExercises = [];
@@ -7142,7 +7259,8 @@ function planEntryToWorkout(plan, idx){
     return { kind:'set', id:uid('s'), values:vals, restSec:s.restSec, done:false };
   });
   if (sets.length===0){ sets.push({ kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false }); }
-  var effRest = (entry.defaultRestSec!==null && entry.defaultRestSec!==undefined) ? entry.defaultRestSec : (ex.defaultRestSec===undefined?null:ex.defaultRestSec);
+  /* the rest the plan's Downs tag names, so the two can't disagree */
+  var effRest = planEntryRest(entry, ex);
   var wex = { kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:effRest, sets:sets };
   if (ladder){
     wex.ladder = { from:ladder.from, to:ladder.to, step:ladder.step, back:!!ladder.back, fieldId:ladder.fieldId,
@@ -7214,8 +7332,7 @@ function addPickedExercise(exId, context, target){
       items.splice(h + planBlockLength(items, h), 0, { kind:'exercise', exerciseId:exId, defaultRestSec:null,
         sets:[{ kind:'set', id:uid('s'), values:blankSetValues(ex ? ex.fields : []), restSec:null }] });
       /* the entries below moved down one, and editors point by position */
-      closePlanLadderEdits(); closeLadderEditor();
-      ui.editingPlanRest = ui.editingPlanSetRest = ui.editingPlanRestBlock = null;
+      closePlanEntryEditors();
     } else {
       if (items.length && circuitHeadingIdx(items, items.length) !== -1) items.push(newPlanBreak());
       items.push(newPlanItem(exId));
@@ -7383,11 +7500,12 @@ function planSetsFromWorkoutExercise(we){
 }
 
 function applyPlanTimesUpdate(w, plan){
-  /* Paired by position, exactly as diffWorkoutVsPlan pairs them. A ladder on
-     either side sits this out (it has no timer targets to carry), but it
-     keeps its place, so the pairs after it stay lined up. Circuits are left
-     out altogether: the session's are nested entries, never kind:'exercise',
-     so the plan's movements are skipped to match. */
+  /* Paired by position, as diffWorkoutVsPlan pairs them, but with circuits
+     left out on both sides: the session's are nested entries, never
+     kind:'exercise', so the plan's movements are skipped to match, and a
+     times-only update leaves circuits alone. A ladder on either side sits
+     this out (it has no timer targets to carry), but it keeps its place, so
+     the pairs after it stay lined up. */
   var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
   var pEx = [], pLadder = [];
   (plan.items||[]).forEach(function(it, idx){
@@ -7544,6 +7662,8 @@ function finishWorkout(){
   w.exercises.forEach(function(e){
     if (itemKind(e)!=='circuit') return;
     if (e.clock) delete e.clock.scoreDue;
+    /* a sheet still open at Finish, or across a reload, left at nothing */
+    dropEmptyScore(e);
     writeCircuitMirror(e);
   });
   /* an end set back by hand can fall before the last backup, which then
@@ -7567,8 +7687,8 @@ function finishWorkout(){
 }
 /* '12 sets completed · Cindy 18 + 7'. Ticked Downs rungs are sets and count;
    a circuit is its score, and a workout of circuits alone leaves the sets
-   part out. withId marks the count the header keeps up to date. */
-function workoutSummaryHTML(w, withId){
+   part out. live is the running header's form, done out of total. */
+function workoutSummaryHTML(w, live){
   var totalSets = 0, doneSets = 0, circuits = [];
   w.exercises.forEach(function(e){
     var k = e.kind || 'exercise';
@@ -7581,8 +7701,8 @@ function workoutSummaryHTML(w, withId){
   });
   var parts = [];
   if (totalSets > 0 || !circuits.length){
-    parts.push(withId ? '<span id="workout-progress-count">'+doneSets+'/'+totalSets+'</span> sets completed'
-                      : doneSets+' set'+(doneSets!==1?'s':'')+' completed');
+    parts.push(live ? doneSets+'/'+totalSets+' sets completed'
+                    : doneSets+' set'+(doneSets!==1?'s':'')+' completed');
   }
   circuits.forEach(function(c){ parts.push(esc(circuitResultLabel(c))); });
   return parts.join(' &middot; ');
@@ -7884,7 +8004,7 @@ function renderExerciseCard(wexIdx){
   var wex = data.activeWorkout.exercises[wexIdx];
   if (isLadderEntry(wex)) return renderLadderCard(wexIdx);
   var unit = data.settings.weightUnit;
-  var lastEntry = lastEntryFor(wex.exerciseId, data.activeWorkout.id, false);
+  var lastEntry = lastEntryFor(wex.exerciseId, data.activeWorkout.id);
 
   var headerCols = '<th></th>' + wex.fields.map(function(f){
     return fieldHeaderCell(f, unit);
@@ -7995,7 +8115,10 @@ function renderLadderCard(wexIdx){
   var last = lastLadderFor(wex.exerciseId, w.id), lastLine = '';
   if (last){
     var ls = ladderSummary(last.entry);
+    /* one ended early says where, as history does, so its time isn't read
+       as the whole ladder's */
     lastLine = '<div class="ladder-last">Last: '+esc(ladderLabel(last.entry.ladder))+' &middot; '+ls.logged+' '+esc(ladderUnit(field, ls.logged))+
+      (ls.done && !ls.complete ? ' &middot; stopped at rung '+ls.stoppedAt+' of '+ls.total : '')+
       (ls.ms && (last.entry.ladder.endedAt || ls.complete) ? ' &middot; '+fmtElapsed(ls.ms) : '')+' &middot; '+esc(fmtShortDate(last.workout.date))+'</div>';
   }
 
@@ -8115,17 +8238,28 @@ function ladderRefreshNext(wexIdx, rung){
 }
 /* A second tap this soon after a logged rung is the other half of a double
    tap. Any other accepted ladder tap in between (End Here, Undo, Climb Back
-   Up) proves it isn't, and resets the stamp to 0. */
+   Up) proves it isn't, and resets the stamp to 0. A clock set back since
+   the stamp leaves the gap below 0, and that is no double tap. */
 function ladderTapTooSoon(){
-  return Date.now() - runtime.ladderLastDoneAt < CIRCUIT_TAP_GUARD_MS;
+  var gap = Date.now() - runtime.ladderLastDoneAt;
+  return gap >= 0 && gap < CIRCUIT_TAP_GUARD_MS;
+}
+/* The ladder only ever stops its own rest, the one labelled 'Next: N'. A
+   plain rest from a bench tick or the ▶ belongs to something else. */
+function clearLadderRest(){
+  if (runtime.timer && runtime.timer.label) clearRestTimer();
 }
 /* Logging a rung, from Done or from its tick in the table. */
 function logLadderRung(wexIdx, setIdx, value){
   var wex = data.activeWorkout.exercises[wexIdx], l = wex.ladder, s = wex.sets[setIdx];
-  var now = Date.now();
+  var now = Date.now(), last = 0;
+  /* Undo takes back the rung with the latest stamp, so a clock set back
+     since the last rung must not stamp this one earlier than it. The
+     double-tap guard below keeps the real time. */
+  wex.sets.forEach(function(x){ if (x !== s && x.done && (x.doneAt||0) > last) last = x.doneAt; });
   s.values[l.fieldId] = value;
   s.done = true;
-  s.doneAt = now;
+  s.doneAt = Math.max(now, last + 1);
   if (!l.startedAt) l.startedAt = now;
   l.endedAt = null;
   ui.ladderNext = null;
@@ -8141,11 +8275,11 @@ function logLadderRung(wexIdx, setIdx, value){
     if (rest && !liveCircuit()) startTimer(rest, 'Next: '+ladderNum(wex.sets[sum.currentIdx].target));
     /* no rest after this rung, so a 'Next: N' left from the one before now
        names the wrong rung */
-    else if (runtime.timer && runtime.timer.label) clearRestTimer();
+    else clearLadderRest();
   } else {
-    l.endedAt = now;
+    l.endedAt = s.doneAt;
     /* nothing comes next, so a 'Next: 1' still counting down is stale */
-    if (runtime.timer && runtime.timer.label) clearRestTimer();
+    clearLadderRest();
   }
   save();
   vibrate(15);
@@ -8172,7 +8306,7 @@ function ladderToggleRung(wexIdx, setIdx){
   ui.ladderNext = null;
   runtime.ladderLastDoneAt = 0;
   /* as Undo: a 'Next: N' rest no longer matches the rung the card is on */
-  if (runtime.timer && runtime.timer.label) clearRestTimer();
+  clearLadderRest();
   save(); renderMain();
 }
 /* After a rung is removed in the table. With the last rung gone the marker
@@ -8185,7 +8319,7 @@ function ladderAfterRungRemoved(wexIdx){
     delete wex.ladder;
     if (ui.rungsOpen === wexIdx) ui.rungsOpen = null;
     ui.ladderNext = null;
-    if (runtime.timer && runtime.timer.label) clearRestTimer();
+    clearLadderRest();
     return;
   }
   if (l.climbed && !wex.sets.some(function(s){ return s.climb; })) l.climbed = false;
@@ -8227,9 +8361,13 @@ function ladderAction(action, el){
       renderMain();
       break;
     case 'ladder-step': {
-      if (sum.currentIdx < 0 || Date.now() - runtime.ladderStartTapAt < CIRCUIT_TAP_GUARD_MS) break;
+      /* a clock set back since Start Downs leaves the gap below 0, and that
+         is no double tap */
+      var sg = Date.now() - runtime.ladderStartTapAt;
+      if (sum.currentIdx < 0 || (sg >= 0 && sg < CIRCUIT_TAP_GUARD_MS)) break;
       var rung = wex.sets[sum.currentIdx];
-      var v = Math.max(0, ladderNextValue(wexIdx, rung) + el.dataset.delta*1);
+      /* rounded, so stepping a decimal count leaves no float noise */
+      var v = Math.max(0, Math.round((ladderNextValue(wexIdx, rung) + el.dataset.delta*1)*1000)/1000);
       ui.ladderNext = { wex: wexIdx, set: rung.id, value: v };
       /* only the numbers change, so only the numbers are rewritten */
       var a = document.querySelector('[data-ladder-next="'+wexIdx+'"]');
@@ -8267,7 +8405,7 @@ function ladderAction(action, el){
         wex.sets.forEach(function(s){ if (s.done && (s.doneAt||0) > lastAt) lastAt = s.doneAt; });
         l.endedAt = back.complete ? (lastAt || Date.now()) : null;
         ui.ladderNext = null;
-        clearRestTimer();
+        clearLadderRest();
         save(); renderMain();
         break;
       }
@@ -8283,7 +8421,7 @@ function ladderAction(action, el){
       l.endedAt = null;
       ui.ladderNext = null;
       runtime.ladderLastDoneAt = 0;
-      clearRestTimer();
+      clearLadderRest();
       save(); renderMain();
       break;
     }
@@ -8291,7 +8429,7 @@ function ladderAction(action, el){
       l.endedAt = Date.now();
       ui.ladderNext = null;
       runtime.ladderLastDoneAt = 0;
-      clearRestTimer();
+      clearLadderRest();
       save(); renderMain();
     }); break;
     case 'ladder-climb': {
@@ -8357,7 +8495,7 @@ function renderCircuitCard(idx){
   return open+
     '<div class="ex-card-head"><div class="plan-ex-title"><div class="ex-card-name">'+esc(c.name)+'</div></div>'+remove+'</div>'+
     '<div class="circuit-line">'+esc(fmtCircuitFormat(c))+(any ? ' &middot; '+esc(circuitRoundText(c)) : '')+'</div>'+
-    (any ? '<div class="circuit-sub faint">'+esc(circuitProgressText(c, w.id))+'</div>'+
+    (any ? '<div class="circuit-sub circuit-last">'+esc(circuitProgressText(c, w.id))+'</div>'+
            '<div class="circuit-info-row"><div class="circuit-sub">Counts as '+n+' set'+(n!==1?'s':'')+' per movement</div>'+
              circuitProgressToggleHTML()+'</div>'+
            '<div class="circuit-chart">'+circuitChartHTML(c, w.id)+'</div>'
@@ -8371,10 +8509,12 @@ function renderCircuitCard(idx){
 /* '▶ Start 20:00', or 'Start 2 × 10:00'. Only one clock runs at a time. */
 function circuitStartHTML(c){
   var k = circuitCfg(c), other = liveCircuit(), why = '';
-  if (!c.members.length) why = 'Add a movement first';
-  else if (other && other.id!==c.id) why = 'Another circuit is running';
+  /* An empty circuit already says 'Add a movement first.' above its Edit
+     button, so Start just goes quiet rather than saying it twice. */
+  var empty = !c.members.length;
+  if (!empty && other && other.id!==c.id) why = 'Another circuit is running';
   var label = k.blocks > 1 ? 'Start '+k.blocks+' × '+secToMMSS(k.workSec) : 'Start '+secToMMSS(k.workSec);
-  return '<button class="btn btn-primary full-width circuit-start" data-action="circuit-start" data-cir="'+esc(c.id)+'"'+(why ? ' disabled' : '')+'>'+
+  return '<button class="btn btn-primary full-width circuit-start" data-action="circuit-start" data-cir="'+esc(c.id)+'"'+(empty || why ? ' disabled' : '')+'>'+
       icon('play')+' '+esc(label)+'</button>'+
     (why ? '<div class="circuit-start-hint">'+esc(why)+'</div>' : '');
 }
@@ -8404,7 +8544,7 @@ function renderCircuitEditor(c, idx, remove){
   return '<div class="ex-card-head"><div class="plan-ex-title">'+
       '<input class="title-input circuit-edit-name" data-commit="circuit-name" '+at+' value="'+esc(c.name)+'" aria-label="Circuit name"></div>'+remove+'</div>'+
     circuitTimingHTML(c, at, false)+
-    (k.blocks > 1 ? '<div class="circuit-sub">'+esc(circuitBlocksLine(c))+'</div>' : '')+
+    (k.blocks > 1 ? '<div class="circuit-sub" data-circuit-blocks="'+esc(c.id)+'">'+esc(circuitBlocksLine(c))+'</div>' : '')+
     (rows || '<div class="circuit-empty">No movements yet.</div>')+
     '<div class="circuit-actions">'+
       '<button class="btn btn-ghost small" data-action="circuit-add-member" '+at+'>'+icon('plus')+' Add Movement</button>'+
@@ -8568,7 +8708,12 @@ function setCircuitRounds(c, n){
    this session has shown the end, its own second decides, so a device
    clock set back since then can't hold the sheet shut. */
 function circuitSheetLocked(c){
-  if (!c.clock || !c.clock.endedAt || Date.now() >= c.clock.endedAt + 1000) return false;
+  if (!c.clock || !c.clock.endedAt) return false;
+  /* nothing writes an end still to come, so a device clock set back behind
+     it leaves the gap below 0 - after a reload too - and that ends the wait
+     rather than stretching it */
+  var gap = Date.now() - c.clock.endedAt;
+  if (gap < 0 || gap >= 1000) return false;
   if (circuitEndShown && circuitEndShown.id===c.id) return circuitEndJustShown(c.id);
   return true;
 }
@@ -8692,6 +8837,9 @@ function circuitAction(action, el){
   /* opening another circuit's sheet or editor ends the wait at the top */
   if (ui.circuitTimeUp && ui.circuitTimeUp!==c.id &&
       (action==='circuit-score-open' || action==='circuit-enter-score' || action==='circuit-edit')) endCircuitTimeUp();
+  /* ...and closes the sheet open on another, as its Done would */
+  if (ui.circuitScoreOpen && ui.circuitScoreOpen!==c.id &&
+      (action==='circuit-score-open' || action==='circuit-enter-score' || action==='circuit-edit')) closeScoreSheet();
   var member = el.dataset.member ? c.members.filter(function(m){ return m.id===el.dataset.member; })[0] : null;
   var editable = circuitEditable(c);
   switch(action){
@@ -8737,7 +8885,7 @@ function circuitAction(action, el){
       renderMain();
       return;
     case 'circuit-score-close':
-      ui.circuitScoreOpen = null; ui.circuitStop = null;
+      closeScoreSheet();
       endCircuitTimeUp();
       renderMain();
       return;
@@ -8816,6 +8964,11 @@ function circuitCommit(kind, t){
     case 'circuit-break':
       if (!circuitEditable(c)) return;
       applyCircuitTiming(circuitSettings(c), kind==='circuit-minutes' ? 'minutes' : 'break', t);
+      /* the line under the timing says the total on the clock. It is
+         rewritten in place, as the plan heading's is, so the field being
+         moved into is never swapped out from under the keyboard. */
+      var bl = document.querySelector('[data-circuit-blocks="'+c.id+'"]');
+      if (bl) bl.textContent = circuitBlocksLine(c);
       break;
     case 'circuit-member': {
       if (!circuitEditable(c) || !member) return;
@@ -9194,12 +9347,15 @@ function circuitHistoryCardHTML(c, w){
     (c.members && c.members.length ? circuitProgressHTML(c, w.id, w.completedAt) : '')+
   '</div>';
 }
-/* 'Avg round 1:05 · fastest 0:58 · blocks 5 · 4 · 4 · 5', from the taps.
-   Splits are work-clock times, so breaks and pauses never lengthen a round;
-   a round tapped in a break belongs to the block that just ended. */
+/* 'Avg round 1:05 · fastest 0:58 · rounds per block 5, 4, 4, 5', from the
+   taps. Splits are work-clock times, so breaks and pauses never lengthen a
+   round; a round tapped in a break belongs to the block that just ended.
+   Only when the taps are the score: rounds added at the end (a missed tap,
+   or the unfinished round made whole) have no time, and a line from the
+   taps alone would then sit beside '8 rounds' saying 2, 2. */
 function circuitSplitsText(c){
   var sp = (c.result && Array.isArray(c.result.splits)) ? c.result.splits : [];
-  if (sp.length < 2) return '';
+  if (sp.length < 2 || circuitScore(c).rounds !== sp.length) return '';
   var k = circuitCfg(c), W = k.workSec*1000, prev = 0, fastest = null, per = [];
   sp.forEach(function(ms){
     var d = ms - prev;
@@ -9212,7 +9368,9 @@ function circuitSplitsText(c){
   if (k.blocks > 1){
     var counts = [];
     for (var i=0;i<k.blocks;i++) counts.push(per[i]||0);
-    bits.push('blocks '+counts.join(' \u00b7 '));
+    /* commas, not the dot, so the counts read as one list rather than as
+       fields of their own */
+    bits.push('rounds per block '+counts.join(', '));
   }
   return bits.join(' \u00b7 ');
 }
@@ -9414,12 +9572,14 @@ function renderTimerBar(){
 
 /* ---- The circuit clock --------------------------------------------------
    Not a second timer object. The whole state is the entry's own clock
-   {startedAt, pausedAt, pausedMs, endedAt} inside data.activeWorkout, saved
-   by the normal save() on each tap - never per tick - so a reload, a locked
-   phone or a killed app loses nothing, and circuitPhase() works out where
-   it is from those timestamps alone. It stays out of runtime.timer on
-   purpose: any rest ▶ replaces that, a finished rest clears itself after
-   8 s, and a 20-minute clock with phases and a round count can't live there.
+   {startedAt, pausedAt, pausedMs, endedAt}, plus scoreDue while the sheet
+   Time! opened waits for Done (see settleCircuitEnd), inside
+   data.activeWorkout, saved by the normal save() on each tap - never per
+   tick - so a reload, a locked phone or a killed app loses nothing, and
+   circuitPhase() works out where it is from those timestamps alone. It
+   stays out of runtime.timer on purpose: any rest ▶ replaces that, a
+   finished rest clears itself after 8 s, and a 20-minute clock with phases
+   and a round count can't live there.
 
    runtime.circuit = {id, handle, phaseKey, lastPip, pendingBeep, lastTapAt,
    wakeLock, wakePending, awake} holds only what a reload may lose: the
@@ -9477,7 +9637,9 @@ function circuitLiveView(c, ph){
             block: k.blocks > 1 ? ' · Block '+ph.block+' of '+k.blocks : '' };
   if (ph.phase==='lead'){ v.phase = 'Get Ready'; v.pill = 'Get Ready '+clock; }
   else if (ph.phase==='work') v.phase = 'left of '+secToMMSS(k.workSec);
-  else if (ph.phase==='break'){ v.phase = 'Break · Block '+(ph.block+1)+' in'; v.pill = 'Break '+clock; }
+  /* the clock sits above this line, so it reads on from the time, as work
+     does: '0:19' / 'Break until Block 2' */
+  else if (ph.phase==='break'){ v.phase = 'Break until Block '+(ph.block+1); v.pill = 'Break '+clock; }
   if (ph.paused){ v.attr = 'paused'; v.phase = 'Paused'; v.pill = 'Paused'; }
   return v;
 }
@@ -9541,10 +9703,11 @@ function renderCircuitDonePanel(c){
     renderScoreSheet(c)+
   '</div>';
 }
-/* '18 Rounds', or 'Ended at 14:32 · 14 Rounds' */
+/* '18 rounds', or 'Ended at 14:32 · 14 rounds': lowercase like the Score
+   line under it, since it is a count and not a heading */
 function circuitDoneLine(c, sc){
   var n = sc.scored ? sc.rounds : 0;
-  var r = n+(n===1 ? ' Round' : ' Rounds');
+  var r = n+(n===1 ? ' round' : ' rounds');
   return circuitEndedEarly(c) ? 'Ended at '+fmtElapsed(circuitPhase(c, c.clock.endedAt).workedMs)+' · '+r : r;
 }
 /* Text and attributes only, and only where they changed. */
@@ -9688,6 +9851,8 @@ function settleCircuitEnd(c){
   if (!c.result.partial || typeof c.result.partial!=='object') c.result.partial = {};
   c.result.rounds = c.result.splits.length;
   c.clock.scoreDue = true;
+  /* another circuit's sheet gives way, closed as its Done would */
+  if (ui.circuitScoreOpen && ui.circuitScoreOpen!==c.id) closeScoreSheet();
   ui.circuitScoreOpen = c.id; ui.circuitTimeUp = c.id;
   ui.circuitStop = null; ui.circuitEditing = null;
   writeCircuitMirror(c);
@@ -9706,6 +9871,13 @@ function endCircuitTimeUp(){
 /* Time!: the end is written as the SCHEDULED end, never the moment the loop
    noticed, so a late wake-up can't add work time. */
 function circuitTimesUp(c){
+  /* the one render nobody tapped for: a value half-typed into the workout
+     is saved first, or the page is rebuilt from data without it - and
+     WebKit removes the field without the focusout that would save it. Only
+     the workout is rebuilt, so a field in a pop-up, or on a tab the render
+     below leaves standing, keeps its keyboard. */
+  var main = document.getElementById('main');
+  if (ui.view==='workout' && main && main.contains(document.activeElement)) commitFocusedField();
   c.clock.pausedAt = null;
   c.clock.endedAt = circuitScheduledEnd(c);
   settleCircuitEnd(c);
@@ -9734,7 +9906,8 @@ function startCircuit(c){
   endCircuitTimeUp();
   c.clock = { startedAt: Date.now() + CIRCUIT_LEAD_SEC*1000, pausedAt:null, pausedMs:0, endedAt:null };
   c.result = { rounds:null, partial:{}, splits:[] };
-  ui.circuitEditing = null; ui.circuitScoreOpen = null; ui.circuitStop = null; ui.picker = null;
+  ui.circuitEditing = null; ui.picker = null;
+  closeScoreSheet();   /* another circuit's, closed as its Done would */
   writeCircuitMirror(c);
   save();
   startCircuitLoop(c);
@@ -9870,19 +10043,43 @@ function circuitFinishAt(c, endAt){
    going goes back to Ready. */
 function endLiveCircuitForFinish(endAt){
   var c = liveCircuit();
-  if (c){
-    var at = circuitFinishAt(c, endAt);
-    if (at===null){
-      c.clock = null;
-      c.result = { rounds:null, partial:{}, splits:[] };
-    } else {
-      endCircuit(c, at);
-      if (!Array.isArray(c.result.splits)) c.result.splits = [];
-      if (c.result.rounds===null || c.result.rounds===undefined) c.result.rounds = c.result.splits.length;
-    }
-  }
+  if (c) settleCircuitForFinish(c, endAt);
   stopCircuitRuntime();
   ui.circuitTimeUp = null;
+}
+/* one circuit, as Finish leaves it: ended at endAt with its taps as its
+   rounds, or back to Ready if it never got going */
+function settleCircuitForFinish(c, endAt){
+  var at = circuitFinishAt(c, endAt);
+  if (at===null){
+    c.clock = null;
+    c.result = { rounds:null, partial:{}, splits:[] };
+    return;
+  }
+  endCircuit(c, at);
+  if (!c.result || typeof c.result!=='object') c.result = { rounds:null, partial:{}, splits:[] };
+  if (!Array.isArray(c.result.splits)) c.result.splits = [];
+  if (c.result.rounds===null || c.result.rounds===undefined) c.result.rounds = c.result.splits.length;
+}
+/* An older build Finishes a session with its circuit still on the clock
+   and saves it that way - taps kept, never ended, never scored - so history
+   read it as '3 rounds so far' and 'Not scored' at once, and the rounds
+   counted nowhere. Nothing in history is on the clock, so each is settled
+   here as this build's own Finish would have done it, at the workout's end.
+   True when anything changed; once settled a circuit never matches again. */
+function settleFinishedCircuits(){
+  var changed = false;
+  (data.workouts||[]).forEach(function(w){
+    if (!w || !w.completedAt) return;
+    (w.exercises||[]).forEach(function(e){
+      if (itemKind(e)!=='circuit' || !circuitIsLive(e)) return;
+      if (!Array.isArray(e.members)) e.members = [];   /* a damaged entry still settles */
+      settleCircuitForFinish(e, w.completedAt);
+      writeCircuitMirror(e);
+      changed = true;
+    });
+  });
+  return changed;
 }
 /* 'Cindy is still on the clock (12:34 left). Finishing ends it now.' The
    loop keeps it current while the sheet is open, so it always says what
@@ -10382,8 +10579,8 @@ function handleAction(action, el){
       setView('plans');
       break;
     }
-    case 'select-plan': ui.selectedPlanId = el.dataset.id; closePlanLadderEdits(); renderMain(); break;
-    case 'deselect-plan': ui.selectedPlanId = null; closePlanLadderEdits(); renderMain(); break;
+    case 'select-plan': ui.selectedPlanId = el.dataset.id; closePlanEntryEditors(); renderMain(); break;
+    case 'deselect-plan': ui.selectedPlanId = null; closePlanEntryEditors(); renderMain(); break;
     case 'confirm-delete-plan': armOrConfirm(el, function(){
       data.plans = data.plans.filter(function(p){return p.id!==el.dataset.id;});
       ui.selectedPlanId = null; save(); renderMain();
@@ -10411,7 +10608,7 @@ function handleAction(action, el){
       if (rcAbove && planBlockLength(rcPlan.items, rcIdx) > 1) rcPlan.items.splice(rcIdx, 1, newPlanBreak());
       else rcPlan.items.splice(rcIdx, 1);
       rcPlan.items = normalizePlanItems(rcPlan.items);
-      closePlanLadderEdits(); closeLadderEditor();   /* they point by position */
+      closePlanEntryEditors();
       save(); renderMain();
       break;
     }
@@ -10427,7 +10624,7 @@ function handleAction(action, el){
       var plan = currentPlan();
       plan.items.splice(el.dataset.idx*1, 1);
       plan.items = normalizePlanItems(plan.items);
-      closePlanLadderEdits(); closeLadderEditor();
+      closePlanEntryEditors();
       save(); renderMain();
       break;
     }
@@ -10637,6 +10834,9 @@ function handleAction(action, el){
       if (gone && gone.id && gone.id===ui.circuitTimeUp) ui.circuitTimeUp = null;
       /* the clock goes with its circuit */
       if (gone && runtime.circuit && gone.id===runtime.circuit.id) stopCircuitRuntime();
+      /* and a ladder's 'Next: N' rest goes with it. Only a ladder on a rung
+         can own one, so another ladder's rest is left running. */
+      if (isLadderEntry(gone) && ladderSummary(gone).running) clearLadderRest();
       save(); renderMain();
     }); break;
 
@@ -11225,7 +11425,8 @@ function onFocusOut(e){
     }
     case 'plan-category-name': {
       var catEntry = currentPlan().items[t.dataset.idx*1];
-      if (catEntry){ catEntry.name = t.value.trim() || 'Untitled Category'; t.value = catEntry.name; save(); }
+      /* a circuit left without a name is called what a new one is, not a category */
+      if (catEntry){ catEntry.name = t.value.trim() || (isCircuitHeading(catEntry) ? 'Circuit' : 'Untitled Category'); t.value = catEntry.name; save(); }
       break;
     }
     case 'plan-name': {
@@ -11384,7 +11585,7 @@ function onKeyDown(e){
       closeLadderEditor(); ui.planRungsOpen = null; ui.rungsOpen = null; renderMain(); return;
     }
     if (ui.circuitEditing!=null || ui.circuitScoreOpen!=null || ui.circuitChooser!=null){
-      ui.circuitEditing = null; ui.circuitScoreOpen = null; ui.circuitChooser = null; ui.circuitStop = null;
+      closeScoreSheet(); ui.circuitEditing = null; ui.circuitChooser = null;
       endCircuitTimeUp();
       renderMain(); return;
     }
@@ -11395,7 +11596,7 @@ function onKeyDown(e){
    anything itself. Closes the innermost thing that is open, the way Escape
    does, then steps out of a detail screen, then back to Home. False means
    there was nothing left to close, and the app may go to the background. */
-var REST_EDITS = ['editingRest','editingDefaultRest','editingPlanRest','editingPlanSetRest','editingPlanRestBlock','editingRestBlock','editingTopRest',
+var INLINE_EDITS = ['editingRest','editingDefaultRest','editingPlanRest','editingPlanSetRest','editingPlanRestBlock','editingRestBlock','editingTopRest',
   'planLadderEditing','planRungsOpen','ladderEditing','rungsOpen','circuitEditing','circuitScoreOpen','circuitChooser'];
 function handleBack(){
   if (combo.el){ comboClose(); return true; }
@@ -11407,10 +11608,10 @@ function handleBack(){
   if (!document.getElementById('finish-modal').hidden){ closeFinishModal(); return true; }
   if (!document.getElementById('settings-modal').hidden){ closeSettings(); return true; }
   if (ui.picker){ handleAction('picker-close'); return true; }
-  var editing = REST_EDITS.filter(function(k){ return ui[k] != null; });
+  var editing = INLINE_EDITS.filter(function(k){ return ui[k] != null; });
   if (editing.length){
     /* closing the sheet Time! opened also stops it reopening at the top */
-    if (ui.circuitScoreOpen!=null) endCircuitTimeUp();
+    if (ui.circuitScoreOpen!=null){ endCircuitTimeUp(); closeScoreSheet(); }
     editing.forEach(function(k){ ui[k] = null; });
     renderMain(); return true;
   }
@@ -11615,6 +11816,8 @@ renderSettingsModal();
 applyTheme();
 watchSystemTheme();
 renderAvatarButton();
+/* a session an older build finished with its circuit still on the clock */
+if (settleFinishedCircuits()) save();
 /* a circuit on the clock when the app closed opens straight on its panel */
 var circuitRestored = restoreCircuit();
 setView(circuitRestored ? 'workout' : 'home');
