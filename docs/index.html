@@ -53,6 +53,8 @@
   --scrim:rgba(42,34,51,.45);
   --danger-soft:#FCE4E5; --danger-ink:#9C2830;
   --warn-soft:#FFF4D6; --warn-border:#FFE1A0;
+  /* amber ink on warn-soft: a Downs rung that fell short of its target */
+  --warn-ink:#8A5B00;
   --heat-1:#FFE7AE; --heat-2:#FFC53D; --heat-3:#FF9A4D;
   /* body outline behind the muscle map */
   --mm-outline:#D9C9B6;
@@ -101,6 +103,7 @@
   --scrim:rgba(8,6,10,.68);
   --danger-soft:#3A1A1E; --danger-ink:#FF9AA3;
   --warn-soft:#33290F; --warn-border:#56451B;
+  --warn-ink:#FFD27A;
   /* the heatmap has to get brighter as it gets busier, on a dark ground too */
   --heat-1:#4D3C16; --heat-2:#8C6B1C; --heat-3:#D0703A;
   --mm-outline:#4A4153;
@@ -454,6 +457,62 @@ body.is-dragging .drag-handle{cursor:grabbing;}
   margin:0;transition:height .13s ease,opacity .13s ease,margin .13s ease;}
 body.dragging-exercise .cat-exit-zone{height:26px;opacity:1;margin:4px 0 12px;border-width:2px;border-color:var(--border);}
 body.dragging-exercise .cat-exit-zone.exit-active{border-color:var(--accent);border-style:solid;background:var(--accent-soft);}
+
+/* ---------------------------------------------------------- Downs ladders */
+.ladder-tag{display:inline-flex;align-items:center;margin-top:4px;font-size:12.5px;font-weight:800;color:var(--accent-deep);
+  background:var(--accent-soft);border:2px solid var(--accent-soft-border);border-radius:20px;padding:2px 10px;
+  max-width:100%;overflow-wrap:anywhere;}
+.rung-row{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 10px;}
+.rung-chip{min-width:36px;height:34px;padding:0 7px;border-radius:11px;display:inline-flex;align-items:center;
+  justify-content:center;font-size:14px;font-weight:800;background:var(--surface-2);border:2px solid var(--border);
+  color:var(--text);font-variant-numeric:tabular-nums;}
+.rung-chip.made{background:var(--good);border-color:var(--good);color:var(--on-good);}
+.rung-chip.failed{background:var(--warn-soft);border-color:var(--warn-border);color:var(--warn-ink);}
+.rung-chip.current{background:var(--surface);border-color:var(--accent);color:var(--accent-deep);}
+.rung-chip.pending{background:none;color:var(--text-faint);}
+.rung-chip.skipped{background:none;border-style:dashed;color:var(--text-faint);text-decoration:line-through;}
+.ladder-sum{font-size:13px;font-weight:700;color:var(--text-dim);line-height:1.45;}
+.ladder-last{font-size:13px;font-weight:700;color:var(--text-faint);margin:-4px 0 8px;line-height:1.45;}
+.ladder-strip{font-size:13.5px;font-weight:800;color:var(--text-dim);background:var(--surface-2);
+  border-radius:var(--radius-sm);padding:9px 12px;line-height:1.45;}
+.ladder-strip.done{background:var(--good-soft);color:var(--good-deep);}
+.ladder-strip.ladder-hist{margin-bottom:10px;}
+.ladder-next{display:flex;flex-direction:column;gap:12px;margin:4px 0 10px;padding:14px;
+  border-radius:var(--radius-md);background:var(--surface-2);border:2px solid var(--border);}
+.ladder-stepper{display:flex;align-items:center;justify-content:center;gap:22px;}
+.ladder-step-btn{width:56px;height:56px;border-radius:18px;border:2px solid var(--border);background:var(--surface);
+  color:var(--text);font-size:26px;font-weight:800;line-height:1;box-shadow:var(--ledge);
+  display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ladder-step-btn:active{transform:translateY(3px);box-shadow:none;}
+.ladder-next-num{display:flex;flex-direction:column;align-items:center;min-width:72px;}
+.ladder-next-num span{font-family:var(--font-display);font-size:44px;font-weight:800;line-height:1;}
+.ladder-next-num small{font-size:12.5px;font-weight:800;color:var(--text-dim);}
+.btn.ladder-go{min-height:62px;font-size:18px;border-radius:18px;}
+.btn.ladder-climb{min-height:48px;margin:4px 0 10px;}
+.ladder-links,.ladder-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;}
+.ladder-links{justify-content:center;}
+.btn.small.active{border-color:var(--accent);color:var(--accent-deep);}
+.ladder-rungs{margin-top:12px;overflow-x:auto;}
+.rung-cell{display:flex;align-items:center;justify-content:center;gap:2px;}
+.num-input.rung-short{border-color:var(--warn-border);background:var(--warn-soft);color:var(--warn-ink);}
+.rung-of{font-size:12.5px;font-weight:800;color:var(--warn-ink);flex-shrink:0;}
+.set-table td.rung-short-cell{color:var(--warn-ink);font-weight:800;white-space:nowrap;}
+.set-table td.rung-skipped{color:var(--text-faint);font-size:12.5px;}
+.ladder-editor{background:var(--surface-2);border:2px solid var(--border);border-radius:var(--radius-md);padding:14px;}
+.ladder-editor-title{font-family:var(--font-display);font-size:17px;font-weight:700;margin-bottom:10px;}
+.ladder-editor-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:12px;}
+.ladder-num{display:flex;flex-direction:column;gap:5px;font-size:12.5px;font-weight:800;color:var(--text-dim);min-width:0;}
+.ladder-num .num-input{max-width:none;min-width:0;}
+.ladder-editor-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+.ladder-editor-label{font-size:13.5px;font-weight:800;}
+.ladder-editor-hint{font-size:12.5px;font-weight:600;color:var(--text-dim);}
+.num-input.ladder-rest-input{width:84px;flex:0 0 84px;min-width:0;}
+.ladder-preview{background:var(--surface);border:2px dashed var(--border);border-radius:var(--radius-sm);
+  padding:10px 12px;margin-bottom:10px;}
+.ladder-preview-rungs{font-size:14px;font-weight:800;color:var(--text);line-height:1.5;overflow-wrap:anywhere;margin-bottom:4px;}
+.ladder-problems{font-size:13px;font-weight:700;color:var(--danger-ink);line-height:1.5;}
+.ladder-editor-note{font-size:12.5px;font-weight:600;color:var(--text-dim);margin-bottom:10px;}
+.ladder-editor .ladder-actions{margin-top:0;}
 
 /* -------------------------------------------------------------- rest bar */
 .timerbar{position:fixed;left:0;right:0;bottom:0;background:var(--inverse);color:var(--on-inverse);z-index:40;
@@ -1288,17 +1347,73 @@ body.photos-hidden .photo-veil{display:flex;}
    exercises: [{ id, name, tags:[str], muscles:{primary:[slug],secondary:[slug]},
                  fields:[{id,type,label,unit}], defaultRestSec,
                  tag: legacy mirror of tags.join(', ') - written, never read }]
-   plans:     [{ id, name, items:[{ exerciseId, targetSets }] }]
+   plans:     [{ id, name, items:[item] }], items a FLAT list of
+                { kind:'exercise', exerciseId, defaultRestSec, ladder?,
+                  sets:[{ kind:'set', id, values:{fieldId:val}, restSec }
+                        | { kind:'rest', id, seconds }] }
+              | { kind:'category', id, name, collapsed, circuit?, sets? }
+              | { kind:'break', id }
+              A category heads every exercise after it, up to the next
+              category or break (see "Categories").
+              circuit = { workSec, blocks, breakSec } turns a category into a
+              circuit (AMRAP; a missing circuit.mode means AMRAP). Its
+              movements are the exercises under it, by the same position
+              rule, so a circuit never sits inside another category. Each
+              member's first set is its per-round amount; any further sets
+              and any ladder marker are ignored there. The heading also
+              carries sets:[], which nothing reads: without it
+              migratePlanItems, in every build, would give the heading a
+              blank set. To a build without circuits it is just a category.
+              ladder = { from, to, step, back, fieldId } marks a Downs ladder.
+              Its sets ARE the rungs (15, 14 ... 1) and stay the truth for
+              targets, volume and charts; the marker only drives the editor,
+              the label and the live flow. The rest between rungs is the
+              entry's own defaultRestSec, so a build without Downs still shows
+              it. fieldId is the count field; once it is gone from the
+              exercise the marker is ignored and the entry is plain sets.
    workouts:  [{ id, planId, name, date, startedAt, completedAt, editedAt,
-                 exercises:[{ exerciseId, name, fields:[snapshot], defaultRestSec,
-                              sets:[{ id, values:{fieldId:val}, restSec, done }] }] }]
+                 excludeFromReference,
+                 exercises:[{ kind:'exercise', exerciseId, name, fields:[snapshot],
+                              defaultRestSec, ladder?,
+                              sets:[{ kind:'set', id, values:{fieldId:val}, restSec, done,
+                                      target?, doneAt?, climb? } | { kind:'rest', id, seconds }] }
+                            | category or break, as in a plan
+                            | { kind:'circuit', id, name, circuit,
+                                members:[{ id, exerciseId, name, fields:[snapshot], values }],
+                                clock, result:{ rounds, partial, splits },
+                                exerciseId:null, defaultRestSec:null, fields, sets }
+                            | { kind:'rest', id, seconds }] }]
+              A circuit is one self-contained entry. Its exerciseId,
+              defaultRestSec, fields and sets are a LEGACY MIRROR (a Score /
+              Per Round / Total table), written and never read, like ex.tag:
+              an older build that draws every entry as an exercise card shows
+              the score instead of crashing. exerciseId stays null so no
+              counter, chart or hint ever takes the circuit for a real
+              exercise.
               date is the local day the workout STARTED. startedAt/completedAt
               can be set by hand; editedAt is when that last happened, so a
               backup older than the edit still counts it as missing.
+              A workout ladder is { from, to, step, back, fieldId, climbed,
+              startedAt, endedAt }. Each rung keeps its planned number in
+              target, so '7/9' survives hand edits, and its count value stays
+              null until it is logged: a rung never reached can never leak
+              into a chart. climbed is an on-the-day Climb Back Up -
+              performance, never template - and each rung it added carries
+              climb:true, so Undo can take the climb back and the plan never
+              gets it.
    activeWorkout: same shape as a workout entry, completedAt=null, or null
-   settings:  { weightUnit: 'lb'|'kg' }
+   restTimer: { totalSec, endAt, pausedRemainingMs, done, doneAt, label } or
+              null. label ('Next: 8') replaces 'Resting' on the bar. It is
+              device-local, so backups leave it out.
+   settings:  { weightUnit: 'lb'|'kg', ... }
    Fields/defaultRestSec are SNAPSHOTTED onto workouts so editing a library
    exercise later never changes historical logs.
+   Every key added since the first version is nested and optional, so an
+   older build reads the data, shows what it knows and carries the rest.
+   BACKUP_FORMAT stays 1 for that reason: raising it makes every older build
+   refuse the whole backup as "made by a newer version". And no key on a plan
+   item may be named restSec or targetSets - migratePlanItems, in every
+   build, deletes both from any item that has no sets.
    Persisted as one JSON blob in localStorage under STORAGE_KEY.
    ========================================================================= */
 
@@ -1307,17 +1422,26 @@ var LEGACY_STORAGE_KEY = 'ironlog_data_v1';
 var BACKUP_FORMAT = 1;
 var EMBED_ID = 'embedded-backup';
 var KG_PER_LB = 0.45359237;
+/* The chosen metric is one setting for every exercise, so it can name one
+   this exercise has nothing for - Total Reps on a pull-up only ever done as
+   Downs. Then the first metric in the usual order that has points wins,
+   rather than opening on an empty chart. */
 function pickMetric(ex){
   var avail = metricsFor(ex);
   if (!avail.length) return null;
   var saved = avail.filter(function(m){ return m.key===data.settings.chartMetric; })[0];
-  if (saved) return saved;
-  var order = ['top','bestreps','far','totdist','hold','totreps','assist','rpe','rir','e1rm','volume'];
-  for (var i=0;i<order.length;i++){
-    var hit = avail.filter(function(m){ return m.key===order[i]; })[0];
-    if (hit) return hit;
+  if (saved && seriesFor(ex, saved).length) return saved;
+  var order = ['top','bestreps','far','totdist','hold','totreps','assist','rpe','rir','e1rm','volume','ladtotal'];
+  var ordered = [];
+  order.forEach(function(k){
+    var hit = avail.filter(function(m){ return m.key===k; })[0];
+    if (hit) ordered.push(hit);
+  });
+  avail.forEach(function(m){ if (ordered.indexOf(m) < 0) ordered.push(m); });
+  for (var i=0;i<ordered.length;i++){
+    if (seriesFor(ex, ordered[i]).length) return ordered[i];
   }
-  return avail[0];
+  return saved || ordered[0];
 }
 var FIELD_TYPE_NAMES = {weight:'Weight', assisted:'Assisted', reps:'Reps', distance:'Distance', timer:'Target Time', time:'Measured Time', rir:'Reps in Reserve', rpe:'RPE', number:'Number', text:'Text'};
 
@@ -1443,6 +1567,35 @@ function parseDecimal(raw){
   if (s.indexOf(',') >= 0 && s.indexOf('.') < 0) s = s.replace(',', '.');
   return parseFloat(s);
 }
+/* What was typed into a field, as the value it is stored as: kilograms,
+   metres, seconds, whole reps. Empty or unreadable is null. The one reading
+   every set input goes through, in a workout and in a plan alike, so the
+   two can never disagree about what "82,5" or "1:30" means. */
+function parseFieldInput(field, raw){
+  if (field.type==='text') return (raw===null||raw===undefined) ? '' : String(raw);
+  var s = (raw===null||raw===undefined) ? '' : String(raw).trim();
+  if (s==='') return null;
+  if (isTimeType(field.type)) return mmssToSec(s);
+  var n = parseDecimal(s);
+  if (isNaN(n)) return null;
+  var unit = data.settings.weightUnit;
+  if (field.type==='weight') return displayToKg(n, unit);
+  if (field.type==='assisted') return displayToKg(Math.abs(n), unit);
+  if (field.type==='distance') return displayToMetres(n, distanceUnit(field));
+  if (field.type==='reps') return Math.round(n);
+  if (isEffortType(field.type)) return clampEffort(field.type, n);
+  return n;
+}
+/* A circuit's length, typed in MINUTES: '20' is 20:00 and '7.5' is 7:30,
+   with '7:30' also read on a keyboard. mmssToSec would take a bare '20' as
+   twenty seconds, and nobody thinks of Cindy as 1200. */
+function parseMinutes(raw){
+  var s = (raw===null||raw===undefined) ? '' : String(raw).trim();
+  if (s==='') return null;
+  if (s.indexOf(':')>=0) return mmssToSec(s);
+  var n = parseDecimal(s);
+  return isNaN(n) ? null : Math.round(n*60);
+}
 /* A phone's number pad has no ":" key, so there a time goes in as seconds -
    "90" is 1:30, "120" is 2:00 - and the empty field says so. A keyboard can
    still type 1:30 either way. */
@@ -1485,7 +1638,8 @@ var FIELD_INFO = {
   },
   'muscle-volume': {
     title: 'Muscle Coverage',
-    body: 'Shows training volume \u2014 how much you worked each muscle, not how strong it is.'
+    body: 'Shows training volume \u2014 how much you worked each muscle, not how strong it is. '+
+      'A Downs ladder counts as many sets as its reps would make at its top rung.'
   }
 };
 function isEffortType(t){ return t==='rir' || t==='rpe'; }
@@ -1574,6 +1728,22 @@ var SECONDARY_WEIGHT = 0.5;
    toggle can point at it later. */
 var WEEKLY_TARGET_SETS = 14;
 var WEEKLY_WINDOW_DAYS = 7;
+/* Circuits and Downs ladders are scored in the same hard sets, and always
+   in whole numbers (see entryVolume). A circuit earns a movement one set for
+   every CIRCUIT_ROUNDS_PER_SET rounds, never more than one per
+   CIRCUIT_SEC_PER_SET of work. */
+var CIRCUIT_ROUNDS_PER_SET = 3;
+var CIRCUIT_SEC_PER_SET = 300;
+var CIRCUIT_LEAD_SEC = 10;
+/* a second tap this soon after an accepted one is a sweaty double-tap, not
+   another round - Downs' Done uses the same guard */
+var CIRCUIT_TAP_GUARD_MS = 1500;
+var CIRCUIT_DEFAULT = { workSec:1200, blocks:1, breakSec:60 };
+var LADDER_MAX_RUNGS = 60;
+/* no ladder counts down from more than this; bigger numbers are typos, and
+   past 2^53 subtracting 1 no longer changes a number at all */
+var LADDER_MAX_TOP = 9999;
+var LADDER_DEFAULT_REST = 30;
 
 function emptyMuscles(){ return { primary: [], secondary: [] }; }
 
@@ -1608,12 +1778,67 @@ function exerciseById(id){ return data.exercises.find(function(e){ return e.id==
 function planSetCount(item){
   return (item.sets || []).filter(function(s){ return (s.kind||'set')==='set'; }).length;
 }
+/* ---- How many hard sets an entry is worth ------------------------------
+   The one place the counting rules live: the plan map, the weekly map and
+   the heatmap all ask here. mode 'plan' counts what a plan sets out to do,
+   'log' what a workout actually ticked off. Every count is a whole number,
+   so a muscle's score stays a sum of 1s and 0.5s - muscleBreakdown's exact
+   equal-rank comparison relies on that.
+     plain sets    a plan counts every set, a log every ticked one
+     Downs ladder  its reps measured in top-rung sets: round(total / top),
+                   at least 1 and at most one per rung counted. 15 -> 1 is
+                   120 / 15 = 8, not 15: the top rung is the near-max set you
+                   would have done anyway, and the short rests keep the
+                   smaller rungs below it hard. A failed rung or a
+                   number-field ladder is measured the same way.
+   A circuit's members will slot in here too, by their own rule. */
+function entryVolume(list, idx, mode){
+  var e = list[idx];
+  if (!e || itemKind(e) !== 'exercise') return [];
+  var fields = mode==='plan' ? ((exerciseById(e.exerciseId) || {}).fields || []) : (e.fields || []);
+  var sets = (e.sets || []).filter(function(s){ return (s.kind||'set')==='set'; });
+  if (circuitHeadingIdx(list, idx) === -1 && ladderUsable(e, fields)){
+    return [{ exerciseId:e.exerciseId, sets:ladderHardSets(e.ladder, sets, mode) }];
+  }
+  return [{ exerciseId:e.exerciseId, sets: mode==='plan' ? planSetCount(e) : workoutSetCount(e) }];
+}
+function ladderHardSets(l, rungs, mode){
+  var counted = mode==='plan' ? rungs : rungs.filter(function(s){ return s.done; });
+  var total = 0, top = 0;
+  counted.forEach(function(s){
+    var v = ladderNum(s.values ? s.values[l.fieldId] : null);
+    total += v;
+    if (mode==='plan' && v > top) top = v;
+  });
+  /* a log measures against what the ladder set out to climb, so a failed
+     top rung does not make the rest look bigger */
+  if (mode!=='plan'){
+    rungs.forEach(function(s){ var t = ladderNum(s.target); if (t > top) top = t; });
+    if (!(top > 0)) counted.forEach(function(s){ var v = ladderNum(s.values[l.fieldId]); if (v > top) top = v; });
+  }
+  return ladderSetsFor(total, top, counted.length);
+}
+function ladderSetsFor(total, top, rungCount){
+  if (!rungCount) return 0;
+  if (!(top > 0)) return 1;
+  return Math.max(1, Math.min(rungCount, Math.round(total / top)));
+}
+/* The heatmap's measure of a day: the same hard sets as muscle coverage. */
+function workoutHardSets(w){
+  var list = w.exercises || [], n = 0;
+  for (var i=0;i<list.length;i++){
+    entryVolume(list, i, 'log').forEach(function(v){ n += v.sets; });
+  }
+  return n;
+}
 function planRawScores(plan){
   var raw = {};
   if (!plan) return raw;
-  (plan.items || []).forEach(function(item){
-    if (itemKind(item) !== 'exercise') return;
-    addMuscleVolume(raw, exerciseById(item.exerciseId), planSetCount(item));
+  var items = plan.items || [];
+  items.forEach(function(item, idx){
+    entryVolume(items, idx, 'plan').forEach(function(v){
+      addMuscleVolume(raw, exerciseById(v.exerciseId), v.sets);
+    });
   });
   return raw;
 }
@@ -1627,15 +1852,18 @@ function planRawScores(plan){
 function planMuscleTiers(plan){
   var tiers = {};
   if (!plan) return tiers;
-  (plan.items || []).forEach(function(item){
-    if (itemKind(item) !== 'exercise' || !(planSetCount(item) > 0)) return;
-    var m = exerciseMuscles(exerciseById(item.exerciseId));
-    m.primary.forEach(function(s){
-      tiers[s] = (tiers[s] === 's' || tiers[s] === 'b') ? 'b' : 'p';
-    });
-    m.secondary.forEach(function(s){
-      if (m.primary.indexOf(s) >= 0) return;
-      tiers[s] = (tiers[s] === 'p' || tiers[s] === 'b') ? 'b' : 's';
+  var items = plan.items || [];
+  items.forEach(function(item, idx){
+    entryVolume(items, idx, 'plan').forEach(function(v){
+      if (!(v.sets > 0)) return;
+      var m = exerciseMuscles(exerciseById(v.exerciseId));
+      m.primary.forEach(function(s){
+        tiers[s] = (tiers[s] === 's' || tiers[s] === 'b') ? 'b' : 'p';
+      });
+      m.secondary.forEach(function(s){
+        if (m.primary.indexOf(s) >= 0) return;
+        tiers[s] = (tiers[s] === 'p' || tiers[s] === 'b') ? 'b' : 's';
+      });
     });
   });
   return tiers;
@@ -1646,9 +1874,11 @@ function workoutSetCount(wex){
   return (wex.sets || []).filter(function(s){ return (s.kind||'set')==='set' && s.done; }).length;
 }
 function addWorkoutVolume(raw, w){
-  (w.exercises || []).forEach(function(wex){
-    if ((wex.kind||'exercise') !== 'exercise') return;
-    addMuscleVolume(raw, exerciseById(wex.exerciseId), workoutSetCount(wex));
+  var list = w.exercises || [];
+  list.forEach(function(wex, idx){
+    entryVolume(list, idx, 'log').forEach(function(v){
+      addMuscleVolume(raw, exerciseById(v.exerciseId), v.sets);
+    });
   });
 }
 
@@ -2867,6 +3097,10 @@ function applyImportedData(payload){
   runtime.timer = null;
   runtime.pendingBeep = false;
   data = Object.assign(defaultData(), payload);
+  /* an open Downs editor or rung table points at an entry by position,
+     and the entries it pointed at are gone */
+  closeLadderEditor(); closePlanLadderEdits();
+  ui.rungsOpen = null; ui.ladderNext = null;
   keepPhotosThroughReplace(ownPhotos, ownPoses);
   data.restTimer = null;
   if (!data.settings || !data.settings.weightUnit) data.settings = { weightUnit:'lb' };
@@ -3779,6 +4013,44 @@ function newPlanCategory(){
   return { kind:'category', id: uid('cat'), name: 'New Category', collapsed: false };
 }
 function itemKind(it){ return it.kind || 'exercise'; }
+/* A circuit, in a plan, is a category heading that also carries a clock
+   (circuit:{workSec, blocks, breakSec}); the exercises under it are its
+   movements. To a build without circuits it is simply a category. */
+function isCircuitHeading(e){
+  return !!e && itemKind(e)==='category' && !!e.circuit && typeof e.circuit==='object';
+}
+/* the circuit heading governing this plan entry, or -1 */
+function circuitHeadingIdx(items, idx){
+  var h = owningCategoryIdx(items, idx);
+  return (h !== -1 && isCircuitHeading(items[h])) ? h : -1;
+}
+/* The field that says how much of a thing was done: reps, else the
+   distance covered, else a time, else a plain number. */
+function countFieldOf(fields){
+  var order = ['reps','distance','timer','time','number'];
+  for (var i=0;i<order.length;i++){
+    var hit = (fields||[]).filter(function(f){ return f.type===order[i]; })[0];
+    if (hit) return hit;
+  }
+  return null;
+}
+/* A Downs ladder counts down in whole steps, so only reps or a plain
+   number can carry it. No such field, no Downs button. */
+function ladderFieldOf(fields){
+  var list = fields || [];
+  return list.filter(function(f){ return f.type==='reps'; })[0] ||
+         list.filter(function(f){ return f.type==='number'; })[0] || null;
+}
+/* A marker only counts while its count field still exists, it still
+   describes a ladder and there is at least one rung left; otherwise the
+   entry is read as the plain sets it is made of (a ladder with no rungs
+   would have nothing to show, start or log). */
+function ladderUsable(entry, fields){
+  var l = entry && entry.ladder;
+  if (!l || typeof l!=='object' || !l.fieldId || ladderProblems(l).length) return false;
+  if (!(entry.sets||[]).some(function(s){ return (s.kind||'set')==='set'; })) return false;
+  return (fields||[]).some(function(f){ return f.id===l.fieldId && (f.type==='reps' || f.type==='number'); });
+}
 /* A 'break' entry closes the category above it, so exercises can sit BELOW a
    category while staying outside it. Without it, position alone would always
    pull them back into the nearest heading above. */
@@ -3847,7 +4119,174 @@ function movePlanBlock(fromIdx, toIdx, exitCategory){
   }
   for (var i=0;i<moved.length;i++) items.splice(dest+i, 0, moved[i]);
   plan.items = normalizePlanItems(items);
+  closePlanLadderEdits();
   save(); renderMain();
+}
+
+/* ---- Downs ladders -------------------------------------------------------
+   A Downs ladder is an ordinary exercise entry plus a `ladder` marker, and
+   its rungs are real sets: 15, 14, 13 ... 1 reps with a short rest between.
+   In a plan the sets hold the numbers, so a build without Downs shows
+   fifteen plain sets and starts them as such. In a workout each rung keeps
+   its planned number in `target` and logs into the count field only when it
+   is done - which is what lets a failed rung read '7/9', and keeps a rung
+   never reached out of every chart. */
+
+function ladderNum(v){ return (v===null || v===undefined || v==='' || isNaN(v*1)) ? 0 : v*1; }
+function ladderRungCount(l){
+  var n = Math.floor((l.from - l.to) / l.step) + 1;
+  return l.back ? 2*n - 1 : n;
+}
+/* One line per thing wrong with a draft; any of them holds Build back. */
+function ladderProblems(l){
+  var out = [];
+  if (!(l.from >= 1) || (l.to >= 1 && !(l.from > l.to))) out.push('Start At must be above Down To.');
+  if (!(l.to >= 1)) out.push('Down To must be at least 1.');
+  if (!(l.step >= 1)) out.push('Step must be at least 1.');
+  if (l.from > LADDER_MAX_TOP) out.push('Start At must be '+LADDER_MAX_TOP+' or less.');
+  if (!out.length && ladderRungCount(l) > LADDER_MAX_RUNGS){
+    out.push('That\u2019s more than '+LADDER_MAX_RUNGS+' rungs \u2014 raise the step.');
+  }
+  return out;
+}
+/* from, from-step, ... down to the last number still >= to; Back Up then
+   mirrors the way down without doing the bottom rung twice, so 10 -> 1 -> 10
+   is 19 rungs. */
+function ladderRungs(l){
+  if (!l || ladderProblems(l).length) return [];
+  /* counted, not stepped until below Down To, so no number can keep the
+     loop from ending - ladderProblems has already capped the count */
+  var n = Math.floor((l.from - l.to) / l.step) + 1, out = [];
+  for (var k=0; k<n; k++) out.push(l.from - k*l.step);
+  if (l.back){ for (var i=out.length-2; i>=0; i--) out.push(out[i]); }
+  return out;
+}
+/* '15 -> 1', '10 -> 1 -> 10'. The bottom is the rung actually reached, so
+   10 down to 1 by 2 honestly reads 10 -> 2. */
+function ladderLabel(l){
+  var down = ladderRungs({ from:l.from, to:l.to, step:l.step, back:false });
+  var bottom = down.length ? down[down.length-1] : l.to;
+  return l.from+' \u2192 '+bottom+(l.back ? ' \u2192 '+l.from : '')+(l.climbed ? ' then back up' : '');
+}
+/* The first set's other targets - the weight, a band - for every rung.
+   The count is the rung's own, and measured time is never a target. */
+function ladderBaseValues(values, fields, fieldId){
+  var out = {};
+  (fields || []).forEach(function(f){
+    var v = values ? values[f.id] : null;
+    out[f.id] = (f.id===fieldId || f.type==='time' || v===undefined) ? null : v;
+  });
+  return out;
+}
+/* plan rungs: the number is the set's own count value */
+function buildLadderSets(l, baseValues, fields){
+  var base = ladderBaseValues(baseValues, fields, l.fieldId);
+  return ladderRungs(l).map(function(r){
+    var v = Object.assign({}, base);
+    v[l.fieldId] = r;
+    return { kind:'set', id:uid('s'), values:v, restSec:null };
+  });
+}
+/* workout rungs: the number is the target, the actual waits to be logged */
+function workoutRung(base, fieldId, target){
+  var v = Object.assign({}, base);
+  v[fieldId] = null;
+  return { kind:'set', id:uid('s'), values:v, restSec:null, done:false, target:target, doneAt:null };
+}
+function buildWorkoutRungs(l, baseValues, fields){
+  var base = ladderBaseValues(baseValues, fields, l.fieldId);
+  return ladderRungs(l).map(function(r){ return workoutRung(base, l.fieldId, r); });
+}
+function firstSetOf(entry){
+  var list = (entry && entry.sets) || [];
+  for (var i=0;i<list.length;i++){ if ((list[i].kind||'set')==='set') return list[i]; }
+  return null;
+}
+/* a workout entry is a ladder when its marker still fits its snapshot */
+function isLadderEntry(wex){
+  return !!wex && (wex.kind||'exercise')==='exercise' && ladderUsable(wex, wex.fields);
+}
+/* a plan entry is a ladder only outside a circuit - there each movement is
+   one round, and a marker is ignored */
+function planEntryIsLadder(items, idx){
+  var it = items[idx];
+  if (!it || itemKind(it)!=='exercise' || circuitHeadingIdx(items, idx) !== -1) return false;
+  var ex = exerciseById(it.exerciseId);
+  return !!ex && ladderUsable(it, ex.fields);
+}
+/* Whether the sets are still exactly what the marker builds. Once a rung
+   has been edited by hand (a vest on the top three, a rung removed), a
+   rebuild would throw that away, so it asks first. */
+function ladderSetsMatch(l, sets, fields, isWorkout){
+  var rungs = ladderRungs(l);
+  if (!rungs.length || sets.length !== rungs.length) return false;
+  var base = null;
+  for (var i=0;i<sets.length;i++){
+    var s = sets[i];
+    if ((s.kind||'set')!=='set') return false;
+    if (s.restSec!==null && s.restSec!==undefined) return false;
+    var n = isWorkout ? s.target : (s.values ? s.values[l.fieldId] : null);
+    if (n===null || n===undefined || n*1 !== rungs[i]) return false;
+    var other = JSON.stringify(ladderBaseValues(s.values, fields, l.fieldId));
+    if (base===null) base = other; else if (other !== base) return false;
+  }
+  return true;
+}
+/* '120 reps', or the number field's own unit or name */
+function ladderUnit(field, n){
+  if (!field || field.type==='reps') return n===1 ? 'rep' : 'reps';
+  return field.unit || String(field.label || '').toLowerCase();
+}
+function ladderCountField(entry, fields){
+  return (fields || []).filter(function(f){ return f.id===entry.ladder.fieldId; })[0] || null;
+}
+/* Everything a workout ladder's strip, chips and history line say, read
+   off the rungs themselves. */
+function ladderSummary(wex){
+  var l = wex.ladder, fid = l.fieldId;
+  var idxs = [], planned = 0, logged = 0, done = 0, cur = -1, lastDone = -1, lastDoneAt = 0;
+  wex.sets.forEach(function(s, i){
+    if ((s.kind||'set')!=='set') return;
+    var pos = idxs.length;
+    idxs.push(i);
+    planned += ladderNum(s.target!==null && s.target!==undefined ? s.target : s.values[fid]);
+    if (s.done){
+      done++; logged += ladderNum(s.values[fid]); lastDone = pos;
+      if ((s.doneAt||0) > lastDoneAt) lastDoneAt = s.doneAt;
+    } else if (cur < 0) cur = pos;
+  });
+  var total = idxs.length, complete = total > 0 && done === total;
+  var end = l.endedAt || (complete ? lastDoneAt : 0) || null;
+  return {
+    label: ladderLabel(l), idxs: idxs, total: total, done: done,
+    planned: planned, logged: logged,
+    current: cur, currentIdx: cur >= 0 ? idxs[cur] : -1,
+    stoppedAt: lastDone + 1, complete: complete,
+    started: !!l.startedAt,
+    stopped: !!l.endedAt && !complete,
+    /* running needs a rung to be on - never true for a ladder with none */
+    running: !!l.startedAt && !l.endedAt && cur >= 0,
+    ms: l.startedAt ? Math.max(0, (end || Date.now()) - l.startedAt) : 0
+  };
+}
+/* The last finished ladder of this exercise, for the card's 'Last' line.
+   Like the greyed hints, it skips sessions kept out of the reference. */
+function lastLadderFor(exerciseId, excludeWorkoutId){
+  var past = data.workouts.filter(function(w){ return w.completedAt && w.id!==excludeWorkoutId && !w.excludeFromReference; })
+    .sort(function(a,b){ return b.completedAt-a.completedAt; });
+  for (var i=0;i<past.length;i++){
+    var entry = (past[i].exercises||[]).filter(function(e){ return e.exerciseId===exerciseId && isLadderEntry(e); })[0];
+    if (entry) return { entry: entry, workout: past[i] };
+  }
+  return null;
+}
+/* A ladder as the charts see it: only the rungs actually ticked off. */
+function ladderTickedView(wex){
+  return Object.assign({}, wex, { sets: wex.sets.filter(function(s){ return (s.kind||'set')==='set' && s.done; }) });
+}
+function closePlanLadderEdits(){
+  ui.planLadderEditing = null;
+  ui.planRungsOpen = null;
 }
 
 /* ------------------------------------------------------------ ui state */
@@ -3887,9 +4326,18 @@ var ui = {
   addingPose: false,
   photosRevealed: false,
   backupIncludePhotos: false,
-  lastTab: 'home'
+  lastTab: 'home',
+  /* Downs: the open editor (a plan index or a workout index), the draft
+     it edits, the rung tables shown on a ladder card, and the next-rung
+     stepper {wex, set: rung id, value} */
+  planLadderEditing: null,
+  planRungsOpen: null,
+  ladderEditing: null,
+  rungsOpen: null,
+  ladderDraft: null,
+  ladderNext: null
 };
-var runtime = { timer: null, timerHandle: null, audioCtx: null, pendingBeep: false };
+var runtime = { timer: null, timerHandle: null, audioCtx: null, pendingBeep: false, ladderLastDoneAt: 0, ladderStartTapAt: 0 };
 var originalTitle = document.title;
 
 /* ------------------------------------------------------- derived stats */
@@ -3912,11 +4360,13 @@ function computeThisMonthCount(){
     return d.getMonth()===now.getMonth() && d.getFullYear()===now.getFullYear();
   }).length;
 }
-function lastEntryFor(exerciseId, excludeWorkoutId){
+/* wantLadder keeps the two shapes apart: a 3x8 card never hints 15, 14, 13
+   from last week's Downs, and a ladder never takes 3x8 as its rungs */
+function lastEntryFor(exerciseId, excludeWorkoutId, wantLadder){
   var past = data.workouts.filter(function(w){ return w.completedAt && w.id!==excludeWorkoutId && !w.excludeFromReference; })
     .sort(function(a,b){ return b.completedAt-a.completedAt; });
   for (var i=0;i<past.length;i++){
-    var entry = past[i].exercises.find(function(e){ return e.exerciseId===exerciseId; });
+    var entry = past[i].exercises.find(function(e){ return e.exerciseId===exerciseId && isLadderEntry(e)===!!wantLadder; });
     if (entry) return entry;
   }
   return null;
@@ -3935,6 +4385,12 @@ function setView(view){
   ui.editingPlanRestBlock = null;
   ui.editingRestBlock = null;
   ui.editingTopRest = null;
+  ui.planLadderEditing = null;
+  ui.planRungsOpen = null;
+  ui.ladderEditing = null;
+  ui.rungsOpen = null;
+  ui.ladderDraft = null;
+  ui.ladderNext = null;
   if (view!=='progress'){ ui.viewingPhotoId = null; ui.compareOpen = false; ui.addingPose = false; }
   if (view!=='profile' && view!=='workout') ui.lastTab = view;
   if (view!=='profile') ui.profileMessage = null;
@@ -4053,10 +4509,11 @@ function renderHome(){
 
 function renderHeatmap(trainedSet, weeks, interactive){
   var countByDate = {};
+  /* coloured by the same hard sets as muscle coverage, so a 15-rung
+     ladder is 8 sets here too rather than 15 */
   data.workouts.forEach(function(w){
     if (!w.completedAt) return;
-    var c = w.exercises.reduce(function(n,e){ return n + (((e.kind||'exercise')==='exercise') ? e.sets.filter(function(s){return (s.kind||'set')==='set' && s.done;}).length : 0); },0);
-    countByDate[w.date] = (countByDate[w.date]||0) + c;
+    countByDate[w.date] = (countByDate[w.date]||0) + workoutHardSets(w);
   });
   var today = new Date();
   var end = new Date(today);
@@ -4237,6 +4694,7 @@ function movePlanItem(idx, dir){
   var j = idx+dir;
   if (j<0 || j>=plan.items.length) return;
   var tmp = plan.items[idx]; plan.items[idx]=plan.items[j]; plan.items[j]=tmp;
+  closePlanLadderEdits();
   save(); renderMain();
 }
 
@@ -4337,6 +4795,18 @@ function renderPlanExerciseCard(idx){
   }).join('');
 
   var inCategory = owningCategoryIdx(plan.items, idx) !== -1;
+  var table = '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table>';
+  /* Downs: a card with a reps (or number) field, outside a circuit */
+  var isLadder = planEntryIsLadder(plan.items, idx);
+  var canDowns = circuitHeadingIdx(plan.items, idx) === -1 && !!ladderFieldOf(fields);
+  var body = (canDowns && ui.planLadderEditing === idx) ? renderLadderEditor('plan', idx) : '';
+  if (!body && isLadder) body = renderPlanLadderBody(idx, item, fields, table);
+  else if (!body) body = table +
+    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
+      '<button class="btn btn-ghost small" data-action="plan-add-set" data-idx="'+idx+'">'+icon('plus')+' Add Set</button>'+
+      '<button class="btn btn-ghost small" data-action="plan-add-rest-block" data-idx="'+idx+'">'+icon('plus')+' Add Rest</button>'+
+      (canDowns ? '<button class="btn btn-ghost small" data-action="plan-ladder-edit" data-idx="'+idx+'">'+icon('chevronDown')+' Downs</button>' : '')+
+    '</div>';
   return '<div class="ex-card'+(inCategory?' in-category':'')+'" data-drag-idx="'+idx+'">'+
     '<div class="ex-card-head">'+
       '<div class="plan-ex-head-left">'+
@@ -4345,16 +4815,219 @@ function renderPlanExerciseCard(idx){
           '<button class="icon-btn tiny" data-action="plan-move-up" data-idx="'+idx+'" '+(idx===0?'disabled':'')+'>'+icon('chevronUp')+'</button>'+
           '<button class="icon-btn tiny" data-action="plan-move-down" data-idx="'+idx+'" '+(idx===plan.items.length-1?'disabled':'')+'>'+icon('chevronDown')+'</button>'+
         '</div>'+
-        '<div class="plan-ex-title"><div class="ex-card-name">'+esc(ex.name)+'</div>'+renderPlanDefaultRest(idx, item)+'</div>'+
+        '<div class="plan-ex-title"><div class="ex-card-name">'+esc(ex.name)+'</div>'+
+          (isLadder ? ladderTagHTML(item.ladder, planEntryRest(item, ex)) : renderPlanDefaultRest(idx, item))+'</div>'+
       '</div>'+
       '<button class="btn btn-ghost plan-ex-remove" data-action="plan-remove-exercise" data-idx="'+idx+'" aria-label="Remove exercise">'+icon('trash')+'<span class="plan-ex-remove-label"> Remove</span></button>'+
     '</div>'+
-    '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table>'+
-    '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
-      '<button class="btn btn-ghost small" data-action="plan-add-set" data-idx="'+idx+'">'+icon('plus')+' Add Set</button>'+
-      '<button class="btn btn-ghost small" data-action="plan-add-rest-block" data-idx="'+idx+'">'+icon('plus')+' Add Rest</button>'+
+    body+
+  '</div>';
+}
+
+/* ---- Downs in a plan -----------------------------------------------------
+   A built ladder shows its rungs as chips, read from the SETS, with the
+   fifteen-row table tucked behind Edit Rungs so a ladder doesn't bury the
+   plan. The editor that builds one is shared with the workout card. */
+
+/* The rest a plan entry will start with: its own, else - as startFromPlan
+   does - the exercise's. A ladder's tag states it outright, so it must be
+   the one the session will really use. */
+function planEntryRest(item, ex){
+  if (item.defaultRestSec!==null && item.defaultRestSec!==undefined) return item.defaultRestSec;
+  return (ex && ex.defaultRestSec!==null && ex.defaultRestSec!==undefined) ? ex.defaultRestSec : null;
+}
+function ladderTagHTML(l, restSec){
+  return '<div class="ladder-tag">Downs '+esc(ladderLabel(l))+
+    ' &middot; '+(restSec ? 'Rest '+fmtRest(restSec) : 'No rest')+'</div>';
+}
+function renderPlanLadderBody(idx, item, fields, table){
+  var fid = item.ladder.fieldId, field = ladderCountField(item, fields);
+  var rungs = (item.sets || []).filter(function(s){ return (s.kind||'set')==='set'; });
+  var total = 0;
+  var chips = rungs.map(function(s){
+    var v = s.values ? s.values[fid] : null;
+    total += ladderNum(v);
+    return '<span class="rung-chip plan">'+(ladderNum(v) || v===0 ? esc(String(v)) : '\u2014')+'</span>';
+  }).join('');
+  var hard = entryVolume(currentPlan().items, idx, 'plan')[0].sets;
+  var open = ui.planRungsOpen === idx;
+  return '<div class="rung-row">'+chips+'</div>'+
+    '<div class="ladder-sum">'+rungs.length+' rung'+(rungs.length!==1?'s':'')+' &middot; '+total+' '+esc(ladderUnit(field, total))+
+      ' &middot; counts as '+hard+' set'+(hard!==1?'s':'')+'</div>'+
+    '<div class="ladder-actions">'+
+      '<button class="btn btn-ghost small" data-action="plan-ladder-edit" data-idx="'+idx+'">'+icon('edit')+' Edit Downs</button>'+
+      '<button class="btn btn-ghost small'+(open?' active':'')+'" data-action="plan-rungs-toggle" data-idx="'+idx+'">'+(open?'Hide Rungs':'Edit Rungs')+'</button>'+
+      '<button class="btn btn-ghost small" data-action="plan-ladder-plain" data-idx="'+idx+'">Plain Sets</button>'+
+    '</div>'+
+    (open ? '<div class="ladder-rungs">'+table+'</div>' : '');
+}
+
+/* The entry a Downs editor works on, plan or workout, with the fields it is
+   read through: the library's for a plan, the snapshot for a workout. */
+function ladderEditContext(scope, idx){
+  var entry, fields;
+  if (scope==='plan'){
+    var plan = currentPlan();
+    entry = plan ? plan.items[idx] : null;
+    var ex = entry ? exerciseById(entry.exerciseId) : null;
+    fields = ex ? ex.fields : null;
+  } else {
+    entry = data.activeWorkout ? data.activeWorkout.exercises[idx] : null;
+    fields = entry ? entry.fields : null;
+  }
+  if (!entry || (entry.kind||'exercise')!=='exercise' || !fields) return null;
+  var field = ladderFieldOf(fields);
+  if (!field) return null;
+  var usable = ladderUsable(entry, fields);
+  return { scope:scope, idx:idx, entry:entry, fields:fields, isWorkout: scope!=='plan',
+           ladder: usable ? entry.ladder : null, field: usable ? ladderCountField(entry, fields) : field };
+}
+function openLadderEditor(scope, idx){
+  var ctx = ladderEditContext(scope, idx);
+  if (!ctx) return;
+  var entry = ctx.entry, l = ctx.ladder;
+  /* A built ladder keeps the rest it was given. A new one starts short: the
+     card's own rest is set for straight sets - two minutes on a bench - and
+     a rest that long between rungs is not Downs any more. */
+  var rest = (l && entry.defaultRestSec!==null && entry.defaultRestSec!==undefined) ? entry.defaultRestSec : LADDER_DEFAULT_REST;
+  if (l){
+    ui.ladderDraft = { scope:scope, idx:idx, from:l.from, to:l.to, step:l.step, back:!!l.back, rest:rest };
+  } else {
+    /* start where the card already is: its first set's count */
+    var first = firstSetOf(entry);
+    var n = first ? (ctx.isWorkout && first.target!=null ? first.target : first.values[ctx.field.id]) : null;
+    n = ladderNum(n);
+    ui.ladderDraft = { scope:scope, idx:idx, from: (n>=2 && n===Math.round(n)) ? n : 10, to:1, step:1, back:false, rest:rest };
+  }
+  /* The editor is found by position, so it also keeps the entry it opened
+     on: if anything above is removed and another card slides into that
+     place, the editor stops there rather than building on the wrong card. */
+  ui.ladderDraft.entry = entry;
+  if (scope==='plan'){ ui.planLadderEditing = idx; ui.planRungsOpen = null; }
+  else { ui.ladderEditing = idx; ui.rungsOpen = null; }
+  renderMain();
+}
+function closeLadderEditor(){
+  ui.planLadderEditing = null;
+  ui.ladderEditing = null;
+  ui.ladderDraft = null;
+}
+/* What Build does to the card, and whether it has to ask first. */
+function ladderBuildLabel(ctx){
+  var sets = ctx.entry.sets || [];
+  if (ctx.ladder){
+    if (ladderSetsMatch(ctx.ladder, sets, ctx.fields, ctx.isWorkout)) return { label:'Build Ladder', confirm:false };
+    return { label:'Rebuild (replaces hand edits)', confirm:true };
+  }
+  var n = sets.filter(function(s){ return (s.kind||'set')==='set'; }).length;
+  var rests = sets.length - n;
+  if (n > 1 || rests > 0) return { label:'Replace '+n+' Set'+(n!==1?'s':''), confirm:true };
+  return { label:'Build Ladder', confirm:false };
+}
+function ladderDraftLadder(d, fieldId){
+  return { from:d.from, to:d.to, step:d.step, back:!!d.back, fieldId:fieldId };
+}
+function ladderPreviewHTML(d, field){
+  var l = ladderDraftLadder(d, field.id);
+  var problems = ladderProblems(l);
+  if (problems.length){
+    return '<div class="ladder-problems">'+problems.map(function(p){ return '<div>'+esc(p)+'</div>'; }).join('')+'</div>';
+  }
+  var rungs = ladderRungs(l), total = 0, top = 0;
+  rungs.forEach(function(r){ total += r; if (r > top) top = r; });
+  var hard = ladderSetsFor(total, top, rungs.length);
+  return '<div class="ladder-preview-rungs">'+rungs.join(' &middot; ')+'</div>'+
+    '<div class="ladder-sum">'+rungs.length+' rungs &middot; '+total+' '+esc(ladderUnit(field, total))+
+    ' &middot; counts as '+hard+' set'+(hard!==1?'s':'')+'</div>';
+}
+function renderLadderEditor(scope, idx){
+  var d = ui.ladderDraft, ctx = ladderEditContext(scope, idx);
+  if (!ctx || !d || d.scope!==scope || d.idx!==idx || d.entry!==ctx.entry) return '';
+  var pre = scope==='plan' ? 'plan-ladder-' : 'ladder-';
+  var at = scope==='plan' ? 'data-idx="'+idx+'"' : 'data-wex="'+idx+'"';
+  var build = ladderBuildLabel(ctx);
+  var bad = ladderProblems(ladderDraftLadder(d, ctx.field.id)).length > 0;
+  /* the line about copying only means something when there is more to
+     copy than the count itself */
+  var others = ctx.fields.some(function(f){ return f.id!==ctx.field.id && f.type!=='time'; });
+  function num(id, label, v, min){
+    return '<label class="ladder-num"><span>'+label+'</span>'+
+      '<input id="'+id+'" class="num-input" type="number" min="'+min+'" step="1" inputmode="numeric" value="'+(v===null||v===undefined?'':v)+'"></label>';
+  }
+  return '<div class="ladder-editor">'+
+    '<div class="ladder-editor-title">Downs</div>'+
+    '<div class="ladder-editor-grid">'+
+      num('ladder-from', 'Start At', d.from, 1)+
+      num('ladder-to', 'Down To', d.to, 1)+
+      num('ladder-step', 'Step', d.step, 1)+
+    '</div>'+
+    '<div class="ladder-editor-row">'+
+      '<span class="ladder-editor-label">Back Up</span>'+
+      '<div class="segmented">'+
+        '<button class="'+(!d.back?'active':'')+'" data-action="ladder-draft-back" data-on="0">Off</button>'+
+        '<button class="'+(d.back?'active':'')+'" data-action="ladder-draft-back" data-on="1">On</button>'+
+      '</div>'+
+      '<span class="ladder-editor-hint" id="ladder-back-hint">Climb back to '+esc(d.from===null?'the top':String(d.from))+' after the bottom</span>'+
+    '</div>'+
+    '<label class="ladder-editor-row">'+
+      '<span class="ladder-editor-label">Rest Between Rungs</span>'+
+      '<input id="ladder-rest" class="num-input ladder-rest-input" type="number" min="0" step="5" inputmode="numeric" placeholder="sec" value="'+(d.rest===null||d.rest===undefined?'':d.rest)+'">'+
+      '<span class="ladder-editor-hint">sec</span>'+
+    '</label>'+
+    '<div class="ladder-preview" id="ladder-preview">'+ladderPreviewHTML(d, ctx.field)+'</div>'+
+    (others ? '<div class="ladder-editor-note">Weight and other targets are copied from the first set.</div>' : '')+
+    '<div class="ladder-actions">'+
+      '<button class="btn btn-primary" id="ladder-build-btn" data-action="'+pre+'build" '+at+(build.confirm?' data-confirm="1"':'')+(bad?' disabled':'')+'>'+esc(build.label)+'</button>'+
+      '<button class="btn btn-ghost" data-action="'+pre+'cancel" '+at+'>Cancel</button>'+
     '</div>'+
   '</div>';
+}
+/* Typing in the editor redraws only its preview, never the inputs being
+   typed into. */
+function ladderDraftInput(t){
+  var d = ui.ladderDraft;
+  if (!d) return;
+  var raw = String(t.value).trim(), n = raw==='' ? null : Math.floor(parseDecimal(raw));
+  if (n!==null && isNaN(n)) n = null;
+  if (t.id==='ladder-from') d.from = n;
+  else if (t.id==='ladder-to') d.to = n;
+  else if (t.id==='ladder-step') d.step = n;
+  else if (t.id==='ladder-rest') d.rest = n===null ? null : Math.max(0, n);
+  var ctx = ladderEditContext(d.scope, d.idx);
+  if (!ctx || ctx.entry!==d.entry) return;
+  var prev = document.getElementById('ladder-preview');
+  if (prev) prev.innerHTML = ladderPreviewHTML(d, ctx.field);
+  var btn = document.getElementById('ladder-build-btn');
+  if (btn) btn.disabled = ladderProblems(ladderDraftLadder(d, ctx.field.id)).length > 0;
+  var hint = document.getElementById('ladder-back-hint');
+  if (hint) hint.textContent = 'Climb back to '+(d.from===null?'the top':d.from)+' after the bottom';
+}
+/* Build: the marker, the rest between rungs, and one set per rung carrying
+   the first set's other targets. A workout builds rungs straight in the
+   workout shape - target set, actual still to come. */
+function buildLadderFromDraft(){
+  var d = ui.ladderDraft;
+  if (!d) return;
+  var ctx = ladderEditContext(d.scope, d.idx);
+  if (!ctx || ctx.entry!==d.entry){ closeLadderEditor(); renderMain(); return; }
+  var l = ladderDraftLadder(d, ctx.field.id);
+  if (ladderProblems(l).length) return;
+  var entry = ctx.entry, first = firstSetOf(entry);
+  var base = first ? first.values : null;
+  /* An emptied Rest box means no rest between rungs. null would mean 'use
+     the exercise's own rest' when the plan starts and when this editor
+     opens again, while the tag already says No rest. */
+  entry.defaultRestSec = (d.rest===null || d.rest===undefined) ? 0 : d.rest;
+  if (ctx.isWorkout){
+    entry.ladder = { from:l.from, to:l.to, step:l.step, back:l.back, fieldId:l.fieldId, climbed:false, startedAt:null, endedAt:null };
+    entry.sets = buildWorkoutRungs(l, base, ctx.fields);
+    ui.ladderNext = null;
+  } else {
+    entry.ladder = l;
+    entry.sets = buildLadderSets(l, base, ctx.fields);
+  }
+  closeLadderEditor();
+  save(); renderMain();
 }
 
 /* ------------------------------------------------------------ exercises */
@@ -4429,6 +5102,12 @@ var CHART_METRICS = [
   { key:'totreps', label:'Total Reps', needs:['reps'], agg:'sum',
     calc:function(w){ return chSum(chVals(w,'reps')); },
     value:function(v){ return Math.round(v)+' reps'; }, axis:function(v){ return String(Math.round(v)); } },
+  /* Downs sessions only - their size is its own line rather than a spike in
+     Total Reps (see seriesFor) */
+  { key:'ladtotal', label:'Downs Total', needs:['reps'], agg:'max', source:'ladder',
+    calc:function(w){ return chSum(chVals(w,'reps')); },
+    value:function(v){ return Math.round(v)+' reps'; }, axis:function(v){ return String(Math.round(v)); },
+    note:'Every ticked rung of a Downs ladder, added up' },
   { key:'e1rm', label:'Est. 1RM', needs:['weight','reps'], agg:'max',
     calc:function(w){ var p=chPairs(w); return p.length ? Math.max.apply(null, p.map(function(x){ return x.w*(1+x.r/30); })) : null; },
     value:fmtWeightVal, axis:fmtWeightAxis, note:'Epley estimate from your heaviest set' },
@@ -4472,10 +5151,17 @@ function customNumberMetrics(ex){
 function metricsFor(ex){
   chartDistanceField = ex.fields.filter(function(f){ return f.type==='distance'; })[0] || null;
   var types = ex.fields.map(function(f){ return f.type; });
+  var ladders = hasFinishedLadder(ex.id);
   var base = CHART_METRICS.filter(function(m){
+    if (m.source==='ladder' && !ladders) return false;
     return m.needs.every(function(t){ return types.indexOf(t)>=0; });
   });
   return base.concat(customNumberMetrics(ex));
+}
+function hasFinishedLadder(exerciseId){
+  return data.workouts.some(function(w){
+    return w.completedAt && (w.exercises||[]).some(function(e){ return e.exerciseId===exerciseId && isLadderEntry(e); });
+  });
 }
 function combine(agg, vals){
   if (!vals.length) return null;
@@ -4485,14 +5171,26 @@ function combine(agg, vals){
   return chAvg(vals);
 }
 /* One point per session. Two entries of the same exercise in one workout are
-   folded together with the metric's own aggregation, not silently plotted twice. */
+   folded together with the metric's own aggregation, not silently plotted twice.
+   A Downs ladder feeds only the metrics that pick ONE set (max or min) - its
+   top made rung is a real Best Set - and only through its ticked rungs. A
+   120-rep ladder beside 3x8 days is a different session shape, not progress,
+   so sums and averages leave it out and Downs Total charts it instead.
+   Plain exercises keep reading every set, ticked or not, as they always
+   have: a ladder's unreached rungs hold no value, a plain card's prefilled
+   ones do, and changing that is a separate decision. */
 function seriesFor(ex, metric){
   var pts = [];
   data.workouts.forEach(function(w){
     var vals = [];
     (w.exercises||[]).forEach(function(wex){
       if ((wex.kind||'exercise')!=='exercise' || wex.exerciseId!==ex.id) return;
-      var v = metric.calc(wex);
+      var src = wex;
+      if (isLadderEntry(wex)){
+        if (metric.source!=='ladder' && metric.agg!=='max' && metric.agg!=='min') return;
+        src = ladderTickedView(wex);
+      } else if (metric.source==='ladder') return;
+      var v = metric.calc(src);
       if (v!==null && v!==undefined && !isNaN(v)) vals.push(v);
     });
     var v = combine(metric.agg, vals);
@@ -5483,7 +6181,7 @@ function startBlankWorkout(){
 function startFromPlan(planId){
   var plan = data.plans.find(function(p){return p.id===planId;});
   if (!plan) return;
-  var wExercises = plan.items.map(function(entry){
+  var wExercises = plan.items.map(function(entry, idx){
     if (itemKind(entry)==='category'){
       return { kind:'category', id:uid('cat'), name:entry.name };
     }
@@ -5493,13 +6191,27 @@ function startFromPlan(planId){
     var ex = data.exercises.find(function(e){return e.id===entry.exerciseId;});
     if (!ex) return null;
     var fields = snapshotFields(ex);
+    /* A Downs ladder's rungs arrive with their number as the target and
+       the count still to be logged; everything else (the weight) is
+       copied as for any set. */
+    var ladder = planEntryIsLadder(plan.items, idx) ? entry.ladder : null;
     var sets = (entry.sets||[]).map(function(s){
       if ((s.kind||'set')==='rest'){ return { kind:'rest', id:uid('r'), seconds:s.seconds }; }
+      if (ladder){
+        var rung = workoutRung(s.values || {}, ladder.fieldId, normVal(s.values ? s.values[ladder.fieldId] : null));
+        rung.restSec = s.restSec;
+        return rung;
+      }
       return { kind:'set', id:uid('s'), values:Object.assign({}, s.values), restSec:s.restSec, done:false };
     });
     if (sets.length===0){ sets.push({ kind:'set', id:uid('s'), values:blankSetValues(fields), restSec:null, done:false }); }
     var effRest = (entry.defaultRestSec!==null && entry.defaultRestSec!==undefined) ? entry.defaultRestSec : (ex.defaultRestSec===undefined?null:ex.defaultRestSec);
-    return { kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:effRest, sets:sets };
+    var wex = { kind:'exercise', exerciseId:ex.id, name:ex.name, fields:fields, defaultRestSec:effRest, sets:sets };
+    if (ladder){
+      wex.ladder = { from:ladder.from, to:ladder.to, step:ladder.step, back:!!ladder.back, fieldId:ladder.fieldId,
+                     climbed:false, startedAt:null, endedAt:null };
+    }
+    return wex;
   }).filter(Boolean);
   data.activeWorkout = { id:uid('w'), planId:plan.id, name:plan.name, date:todayISO(), startedAt:Date.now(), completedAt:null, exercises:wExercises };
   save(); setView('workout');
@@ -5527,7 +6239,12 @@ function diffWorkoutVsPlan(w){
   if (!plan) return null;
   var timesChanged = false, structureChanged = false;
   var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
-  var pItems = (plan.items||[]).filter(function(it){ return itemKind(it)==='exercise'; });
+  var pItems = [], pLadder = [];
+  (plan.items||[]).forEach(function(it, idx){
+    if (itemKind(it)!=='exercise') return;
+    pItems.push(it);
+    pLadder.push(planEntryIsLadder(plan.items, idx));
+  });
   /* category headings and their order are part of the template too */
   function groupSig(list, nameOf, kindOf){
     return list.map(function(x){
@@ -5546,6 +6263,13 @@ function diffWorkoutVsPlan(w){
     var we = wEx[i], pi = pItems[i];
     if (we.exerciseId !== pi.exerciseId){ structureChanged = true; continue; }
     if (normVal(we.defaultRestSec) !== normVal(pi.defaultRestSec)) structureChanged = true;
+    /* A ladder is compared by what the plan would get back from it - see
+       sameLadderTemplate - never by how it went. */
+    var wL = isLadderEntry(we);
+    if (wL || pLadder[i]){
+      if (wL !== pLadder[i] || !sameLadderTemplate(we, pi)) structureChanged = true;
+      continue;
+    }
     var wSets = we.sets || [], pSets = pi.sets || [];
     if (wSets.length !== pSets.length) structureChanged = true;
     var m = Math.min(wSets.length, pSets.length);
@@ -5571,6 +6295,31 @@ function diffWorkoutVsPlan(w){
   }
   return { plan: plan, timesChanged: timesChanged, structureChanged: structureChanged };
 }
+/* The same template when the marker and every rung the plan would be
+   given back (applyPlanFullUpdate) match: each rung's planned number, its
+   other targets and its own rest. Actuals, a failed rung, Skipped and Climb
+   Back Up are how it went, not the template, so they are never compared. */
+function sameLadderTemplate(we, pi){
+  var a = we.ladder, b = pi.ladder;
+  if (a.from!==b.from || a.to!==b.to || a.step!==b.step || !!a.back!==!!b.back || a.fieldId!==b.fieldId) return false;
+  var ws = (we.sets||[]).filter(function(s){ return !s.climb; }), ps = pi.sets || [];
+  if (ws.length !== ps.length) return false;
+  for (var i=0;i<ws.length;i++){
+    var w = ws[i], p = ps[i], k = w.kind||'set';
+    if (k !== (p.kind||'set')) return false;
+    if (k==='rest'){ if (normVal(w.seconds) !== normVal(p.seconds)) return false; continue; }
+    if (normVal(w.restSec) !== normVal(p.restSec)) return false;
+    var wv = w.values || {}, pv = p.values || {};
+    var n = (w.target!==null && w.target!==undefined) ? w.target : wv[a.fieldId];
+    if (normVal(n) !== normVal(pv[a.fieldId])) return false;
+    var same = we.fields.every(function(f){
+      if (f.id===a.fieldId || f.type==='time') return true;
+      return normVal(wv[f.id]) === normVal(pv[f.id]);
+    });
+    if (!same) return false;
+  }
+  return true;
+}
 
 function planSetsFromWorkoutExercise(we){
   return (we.sets||[]).map(function(s){
@@ -5585,12 +6334,21 @@ function planSetsFromWorkoutExercise(we){
 }
 
 function applyPlanTimesUpdate(w, plan){
+  /* Paired by position, exactly as diffWorkoutVsPlan pairs them. A ladder on
+     either side sits this out (it has no timer targets to carry), but it
+     keeps its place, so the pairs after it stay lined up. */
   var wEx = w.exercises.filter(function(e){ return (e.kind||'exercise')==='exercise'; });
-  var pEx = (plan.items||[]).filter(function(it){ return itemKind(it)==='exercise'; });
+  var pEx = [], pLadder = [];
+  (plan.items||[]).forEach(function(it, idx){
+    if (itemKind(it)!=='exercise') return;
+    pEx.push(it);
+    pLadder.push(planEntryIsLadder(plan.items, idx));
+  });
   var n = Math.min(wEx.length, pEx.length);
   for (var i=0;i<n;i++){
     var we = wEx[i], pi = pEx[i];
     if (we.exerciseId !== pi.exerciseId) continue;
+    if (isLadderEntry(we) || pLadder[i]) continue;
     var timerFields = we.fields.filter(function(f){ return f.type==='timer'; });
     if (!timerFields.length) continue;
     var wSets = (we.sets||[]).filter(function(s){ return (s.kind||'set')==='set'; });
@@ -5612,6 +6370,24 @@ function applyPlanFullUpdate(w, plan){
     if (k==='category'){ items.push({ kind:'category', id:uid('cat'), name:we.name, collapsed:false }); return; }
     if (k==='break'){ items.push(newPlanBreak()); return; }
     if (k!=='exercise') return; /* top-level rest blocks live inside the session, not the preset */
+    if (isLadderEntry(we)){
+      /* Written back from the session's own rungs - the exact inverse of
+         startFromPlan - so per-rung edits (a vest on the top rungs, a longer
+         rest after one) survive, as they do for plain sets. Each count is the
+         rung's planned number (target), never what was done, so a failed or
+         stopped ladder never shrinks the plan; and the rungs Climb Back Up
+         added are how the day went, not the template, so they stay out. */
+      var l = we.ladder;
+      var desc = { from:l.from, to:l.to, step:l.step, back:!!l.back, fieldId:l.fieldId };
+      var kept = (we.sets||[]).filter(function(s){ return !s.climb; });
+      var sets = planSetsFromWorkoutExercise({ fields: we.fields, sets: kept });
+      kept.forEach(function(s, i){
+        if ((s.kind||'set')==='set' && s.target!==null && s.target!==undefined) sets[i].values[l.fieldId] = s.target;
+      });
+      items.push({ kind:'exercise', exerciseId: we.exerciseId, defaultRestSec: (we.defaultRestSec===undefined?null:we.defaultRestSec),
+                   ladder: desc, sets: sets });
+      return;
+    }
     items.push({ kind:'exercise', exerciseId: we.exerciseId, defaultRestSec: (we.defaultRestSec===undefined?null:we.defaultRestSec), sets: planSetsFromWorkoutExercise(we) });
   });
   plan.items = normalizePlanItems(items);
@@ -5696,6 +6472,15 @@ function finishWorkout(){
   /* an end set back by hand can fall before the last backup, which then
      would not count this workout as missing from it */
   if (f.endAt && w.completedAt===f.endAt) w.editedAt = Date.now();
+  /* A ladder left running ends at its last logged rung, not at Finish, so
+     the walk to the bench isn't timed. Nothing is trimmed: rungs never
+     reached stay, with no value, and history shows them as Skipped. */
+  w.exercises.forEach(function(e){
+    if (!isLadderEntry(e) || !e.ladder.startedAt || e.ladder.endedAt) return;
+    var lastAt = 0;
+    e.sets.forEach(function(s){ if (s.done && (s.doneAt||0) > lastAt) lastAt = s.doneAt; });
+    e.ladder.endedAt = lastAt || w.completedAt;
+  });
   if (!f.saveValues) w.excludeFromReference = true;
   data.workouts.push(w);
   data.activeWorkout = null;
@@ -5990,8 +6775,9 @@ function renderTopRestBlock(idx, block){
 
 function renderExerciseCard(wexIdx){
   var wex = data.activeWorkout.exercises[wexIdx];
+  if (isLadderEntry(wex)) return renderLadderCard(wexIdx);
   var unit = data.settings.weightUnit;
-  var lastEntry = lastEntryFor(wex.exerciseId, data.activeWorkout.id);
+  var lastEntry = lastEntryFor(wex.exerciseId, data.activeWorkout.id, false);
 
   var headerCols = '<th></th>' + wex.fields.map(function(f){
     return fieldHeaderCell(f, unit);
@@ -6008,14 +6794,21 @@ function renderExerciseCard(wexIdx){
     return rowHtml;
   }).join('');
 
-  return '<div class="ex-card" id="ex-card-'+wexIdx+'">'+
-    '<div class="ex-card-head"><div><div class="ex-card-name">'+esc(wex.name)+'</div>'+renderDefaultRest(wexIdx, wex)+'</div>'+
-    '<button class="btn btn-ghost" data-action="confirm-remove-exercise" data-wex="'+wexIdx+'">'+icon('trash')+' Remove</button></div>'+
+  /* Downs turns a card into a ladder, but only before anything on it is
+     ticked - a half-logged card rebuilt as rungs would be a muddled log */
+  var canDowns = !!ladderFieldOf(wex.fields) &&
+    !wex.sets.some(function(s){ return (s.kind||'set')==='set' && s.done; });
+  var body = ((canDowns && ui.ladderEditing === wexIdx) ? renderLadderEditor('workout', wexIdx) : '') ||
     '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table>'+
     '<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">'+
       '<button class="btn btn-ghost small" data-action="add-set" data-wex="'+wexIdx+'">'+icon('plus')+' Add Set</button>'+
       '<button class="btn btn-ghost small" data-action="add-rest-block" data-wex="'+wexIdx+'">'+icon('plus')+' Add Rest</button>'+
-    '</div>'+
+      (canDowns ? '<button class="btn btn-ghost small" data-action="ladder-edit" data-wex="'+wexIdx+'">'+icon('chevronDown')+' Downs</button>' : '')+
+    '</div>';
+  return '<div class="ex-card" id="ex-card-'+wexIdx+'">'+
+    '<div class="ex-card-head"><div><div class="ex-card-name">'+esc(wex.name)+'</div>'+renderDefaultRest(wexIdx, wex)+'</div>'+
+    '<button class="btn btn-ghost" data-action="confirm-remove-exercise" data-wex="'+wexIdx+'">'+icon('trash')+' Remove</button></div>'+
+    body+
   '</div>';
 }
 
@@ -6039,6 +6832,8 @@ function renderRestBlockRow(wexIdx, idx, item, fieldCount){
 function renderSetRow(wexIdx, idx, setNumber, wex, set, lastEntry, unit){
   var lastSets = lastEntry ? lastEntry.sets.filter(function(x){ return (x.kind||'set')==='set'; }) : null;
   var lastSet = lastSets ? lastSets[setNumber] : null;
+  /* a Downs rung's count cell hints at its own target, not at last time */
+  var rungField = (set.target!==null && set.target!==undefined && isLadderEntry(wex)) ? wex.ladder.fieldId : null;
   var cells = '<td>'+(setNumber+1)+'</td>';
   wex.fields.forEach(function(f){
     var currentRaw = set.values[f.id];
@@ -6046,6 +6841,15 @@ function renderSetRow(wexIdx, idx, setNumber, wex, set, lastEntry, unit){
     var currentDisplay = hasCurrent ? fieldDisplayValue(f, currentRaw, unit) : '';
     var placeholderRaw = lastSet ? lastSet.values[f.id] : null;
     var placeholderDisplay = (placeholderRaw!==null && placeholderRaw!==undefined && placeholderRaw!=='') ? fieldDisplayValue(f, placeholderRaw, unit) : '';
+    if (f.id===rungField){
+      placeholderDisplay = String(set.target);
+      /* a ticked rung short of its target reads '7/9' */
+      if (set.done && hasCurrent && currentRaw*1 < set.target){
+        cells += '<td><div class="rung-cell"><input class="num-input rung-short" data-commit="set-num" data-type="'+f.type+'" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" inputmode="decimal" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay)+'">'+
+          '<span class="rung-of">/'+esc(String(set.target))+'</span></div></td>';
+        return;
+      }
+    }
     if (f.type==='text'){
       cells += '<td><input class="num-input" data-commit="set-text" data-wex="'+wexIdx+'" data-set="'+idx+'" data-field="'+f.id+'" value="'+esc(currentDisplay)+'" placeholder="'+esc(placeholderDisplay)+'"></td>';
     } else if (f.type==='timer'){
@@ -6066,6 +6870,349 @@ function renderSetRow(wexIdx, idx, setNumber, wex, set, lastEntry, unit){
   return '<tr>'+cells+'</tr>';
 }
 
+/* ---- Downs in a workout --------------------------------------------------
+   One big Done per rung, the rest between rungs starting by itself, and the
+   rung table - the ordinary set rows - kept behind Edit Rungs. Every tap
+   here is a one-off render; the only thing that runs on a clock is the
+   strip's time, which tick() rewrites as text. */
+
+function renderLadderCard(wexIdx){
+  var w = data.activeWorkout, wex = w.exercises[wexIdx], l = wex.ladder, fid = l.fieldId;
+  var field = ladderCountField(wex, wex.fields);
+  var sum = ladderSummary(wex);
+  var head = '<div class="ex-card-head"><div><div class="ex-card-name">'+esc(wex.name)+'</div>'+ladderTagHTML(l, wex.defaultRestSec)+'</div>'+
+    '<button class="btn btn-ghost" data-action="confirm-remove-exercise" data-wex="'+wexIdx+'">'+icon('trash')+' Remove</button></div>';
+  var editor = (ui.ladderEditing === wexIdx && sum.done === 0) ? renderLadderEditor('workout', wexIdx) : '';
+  if (editor) return '<div class="ex-card ladder-card" id="ex-card-'+wexIdx+'">'+head+editor+'</div>';
+
+  var last = lastLadderFor(wex.exerciseId, w.id), lastLine = '';
+  if (last){
+    var ls = ladderSummary(last.entry);
+    lastLine = '<div class="ladder-last">Last: '+esc(ladderLabel(last.entry.ladder))+' &middot; '+ls.logged+' '+esc(ladderUnit(field, ls.logged))+
+      (ls.ms && (last.entry.ladder.endedAt || ls.complete) ? ' &middot; '+fmtElapsed(ls.ms) : '')+' &middot; '+esc(fmtShortDate(last.workout.date))+'</div>';
+  }
+
+  var strip, stripCls = '';
+  var unit = function(n){ return esc(ladderUnit(field, n)); };
+  if (sum.complete){
+    stripCls = ' done';
+    strip = 'Done &middot; '+sum.logged+' '+unit(sum.logged)+' in '+fmtElapsed(sum.ms)+' &middot; '+sum.done+' of '+sum.total+' rungs';
+  } else if (sum.stopped){
+    strip = (sum.stoppedAt ? 'Stopped at rung '+sum.stoppedAt : 'Stopped before rung 1')+' of '+sum.total+' &middot; '+
+      sum.logged+' '+unit(sum.logged)+' &middot; '+fmtElapsed(sum.ms);
+  } else if (sum.started){
+    strip = 'Rung '+(sum.current+1)+' of '+sum.total+' &middot; '+sum.logged+' / '+sum.planned+' '+unit(sum.planned)+
+      ' &middot; <span data-ladder-clock="'+wexIdx+'">'+fmtElapsed(sum.ms)+'</span>';
+  } else {
+    strip = sum.total+' rung'+(sum.total!==1?'s':'')+' &middot; '+sum.planned+' '+unit(sum.planned);
+  }
+
+  /* made, failed '7/9', the one you're on, still to come, or - after End
+     Here - skipped: kept, struck through, and counted nowhere */
+  var chips = sum.idxs.map(function(si, pos){
+    var s = wex.sets[si], t = s.target, has = t!==null && t!==undefined;
+    var tTxt = has ? String(t) : '\u2014';
+    if (s.done){
+      var v = ladderNum(s.values[fid]);
+      if (has && v < t) return '<span class="rung-chip failed" title="'+v+' of '+t+'">'+v+'/'+t+'</span>';
+      return '<span class="rung-chip made">'+v+'</span>';
+    }
+    if (sum.stopped) return '<span class="rung-chip skipped" title="Skipped">'+tTxt+'</span>';
+    if (pos === sum.current) return '<span class="rung-chip current">'+tTxt+'</span>';
+    return '<span class="rung-chip pending">'+tTxt+'</span>';
+  }).join('');
+
+  var panel = '';
+  if (!sum.started && !sum.complete){
+    panel = '<button class="btn btn-primary full-width ladder-go" data-action="ladder-start" data-wex="'+wexIdx+'">'+icon('play')+' Start Downs</button>';
+  } else if (sum.running){
+    var val = ladderNextValue(wexIdx, wex.sets[sum.currentIdx]);
+    panel = '<div class="ladder-next">'+
+      '<div class="ladder-stepper">'+
+        '<button class="ladder-step-btn" data-action="ladder-step" data-wex="'+wexIdx+'" data-delta="-1" aria-label="One less">&minus;</button>'+
+        '<div class="ladder-next-num"><span data-ladder-next="'+wexIdx+'">'+val+'</span><small>'+unit(2)+'</small></div>'+
+        '<button class="ladder-step-btn" data-action="ladder-step" data-wex="'+wexIdx+'" data-delta="1" aria-label="One more">+</button>'+
+      '</div>'+
+      '<button class="btn btn-primary full-width ladder-go" data-action="ladder-done" data-wex="'+wexIdx+'"><span>Done &middot; <span data-ladder-done="'+wexIdx+'">'+val+'</span></span></button>'+
+    '</div>';
+  }
+  if (sum.complete && !l.back && !l.climbed){
+    panel += '<button class="btn btn-ghost full-width ladder-climb" data-action="ladder-climb" data-wex="'+wexIdx+'">Climb Back Up</button>';
+  }
+
+  var links = '';
+  /* Undo is there while it has something to take back: a rung, or an End Here */
+  if (sum.done > 0 || sum.stopped) links += '<button class="btn btn-ghost small" data-action="ladder-undo" data-wex="'+wexIdx+'">Undo</button>';
+  if (sum.running) links += '<button class="btn btn-ghost small" data-action="ladder-end" data-wex="'+wexIdx+'">End Here</button>';
+  var open = ui.rungsOpen === wexIdx;
+  var tools = '<button class="btn btn-ghost small'+(open?' active':'')+'" data-action="rungs-toggle" data-wex="'+wexIdx+'">'+(open?'Hide Rungs':'Edit Rungs')+'</button>'+
+    (sum.done === 0 ? '<button class="btn btn-ghost small" data-action="ladder-edit" data-wex="'+wexIdx+'">'+icon('edit')+' Edit Downs</button>' : '');
+
+  var table = '';
+  if (open){
+    var unitW = data.settings.weightUnit, setCounter = 0;
+    var headerCols = '<th></th>' + wex.fields.map(function(f){ return fieldHeaderCell(f, unitW); }).join('') + '<th>Rest</th><th></th><th></th>';
+    var rows = wex.sets.map(function(item, i){
+      if ((item.kind||'set')==='rest') return renderRestBlockRow(wexIdx, i, item, wex.fields.length);
+      return renderSetRow(wexIdx, i, setCounter++, wex, item, null, unitW);
+    }).join('');
+    table = '<div class="ladder-rungs"><table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+  }
+
+  return '<div class="ex-card ladder-card" id="ex-card-'+wexIdx+'">'+head+lastLine+
+    '<div class="ladder-strip'+stripCls+'">'+strip+'</div>'+
+    '<div class="rung-row">'+chips+'</div>'+
+    panel+
+    (links ? '<div class="ladder-links">'+links+'</div>' : '')+
+    '<div class="ladder-actions">'+tools+'</div>'+
+    table+
+  '</div>';
+}
+/* History's one line for a ladder - 'Downs 15 -> 1, 120 reps, 9:41' - or
+   where it stopped. The time only when the ladder has an end to measure to. */
+function ladderHistoryLineHTML(wex){
+  var sum = ladderSummary(wex), field = ladderCountField(wex, wex.fields);
+  var parts = ['Downs '+sum.label];
+  if (!sum.done) parts.push('not started');
+  else {
+    if (!sum.complete) parts.push('stopped at rung '+sum.stoppedAt+' of '+sum.total);
+    parts.push(sum.logged+' '+ladderUnit(field, sum.logged));
+    if (sum.started && (wex.ladder.endedAt || sum.complete)) parts.push(fmtElapsed(sum.ms));
+  }
+  return '<div class="ladder-strip ladder-hist'+(sum.complete?' done':'')+'">'+esc(parts.join(' \u00b7 '))+'</div>';
+}
+/* The stepper holds a number only while you are changing it; otherwise it
+   shows the rung's own count when one is there (typed into the table, or
+   kept by an untick), else its target - so Done logs what the table shows,
+   as the tick would, and it resets the moment the rung moves on. */
+function ladderNextValue(wexIdx, rung){
+  var n = ui.ladderNext;
+  if (n && n.wex === wexIdx && n.set === rung.id) return n.value;
+  var wex = data.activeWorkout && data.activeWorkout.exercises[wexIdx];
+  var own = (wex && wex.ladder) ? rung.values[wex.ladder.fieldId] : null;
+  if (own!==null && own!==undefined && own!=='') return ladderNum(own);
+  return ladderNum(rung.target);
+}
+/* A count typed into the current rung's cell is the latest word on it, so
+   the panel above shows it at once. Only the numbers are rewritten: this
+   runs on focusout, and a render would break focus moving to the next cell. */
+function ladderRefreshNext(wexIdx, rung){
+  var wex = data.activeWorkout.exercises[wexIdx], sum = ladderSummary(wex);
+  if (!sum.running || wex.sets[sum.currentIdx] !== rung) return;
+  ui.ladderNext = null;
+  var v = ladderNextValue(wexIdx, rung);
+  var a = document.querySelector('[data-ladder-next="'+wexIdx+'"]');
+  var b = document.querySelector('[data-ladder-done="'+wexIdx+'"]');
+  if (a) a.textContent = v;
+  if (b) b.textContent = v;
+}
+/* A second tap this soon after a logged rung is the other half of a double
+   tap. Any other accepted ladder tap in between (End Here, Undo, Climb Back
+   Up) proves it isn't, and resets the stamp to 0. */
+function ladderTapTooSoon(){
+  return Date.now() - runtime.ladderLastDoneAt < CIRCUIT_TAP_GUARD_MS;
+}
+/* Logging a rung, from Done or from its tick in the table. */
+function logLadderRung(wexIdx, setIdx, value){
+  var wex = data.activeWorkout.exercises[wexIdx], l = wex.ladder, s = wex.sets[setIdx];
+  var now = Date.now();
+  s.values[l.fieldId] = value;
+  s.done = true;
+  s.doneAt = now;
+  if (!l.startedAt) l.startedAt = now;
+  l.endedAt = null;
+  ui.ladderNext = null;
+  runtime.ladderLastDoneAt = now;   /* the tick shares Done's double-tap guard */
+  var sum = ladderSummary(wex);
+  if (sum.currentIdx >= 0){
+    /* The short rest is part of the Downs you set up, so it starts whatever
+       Start Rest on Tick says - fifteen taps on the play button would defeat
+       it. It restarts from this tap if one was already running. */
+    var rest = effectiveRest(wex, s);
+    if (rest) startTimer(rest, 'Next: '+ladderNum(wex.sets[sum.currentIdx].target));
+    /* no rest after this rung, so a 'Next: N' left from the one before now
+       names the wrong rung */
+    else if (runtime.timer && runtime.timer.label) clearRestTimer();
+  } else {
+    l.endedAt = now;
+    /* nothing comes next, so a 'Next: 1' still counting down is stale */
+    if (runtime.timer && runtime.timer.label) clearRestTimer();
+  }
+  save();
+  vibrate(15);
+  renderMain();
+}
+/* Ticking a rung in the table is Done by another route: an empty count
+   takes the target. Unticking keeps whatever was typed; only ticked rungs
+   count anywhere. */
+function ladderToggleRung(wexIdx, setIdx){
+  var wex = data.activeWorkout.exercises[wexIdx], l = wex.ladder, s = wex.sets[setIdx];
+  if (!s.done){
+    var v = s.values[l.fieldId];
+    if (v===null || v===undefined || v==='') v = (s.target!==null && s.target!==undefined) ? s.target : null;
+    logLadderRung(wexIdx, setIdx, v);
+    return;
+  }
+  /* the other half of a double tap, landing on the tick the first half
+     just redrew */
+  if (ladderTapTooSoon()) return;
+  var wasComplete = ladderSummary(wex).complete;
+  s.done = false;
+  s.doneAt = null;
+  if (wasComplete) l.endedAt = null;
+  ui.ladderNext = null;
+  runtime.ladderLastDoneAt = 0;
+  /* as Undo: a 'Next: N' rest no longer matches the rung the card is on */
+  if (runtime.timer && runtime.timer.label) clearRestTimer();
+  save(); renderMain();
+}
+/* After a rung is removed in the table. With the last rung gone the marker
+   would only come back to life - already started - on the next Add Set, so
+   the card goes back to being a plain one. With the last climb rung gone,
+   the ladder was not climbed after all. */
+function ladderAfterRungRemoved(wexIdx){
+  var wex = data.activeWorkout.exercises[wexIdx], l = wex.ladder;
+  if (!firstSetOf(wex)){
+    delete wex.ladder;
+    if (ui.rungsOpen === wexIdx) ui.rungsOpen = null;
+    ui.ladderNext = null;
+    if (runtime.timer && runtime.timer.label) clearRestTimer();
+    return;
+  }
+  if (l.climbed && !wex.sets.some(function(s){ return s.climb; })) l.climbed = false;
+}
+function ladderAction(action, el){
+  var wexIdx = el.dataset.wex*1, idx = el.dataset.idx*1;
+  var wex = (data.activeWorkout && el.dataset.wex!==undefined) ? data.activeWorkout.exercises[wexIdx] : null;
+  switch(action){
+    case 'plan-ladder-edit': openLadderEditor('plan', idx); break;
+    case 'ladder-edit': openLadderEditor('workout', wexIdx); break;
+    case 'plan-ladder-build':
+    case 'ladder-build':
+      if (el.dataset.confirm) armOrConfirm(el, buildLadderFromDraft); else buildLadderFromDraft();
+      break;
+    case 'plan-ladder-cancel':
+    case 'ladder-cancel': closeLadderEditor(); renderMain(); break;
+    case 'ladder-draft-back':
+      if (ui.ladderDraft){ ui.ladderDraft.back = el.dataset.on==='1'; renderMain(); }
+      break;
+    case 'plan-ladder-plain': {
+      /* the rungs stay as ordinary sets - nothing is lost */
+      var pItem = currentPlan().items[idx];
+      if (pItem) delete pItem.ladder;
+      closePlanLadderEdits(); save(); renderMain();
+      break;
+    }
+    case 'plan-rungs-toggle': ui.planRungsOpen = ui.planRungsOpen===idx ? null : idx; renderMain(); break;
+    case 'rungs-toggle': ui.rungsOpen = ui.rungsOpen===wexIdx ? null : wexIdx; renderMain(); break;
+  }
+  if (!isLadderEntry(wex)) return;
+  var l = wex.ladder, sum = ladderSummary(wex);
+  switch(action){
+    case 'ladder-start':
+      ensureAudio();   /* the tap that lets the rest beeps sound on iOS */
+      /* the other half of a double tap lands on the stepper that replaces
+         this button */
+      runtime.ladderStartTapAt = Date.now();
+      if (!l.startedAt){ l.startedAt = Date.now(); save(); }
+      renderMain();
+      break;
+    case 'ladder-step': {
+      if (sum.currentIdx < 0 || Date.now() - runtime.ladderStartTapAt < CIRCUIT_TAP_GUARD_MS) break;
+      var rung = wex.sets[sum.currentIdx];
+      var v = Math.max(0, ladderNextValue(wexIdx, rung) + el.dataset.delta*1);
+      ui.ladderNext = { wex: wexIdx, set: rung.id, value: v };
+      /* only the numbers change, so only the numbers are rewritten */
+      var a = document.querySelector('[data-ladder-next="'+wexIdx+'"]');
+      var b = document.querySelector('[data-ladder-done="'+wexIdx+'"]');
+      if (a) a.textContent = v;
+      if (b) b.textContent = v;
+      break;
+    }
+    case 'ladder-done': {
+      if (sum.currentIdx < 0 || ladderTapTooSoon()) break;
+      logLadderRung(wexIdx, sum.currentIdx, ladderNextValue(wexIdx, wex.sets[sum.currentIdx]));
+      break;
+    }
+    case 'ladder-undo': {
+      /* the final Done drops the next-rung panel and Undo slides up under
+         the thumb: the other half of that double tap must not revert the
+         rung it just logged */
+      if (ladderTapTooSoon()) break;
+      /* Undo takes back the last thing you did. An End Here, or a Climb Back
+         Up with none of its rungs done yet, is that thing - the rungs before
+         it were really done and are not the ones to revert. */
+      if (sum.stopped){
+        l.endedAt = null;
+        ui.ladderNext = null;
+        save(); renderMain();
+        break;
+      }
+      var climbAt = [], climbDone = false;
+      wex.sets.forEach(function(s, i){ if (s.climb){ climbAt.push(i); if (s.done) climbDone = true; } });
+      if (l.climbed && !climbDone){
+        for (var ci=climbAt.length-1; ci>=0; ci--) wex.sets.splice(climbAt[ci], 1);
+        l.climbed = false;
+        /* finished at the bottom again, as it was before the climb */
+        var back = ladderSummary(wex), lastAt = 0;
+        wex.sets.forEach(function(s){ if (s.done && (s.doneAt||0) > lastAt) lastAt = s.doneAt; });
+        l.endedAt = back.complete ? (lastAt || Date.now()) : null;
+        ui.ladderNext = null;
+        clearRestTimer();
+        save(); renderMain();
+        break;
+      }
+      /* the most recently logged rung, whatever its place in the ladder */
+      var pick = -1, at = -1;
+      wex.sets.forEach(function(s, i){
+        if ((s.kind||'set')!=='set' || !s.done) return;
+        if ((s.doneAt||0) >= at){ at = s.doneAt||0; pick = i; }
+      });
+      if (pick < 0) break;
+      var u = wex.sets[pick];
+      u.done = false; u.values[l.fieldId] = null; u.doneAt = null;
+      l.endedAt = null;
+      ui.ladderNext = null;
+      runtime.ladderLastDoneAt = 0;
+      clearRestTimer();
+      save(); renderMain();
+      break;
+    }
+    case 'ladder-end': armOrConfirm(el, function(){
+      l.endedAt = Date.now();
+      ui.ladderNext = null;
+      runtime.ladderLastDoneAt = 0;
+      clearRestTimer();
+      save(); renderMain();
+    }); break;
+    case 'ladder-climb': {
+      if (!sum.complete || l.back || l.climbed) break;
+      var first = firstSetOf(wex), bottom = wex.sets[sum.idxs[sum.idxs.length-1]];
+      var down = sum.idxs.map(function(si){ return wex.sets[si]; });
+      var ups = ladderRungs({ from:l.from, to:l.to, step:l.step, back:false }).slice(0, -1).reverse();
+      ups.forEach(function(r){
+        /* each rung on the way up carries what its twin on the way down
+           carried, so a vest worn only on the top rungs stays on the top
+           rungs rather than being logged on the light ones */
+        var twin = null;
+        for (var i=0;i<down.length;i++){ if (down[i].target===r){ twin = down[i]; break; } }
+        var src = twin || first;
+        var up = workoutRung(ladderBaseValues(src ? src.values : null, wex.fields, l.fieldId), l.fieldId, r);
+        up.climb = true;
+        wex.sets.push(up);
+      });
+      l.climbed = true;
+      l.endedAt = null;
+      runtime.ladderLastDoneAt = 0;
+      /* the panel comes back where this button was */
+      runtime.ladderStartTapAt = Date.now();
+      var rest = effectiveRest(wex, bottom);
+      if (ups.length && rest) startTimer(rest, 'Next: '+ups[0]);
+      save(); renderMain();
+      break;
+    }
+  }
+}
 
 /* ---- the Photos half of the Progress tab -------------------------------- */
 
@@ -6319,6 +7466,9 @@ function renderWorkoutDetailHTML(w){
     var headerCols = '<th></th>' + wex.fields.map(function(f){
       return fieldHeaderCell(f, unit);
     }).join('');
+    /* a Downs ladder: a line saying how it went, '7 / 9' for a rung short
+       of its target, and the rungs never reached as Skipped */
+    var ladderField = isLadderEntry(wex) ? wex.ladder.fieldId : null;
     var setCounter = 0;
     var rows = wex.sets.map(function(s){
       var sKind = s.kind || 'set';
@@ -6328,8 +7478,13 @@ function renderWorkoutDetailHTML(w){
       }
       var tds = '<td>'+(setCounter+1)+'</td>';
       setCounter++;
+      var rungTarget = (ladderField && s.target!==null && s.target!==undefined) ? s.target : null;
       wex.fields.forEach(function(f){
         var v = s.values[f.id];
+        if (f.id===ladderField && rungTarget!==null){
+          if (!s.done){ tds += '<td class="rung-skipped">\u2014 / '+esc(String(rungTarget))+' &middot; Skipped</td>'; return; }
+          if (ladderNum(v) < rungTarget){ tds += '<td class="rung-short-cell">'+esc(String(ladderNum(v)))+' / '+esc(String(rungTarget))+'</td>'; return; }
+        }
         var disp = '\u2014';
         if (v!==null && v!==undefined && v!==''){
           if (f.type==='weight') disp = kgToDisplay(v, unit);
@@ -6338,11 +7493,12 @@ function renderWorkoutDetailHTML(w){
           else if (f.type==='time' || f.type==='timer') disp = secToMMSS(v);
           else disp = v;
         }
-        tds += '<td style="font-family:var(--font-mono);'+(s.done?'color:var(--good);':'')+'">'+esc(String(disp))+'</td>';
+        tds += '<td style="font-family:var(--font-mono);'+(s.done?'color:var(--good);':(rungTarget!==null?'color:var(--text-faint);':''))+'">'+esc(String(disp))+'</td>';
       });
       return '<tr>'+tds+'</tr>';
     }).join('');
     html += '<div class="ex-card"><div class="ex-card-name" style="margin-bottom:10px;">'+esc(wex.name)+'</div>'+
+      (ladderField ? ladderHistoryLineHTML(wex) : '')+
       '<table class="set-table"><thead><tr>'+headerCols+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
   });
   return html;
@@ -6360,25 +7516,32 @@ function ensureAudio(){
     runtime.audioCtx.resume().catch(function(){});
   }
 }
-function beep(ctx, delay){
+/* freq and len are optional: a short, lower pip counts down to a phase
+   change, and the default is the rest timer's own beep */
+function beep(ctx, delay, freq, len){
   if (!ctx) return;
   var t0 = ctx.currentTime + (delay||0);
+  var dur = len || 0.35;
   var o = ctx.createOscillator(), g = ctx.createGain();
-  o.type = 'sine'; o.frequency.value = 880;
+  o.type = 'sine'; o.frequency.value = freq || 880;
   g.gain.setValueAtTime(0.0001, t0);
   g.gain.exponentialRampToValueAtTime(0.25, t0+0.01);
-  g.gain.exponentialRampToValueAtTime(0.0001, t0+0.35);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0+dur);
   o.connect(g); g.connect(ctx.destination);
-  o.start(t0); o.stop(t0+0.4);
+  o.start(t0); o.stop(t0+dur+0.05);
 }
-function playCompletionBeep(){
+function playCompletionBeep(count){
   if (!runtime.audioCtx) return;
-  beep(runtime.audioCtx, 0);
-  beep(runtime.audioCtx, 0.45);
+  var n = count || 2;
+  for (var i=0;i<n;i++) beep(runtime.audioCtx, i*0.45);
 }
-function flashTitleIfHidden(){
+/* A short buzz where the phone has one; iOS has none and ignores it. */
+function vibrate(pattern){
+  try { if (navigator.vibrate) navigator.vibrate(pattern); } catch(e){}
+}
+function flashTitleIfHidden(text){
   if (!document.hidden) return;
-  document.title = 'Rest done! \u2014 Athleticism';
+  document.title = (text || 'Rest done!') + ' \u2014 Athleticism';
   function restore(){ document.title = originalTitle; document.removeEventListener('visibilitychange', restore); }
   document.addEventListener('visibilitychange', restore);
 }
@@ -6409,7 +7572,9 @@ function clearRestTimer(){
   save();
   renderTimerBar();
 }
-function startTimer(seconds){
+/* label is optional: a Downs rest says what comes next ('Next: 7') where a
+   plain rest says 'Resting' */
+function startTimer(seconds, label){
   ensureAudio();
   clearInterval(runtime.timerHandle);
   runtime.pendingBeep = false;
@@ -6418,7 +7583,8 @@ function startTimer(seconds){
     endAt: Date.now() + seconds*1000,
     pausedRemainingMs: null,
     done: false,
-    doneAt: null
+    doneAt: null,
+    label: label || null
   };
   persistTimer();
   renderTimerBar();
@@ -6491,7 +7657,9 @@ function renderTimerBar(){
   if (!runtime.timer){ bar.className='timerbar'; bar.innerHTML=''; timerBarShape=''; return; }
   var t = runtime.timer;
   var running = timerIsRunning(t);
-  var shape = t.done ? 'done' : (running ? 'running' : 'paused');
+  /* the label is part of the shape, so a new 'Next: 7' rebuilds the bar
+     once and every tick after it still only rewrites the time */
+  var shape = (t.done ? 'done' : (running ? 'running' : 'paused')) + '|' + (t.label || '');
   var time = fmtElapsed(timerRemainingMs(t));
   bar.className = 'timerbar show' + (t.done?' done':'');
   var timeEl = shape === timerBarShape ? bar.querySelector('.timerbar-time') : null;
@@ -6501,7 +7669,7 @@ function renderTimerBar(){
   }
   timerBarShape = shape;
   bar.innerHTML = '<div class="timerbar-inner">'+
-    '<div class="timerbar-label">'+(t.done?'Rest Complete':(running?'Resting':'Paused'))+'</div>'+
+    '<div class="timerbar-label">'+(t.done?'Rest Complete':(running?esc(t.label||'Resting'):'Paused'))+'</div>'+
     '<div class="timerbar-time">'+time+'</div>'+
     (!t.done ? (
       '<button data-action="timer-adjust" data-delta="-15">&minus;15</button>'+
@@ -6819,7 +7987,7 @@ function renderSettingsModal(){
     unitsSectionHTML()+
 
     '<div class="settings-row"><div class="settings-row-text"><span>Start Rest on Tick</span>'+
-      '<span class="settings-row-sub">Ticking a set off starts its rest timer, if it has one. Off leaves that to the ▶ button</span></div>'+
+      '<span class="settings-row-sub">Ticking a set off starts its rest timer, if it has one. Off leaves that to the ▶ button. Downs rungs always do.</span></div>'+
       '<div class="segmented">'+
         '<button class="'+(!data.settings.autoRest?'active':'')+'" data-action="auto-rest-toggle" data-on="0">Off</button>'+
         '<button class="'+(data.settings.autoRest?'active':'')+'" data-action="auto-rest-toggle" data-on="1">On</button>'+
@@ -6992,8 +8160,8 @@ function handleAction(action, el){
       setView('plans');
       break;
     }
-    case 'select-plan': ui.selectedPlanId = el.dataset.id; renderMain(); break;
-    case 'deselect-plan': ui.selectedPlanId = null; renderMain(); break;
+    case 'select-plan': ui.selectedPlanId = el.dataset.id; closePlanLadderEdits(); renderMain(); break;
+    case 'deselect-plan': ui.selectedPlanId = null; closePlanLadderEdits(); renderMain(); break;
     case 'confirm-delete-plan': armOrConfirm(el, function(){
       data.plans = data.plans.filter(function(p){return p.id!==el.dataset.id;});
       ui.selectedPlanId = null; save(); renderMain();
@@ -7015,6 +8183,7 @@ function handleAction(action, el){
       var rcPlan = currentPlan();
       rcPlan.items.splice(el.dataset.idx*1, 1);
       rcPlan.items = normalizePlanItems(rcPlan.items);
+      closePlanLadderEdits(); closeLadderEditor();   /* they point by position */
       save(); renderMain();
       break;
     }
@@ -7030,6 +8199,7 @@ function handleAction(action, el){
       var plan = currentPlan();
       plan.items.splice(el.dataset.idx*1, 1);
       plan.items = normalizePlanItems(plan.items);
+      closePlanLadderEdits(); closeLadderEditor();
       save(); renderMain();
       break;
     }
@@ -7069,7 +8239,15 @@ function handleAction(action, el){
       break;
     }
     case 'plan-remove-set': {
-      currentPlan().items[el.dataset.idx*1].sets.splice(el.dataset.set*1, 1);
+      var prsIdx = el.dataset.idx*1, prsItem = currentPlan().items[prsIdx];
+      var prsWasLadder = planEntryIsLadder(currentPlan().items, prsIdx);
+      prsItem.sets.splice(el.dataset.set*1, 1);
+      /* the last rung gone: the marker would only come back to life on the
+         next Add Set, so the card goes back to being a plain one */
+      if (prsWasLadder && !firstSetOf(prsItem)){
+        delete prsItem.ladder;
+        if (ui.planRungsOpen === prsIdx) ui.planRungsOpen = null;
+      }
       save(); renderMain();
       break;
     }
@@ -7133,13 +8311,16 @@ function handleAction(action, el){
     }
     case 'remove-set': {
       var wex2 = data.activeWorkout.exercises[el.dataset.wex*1];
+      var wasLadder = isLadderEntry(wex2);
       wex2.sets.splice(el.dataset.set*1, 1);
+      if (wasLadder) ladderAfterRungRemoved(el.dataset.wex*1);
       save(); renderMain();
       break;
     }
     case 'toggle-set-done': {
       var doneWex = data.activeWorkout.exercises[el.dataset.wex*1];
       var set = doneWex.sets[el.dataset.set*1];
+      if (isLadderEntry(doneWex)){ ladderToggleRung(el.dataset.wex*1, el.dataset.set*1); break; }
       set.done = !set.done;
       save();
       el.classList.toggle('done', set.done);
@@ -7209,8 +8390,18 @@ function handleAction(action, el){
 
     case 'confirm-remove-exercise': armOrConfirm(el, function(){
       data.activeWorkout.exercises.splice(el.dataset.wex*1, 1);
+      ui.ladderEditing = null; ui.rungsOpen = null; ui.ladderDraft = null;   /* they point by position */
       save(); renderMain();
     }); break;
+
+    /* Downs ladders, in plans and in workouts */
+    case 'plan-ladder-edit': case 'plan-ladder-build': case 'plan-ladder-cancel':
+    case 'plan-ladder-plain': case 'plan-rungs-toggle': case 'ladder-draft-back':
+    case 'ladder-edit': case 'ladder-build': case 'ladder-cancel': case 'ladder-start':
+    case 'ladder-step': case 'ladder-done': case 'ladder-undo': case 'ladder-end':
+    case 'ladder-climb': case 'rungs-toggle':
+      ladderAction(action, el);
+      break;
 
     case 'add-rest-between-exercises': {
       data.activeWorkout.exercises.push({ kind:'rest', id: uid('r'), seconds: 60 });
@@ -7219,6 +8410,7 @@ function handleAction(action, el){
     }
     case 'remove-exercise-block': {
       data.activeWorkout.exercises.splice(el.dataset.wex*1, 1);
+      ui.ladderEditing = null; ui.rungsOpen = null; ui.ladderDraft = null;   /* they point by position */
       save(); renderMain();
       break;
     }
@@ -7732,27 +8924,10 @@ function handlePlanSetCommit(kind, t){
   var ex = data.exercises.find(function(e){return e.id===item.exerciseId;});
   var field = ex ? ex.fields.find(function(f){return f.id===t.dataset.field;}) : null;
   if (!field) return;
-  if (kind==='set-num'){
-    var raw = t.value.trim();
-    if (raw===''){ set.values[field.id] = null; }
-    else {
-      var n = parseDecimal(raw);
-      if (isNaN(n)){ set.values[field.id] = null; t.value=''; }
-      else {
-        if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
-        else if (field.type==='assisted') set.values[field.id] = displayToKg(Math.abs(n), data.settings.weightUnit);
-        else if (field.type==='distance') set.values[field.id] = displayToMetres(n, distanceUnit(field));
-        else if (field.type==='reps') set.values[field.id] = Math.round(n);
-        else if (isEffortType(field.type)) set.values[field.id] = clampEffort(field.type, n);
-        else set.values[field.id] = n;
-        t.value = fieldDisplayValue(field, set.values[field.id], data.settings.weightUnit);
-      }
-    }
-  } else if (kind==='set-time'){
-    var raw2 = t.value.trim();
-    var sec = raw2==='' ? null : mmssToSec(raw2);
-    set.values[field.id] = sec;
-    t.value = sec===null ? '' : secToMMSS(sec);
+  if (kind==='set-num' || kind==='set-time'){
+    var v = parseFieldInput(field, t.value);
+    set.values[field.id] = v;
+    t.value = v===null ? '' : fieldDisplayValue(field, v, data.settings.weightUnit);
   } else if (kind==='set-text'){
     set.values[field.id] = t.value;
   }
@@ -7812,30 +8987,18 @@ function onFocusOut(e){
       var wex = data.activeWorkout.exercises[t.dataset.wex*1];
       var set = wex.sets[t.dataset.set*1];
       var field = wex.fields.find(function(f){return f.id===t.dataset.field;});
-      var raw = t.value.trim();
-      if (raw===''){ set.values[field.id] = null; }
-      else {
-        var n = parseDecimal(raw);
-        if (isNaN(n)){ set.values[field.id] = null; t.value=''; }
-        else {
-          if (field.type==='weight') set.values[field.id] = displayToKg(n, data.settings.weightUnit);
-          else if (field.type==='assisted') set.values[field.id] = displayToKg(Math.abs(n), data.settings.weightUnit);
-          else if (field.type==='distance') set.values[field.id] = displayToMetres(n, distanceUnit(field));
-          else if (field.type==='reps') set.values[field.id] = Math.round(n);
-          else if (isEffortType(field.type)) set.values[field.id] = clampEffort(field.type, n);
-          else set.values[field.id] = n;
-          t.value = fieldDisplayValue(field, set.values[field.id], data.settings.weightUnit);
-        }
-      }
+      var n = parseFieldInput(field, t.value);
+      set.values[field.id] = n;
+      t.value = n===null ? '' : fieldDisplayValue(field, n, data.settings.weightUnit);
       save();
+      if (isLadderEntry(wex) && field.id===wex.ladder.fieldId) ladderRefreshNext(t.dataset.wex*1, set);
       break;
     }
     case 'set-time': {
       var wex2 = data.activeWorkout.exercises[t.dataset.wex*1];
       var set2 = wex2.sets[t.dataset.set*1];
       var field2 = wex2.fields.find(function(f){return f.id===t.dataset.field;});
-      var raw2 = t.value.trim();
-      var sec = raw2==='' ? null : mmssToSec(raw2);
+      var sec = parseFieldInput(field2, t.value);
       set2.values[field2.id] = sec;
       t.value = sec===null ? '' : secToMMSS(sec);
       save();
@@ -7868,6 +9031,7 @@ function onInput(e){
     return;
   }
   if (t.id==='picker-search'){ ui.picker.query = t.value; renderPickerResults(); return; }
+  if (t.id==='ladder-from' || t.id==='ladder-to' || t.id==='ladder-step' || t.id==='ladder-rest'){ ladderDraftInput(t); return; }
   if (t.id==='exercise-search-input'){ ui.exerciseSearch = t.value; renderExerciseListResults(); return; }
 }
 
@@ -7951,6 +9115,9 @@ function onKeyDown(e){
     if (!finModal.hidden){ closeFinishModal(); return; }
     if (!settingsModal.hidden){ closeSettings(); return; }
     if (ui.editingRest || ui.editingDefaultRest!==null){ ui.editingRest=null; ui.editingDefaultRest=null; renderMain(); return; }
+    if (ui.planLadderEditing!=null || ui.ladderEditing!=null || ui.planRungsOpen!=null || ui.rungsOpen!=null){
+      closeLadderEditor(); ui.planRungsOpen = null; ui.rungsOpen = null; renderMain(); return;
+    }
   }
 }
 
@@ -7958,7 +9125,8 @@ function onKeyDown(e){
    anything itself. Closes the innermost thing that is open, the way Escape
    does, then steps out of a detail screen, then back to Home. False means
    there was nothing left to close, and the app may go to the background. */
-var REST_EDITS = ['editingRest','editingDefaultRest','editingPlanRest','editingPlanSetRest','editingPlanRestBlock','editingRestBlock','editingTopRest'];
+var REST_EDITS = ['editingRest','editingDefaultRest','editingPlanRest','editingPlanSetRest','editingPlanRestBlock','editingRestBlock','editingTopRest',
+  'planLadderEditing','planRungsOpen','ladderEditing','rungsOpen'];
 function handleBack(){
   if (combo.el){ comboClose(); return true; }
   if (infoPop.el){ hideFieldInfo(); return true; }
@@ -8142,6 +9310,14 @@ function tick(){
     else {
       var elapsedEl = document.getElementById('workout-elapsed');
       if (elapsedEl) elapsedEl.textContent = fmtElapsed(Date.now()-data.activeWorkout.startedAt);
+      /* a running Downs ladder's own clock, rewritten as text like the one above */
+      var ladderClocks = document.querySelectorAll('[data-ladder-clock]');
+      for (var lc=0; lc<ladderClocks.length; lc++){
+        var lw = data.activeWorkout.exercises[ladderClocks[lc].dataset.ladderClock*1];
+        if (lw && lw.ladder && lw.ladder.startedAt && !lw.ladder.endedAt){
+          ladderClocks[lc].textContent = fmtElapsed(Date.now()-lw.ladder.startedAt);
+        }
+      }
     }
   }
   /* "so far", "now" and what counts as the future all move with the clock */
